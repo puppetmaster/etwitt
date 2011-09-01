@@ -4,6 +4,8 @@ typedef struct
 {
     Evas_Object *win;
     Evas_Object *roll;
+	Evas_Object *entry;
+
 } Twitter;
 
 
@@ -46,22 +48,27 @@ _refresh_roll(void *data, Evas_Object *obj, void *event_info)
 static void
 _win_del(void *data, Evas_Object *obj, void *event_info)
 {
-    free(data);
+	if(data != NULL)
+	{
+		free(data);
+	}
+	
     elm_exit();
 }
 
 static void
 _twitt_bt_press(void *data, Evas_Object *obj,void *event_info)
 {
+	Twitter *infos = data;
+	char *message = elm_entry_entry_get(infos->entry);
+
     printf("Button pressed\n");
-    etwitt_add_twitt(data,"Test");
+
+    etwitt_add_twitt(data,message);
 }
 
-
-
-
-EAPI_MAIN int
-elm_main(int argc, char **argv)
+int
+main(int argc, char **argv)
 {
     Evas_Object *win;
     Evas_Object *layout;
@@ -69,7 +76,7 @@ elm_main(int argc, char **argv)
     Evas_Object *roll;
     Evas_Object *toolbar;
     Evas_Object *tw_box;
-    Evas_Object *tw_scroll;
+    Evas_Object *scroll;
     Evas_Object *tw_entry;
     Evas_Object *tw_bt;
 
@@ -98,9 +105,6 @@ elm_main(int argc, char **argv)
     elm_layout_content_set(layout,"toolbar",toolbar);
     evas_object_show(toolbar);
 
-    tw_scroll = elm_scroller_add(win);
-    evas_object_size_hint_weight_set(tw_scroll,EVAS_HINT_EXPAND,EVAS_HINT_EXPAND);
-    elm_win_resize_object_add(win,tw_scroll);
 
 
     tw_box = elm_box_add(win);
@@ -109,9 +113,11 @@ elm_main(int argc, char **argv)
     evas_object_size_hint_weight_set(tw_box,EVAS_HINT_EXPAND,0.0);
 
     tw_entry = elm_entry_add(win);
+	infos->entry = tw_entry;
     evas_object_size_hint_weight_set(tw_entry, EVAS_HINT_EXPAND, 0.0);
     evas_object_size_hint_align_set(tw_entry, EVAS_HINT_FILL, EVAS_HINT_FILL);
     elm_box_pack_end(tw_box,tw_entry);
+	elm_entry_scrollable_set(tw_entry,EINA_TRUE);
     evas_object_show(tw_entry);
     
     tw_bt = elm_button_add(win);
@@ -122,26 +128,29 @@ elm_main(int argc, char **argv)
     evas_object_smart_callback_add(tw_bt, "clicked", _twitt_bt_press, infos);
     evas_object_show(tw_bt);
 
-    elm_scroller_content_set(tw_scroll, tw_box);
-    elm_layout_content_set(layout,"entry",tw_scroll);
-
-
+    elm_layout_content_set(layout,"entry",tw_box);
     evas_object_show(tw_box);
+
+    scroll = elm_scroller_add(win);
+    evas_object_size_hint_weight_set(scroll,EVAS_HINT_EXPAND,EVAS_HINT_EXPAND);
+    elm_win_resize_object_add(win,scroll);
 
     roll = elm_box_add(win);
     infos->roll = roll;
     evas_object_size_hint_weight_set(roll, EVAS_HINT_EXPAND, 0.0);
     evas_object_size_hint_align_set(roll, EVAS_HINT_FILL, EVAS_HINT_FILL);
-    elm_layout_content_set(layout,"roll",roll);
     etwitt_add_twitt(infos,"Message 1");
     etwitt_add_twitt(infos,"Message 2");
     etwitt_add_twitt(infos,"Message 3");
     evas_object_show(roll);
+
+
+    elm_scroller_content_set(scroll, roll);
+    elm_layout_content_set(layout,"roll",scroll);
+	evas_object_show(scroll);
 
     elm_win_resize_object_add (win,layout );
     
     elm_run();
     elm_shutdown();
 }
-
-ELM_MAIN();
