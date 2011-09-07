@@ -1,8 +1,17 @@
 #include <Elementary.h>
 
 typedef struct _Twitt Twitt;
-
+typedef struct _Account Account;
+typedef struct _Interface Etwitt_Iface;
 #define THEME_FILE "./phone.edj"
+
+struct _Account
+{
+    const char *username;
+    const char *password;
+    const char *realname;
+    const char *avatar;
+};
 
 struct _Twitt
 {
@@ -12,16 +21,21 @@ struct _Twitt
     const char *icon;
 };
 
-typedef struct
+struct _Interface
 {
    Evas_Object *win;
+   Evas_Object *layout;
+   Evas_Object *toolbar;
+   Evas_Object *panel;
    Evas_Object *roll;
+   Evas_Object *cfg_bx;
    Evas_Object *entry;
-   Evas_Object *scroller;
+   Evas_Object *tw_box;
    Evas_Object *list;
+   Elm_Theme *theme;
    char *avatar;
 
-} Twitter;
+};
 
 
 static char *
@@ -66,45 +80,8 @@ static Elm_Genlist_Item_Class itc_default = {
   }
 };
 
-#if 0
-
 static void
-etwitt_add_twitt(Twitter *info, char* message)
-{
-   Evas_Object *twitt;
-   Evas_Object *twittmsg;
-   Evas_Object *tw_icon;
-   char buf[PATH_MAX];
-
-
-   twitt = elm_bubble_add(info->win);
-   //elm_object_text_set(twitt,"Twitt");
-   elm_object_text_part_set(twitt,"info","20:35 02/02/2012");
-   evas_object_size_hint_weight_set(twitt, EVAS_HINT_EXPAND, 0.0);
-   evas_object_size_hint_align_set(twitt, EVAS_HINT_FILL, EVAS_HINT_FILL);
-
-   tw_icon = elm_icon_add(info->win);
-   snprintf(buf, sizeof(buf), info->avatar);
-   elm_icon_file_set(tw_icon, buf, NULL);
-   elm_icon_scale_set(tw_icon, 0, 0);
-   evas_object_size_hint_aspect_set(tw_icon, EVAS_ASPECT_CONTROL_HORIZONTAL, 1, 1);
-
-   twittmsg = elm_anchorblock_add(info->win);
-   elm_anchorblock_hover_style_set(twittmsg,"popout");
-   elm_anchorblock_hover_parent_set(twittmsg,info->win);
-   elm_bubble_icon_set(twitt, tw_icon);                                                                                                                                                 
-   elm_object_text_set(twittmsg, message);
-   elm_bubble_content_set(twitt,twittmsg);
-
-   evas_object_show(twittmsg);
-   elm_box_pack_end(info->roll,twitt);
-   evas_object_show(twitt);
-}
-
-#endif
-
-static void
-etwitt_add_twitt(Twitter *info, char* message)
+etwitt_add_twitt(Etwitt_Iface *interface, char* message)
 {
     Twitt *twitt;
     Elm_Genlist_Item *egi;
@@ -113,23 +90,29 @@ etwitt_add_twitt(Twitter *info, char* message)
 
     twitt->message = eina_stringshare_add(message);
     twitt->date = eina_stringshare_add("20:35 02/02/2012");
-    twitt->icon = eina_stringshare_add(info->avatar);
+    twitt->icon = eina_stringshare_add(interface->avatar);
     twitt->name = eina_stringshare_add("Nico");
     
-    egi = elm_genlist_item_append(info->list, &itc_default, twitt, NULL,
+    egi = elm_genlist_item_append(interface->list, &itc_default, twitt, NULL,
 				  ELM_GENLIST_ITEM_NONE, NULL, NULL);
     elm_genlist_item_show(egi);
 }
 
 static void
-_configuration(void *data, Evas_Object *obj, void *event_info)
+_show_configuration(void *data, Evas_Object *obj, void *event_info)
 {
-   printf("Callback _configuration\n");
+   Etwitt_Iface *iface = data;
+   evas_object_hide(iface->list);
+   evas_object_hide(iface->tw_box);
+   printf("Callback _show_configuration\n");
 }
 
 static void
-_refresh_roll(void *data, Evas_Object *obj, void *event_info)
+_show_roll(void *data, Evas_Object *obj, void *event_info)
 {
+    Etwitt_Iface *iface = data;
+    evas_object_show(iface->list);
+    evas_object_show(iface->tw_box);
    printf("Callback _refresh_roll\n");
 }
 
@@ -147,7 +130,7 @@ _win_del(void *data, Evas_Object *obj, void *event_info)
 static void
 _twitt_bt_press(void *data, Evas_Object *obj,void *event_info)
 {
-   Twitter *infos = data;
+   Etwitt_Iface *infos = data;
    const char *entry = elm_entry_entry_get(infos->entry);
    char *msg;
 
@@ -160,109 +143,126 @@ _twitt_bt_press(void *data, Evas_Object *obj,void *event_info)
    free(msg);
 }
 
+static void
+etwitt_win_add(Etwitt_Iface *interface)
+{
+   interface->win = elm_win_add(NULL,"etwitt", ELM_WIN_BASIC);
+   elm_win_title_set(interface->win,"Etwitt");
+   evas_object_smart_callback_add(interface->win,"delete,request",_win_del,interface);
+
+   interface->layout = elm_layout_add(interface->win);
+   elm_layout_file_set(interface->layout,THEME_FILE,"elm/layout/roll");
+   elm_win_resize_object_add (interface->win,interface->layout);
+   evas_object_show(interface->layout);
+
+   elm_object_theme_set(interface->win, interface->theme);
+}
+
+static void
+etwitt_main_toolbar_add(Etwitt_Iface *interface)
+{
+   /* 
+   interface->panel = elm_panel_add(interface->win);
+   elm_panel_orient_set(interface->panel, ELM_PANEL_ORIENT_TOP);
+   evas_object_size_hint_weight_set(interface->panel, EVAS_HINT_EXPAND, 0);
+   evas_object_size_hint_align_set(interface->panel, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   */
+
+   interface->toolbar = elm_toolbar_add(interface->win);
+   elm_toolbar_mode_shrink_set(interface->toolbar, ELM_TOOLBAR_SHRINK_SCROLL);
+   //elm_toolbar_mode_shrink_set(interface->toolbar, ELM_TOOLBAR_SHRINK_NONE);
+   elm_toolbar_homogeneous_set(interface->toolbar, 0);
+   evas_object_size_hint_weight_set(interface->toolbar, EVAS_HINT_EXPAND, 0);
+   evas_object_size_hint_align_set(interface->toolbar, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   evas_object_show(interface->toolbar);
+
+   elm_toolbar_item_append(interface->toolbar, "refresh", "Roll",_show_roll, interface);
+   elm_toolbar_item_append(interface->toolbar, "folder-new", "Accounts",_show_configuration, interface);
+
+   //elm_panel_content_set(interface->panel, interface->toolbar);
+   //elm_layout_content_set(interface->layout,"toolbar",interface->panel);
+   elm_layout_content_set(interface->layout,"toolbar",interface->toolbar);
+   //evas_object_show(interface->panel);
+
+}
+
+
+static void 
+etwitt_twitt_bar_add(Etwitt_Iface *interface)
+{
+   Evas_Object *box;
+   Evas_Object *icon;
+   Evas_Object *entry;
+   Evas_Object *button;
+   char buf[PATH_MAX];
+
+   interface->tw_box = elm_box_add(interface->win);
+   elm_box_horizontal_set(interface->tw_box,EINA_TRUE);
+   elm_box_homogeneous_set(interface->tw_box,EINA_FALSE);
+   evas_object_size_hint_weight_set(interface->tw_box,EVAS_HINT_EXPAND,0.0);
+
+   icon = elm_icon_add(interface->win);
+   snprintf(buf, sizeof(buf), "twitt.png");
+   elm_icon_file_set(icon, buf, NULL);
+   elm_icon_scale_set(icon, 0.5, 0.5);
+   evas_object_size_hint_aspect_set(icon, EVAS_ASPECT_CONTROL_HORIZONTAL, 1, 1);
+   elm_box_pack_end(interface->tw_box,icon);
+   evas_object_show(icon);
+
+   interface->entry = elm_entry_add(interface->win);
+   evas_object_size_hint_weight_set(interface->entry, EVAS_HINT_EXPAND, 0.0);
+   evas_object_size_hint_align_set(interface->entry, EVAS_HINT_FILL, EVAS_HINT_FILL);
+
+   elm_box_pack_end(interface->tw_box,interface->entry);
+   elm_entry_scrollable_set(interface->entry,EINA_TRUE);
+   evas_object_show(interface->entry);
+
+   button = elm_button_add(interface->win);
+   elm_object_text_set(button,"Twitt!");
+   elm_box_pack_end(interface->tw_box,button);
+   evas_object_smart_callback_add(button, "clicked", _twitt_bt_press, interface);
+   evas_object_show(button);
+
+   elm_layout_content_set(interface->layout,"entry",interface->tw_box);
+   evas_object_show(interface->tw_box);
+}
+
+static void
+etwitt_roll_add(Etwitt_Iface *interface)
+{
+
+   interface->list = elm_genlist_add(interface->win);
+   evas_object_show(interface->list);
+   elm_layout_content_set(interface->layout,"roll",interface->list);
+}
+
 int
 main(int argc, char **argv)
 {
-   Evas_Object *win;
-   Evas_Object *layout;
-   Evas_Object *edje;
-   Evas_Object *roll;
-   Evas_Object *toolbar;
-   Evas_Object *tw_box;
-   /* Evas_Object *scroll; */
-   Evas_Object *list;
-   Evas_Object *tw_entry;
-   Evas_Object *tw_bt;
-   Elm_Toolbar_Item *item;
-   Elm_Theme *eth;
-
-   Twitter *infos;
-   infos = malloc(sizeof(Twitter));
+   Etwitt_Iface *infos;
+   infos = calloc(1,sizeof(Etwitt_Iface));
 
    infos->avatar = "avatar.png";
 
    elm_init(argc, argv);
 
-
-   eth = elm_theme_new();
-   elm_theme_extension_add(eth, THEME_FILE);
-   elm_theme_overlay_add(eth, THEME_FILE);
+   infos->theme = elm_theme_new();
+   elm_theme_extension_add(infos->theme, THEME_FILE);
+   elm_theme_overlay_add(infos->theme, THEME_FILE);
    
+   // Main window creation
+   etwitt_win_add(infos);
 
-   win = elm_win_add(NULL,"etwitt", ELM_WIN_BASIC);
-   infos->win = win;
-   elm_win_title_set(win,"Etwitt");
-   evas_object_smart_callback_add(win,"delete,request",_win_del,infos);
-   elm_object_theme_set(win, eth);
+   // Main menu bar
+   etwitt_main_toolbar_add(infos);
 
-   layout = elm_layout_add(win);
-   elm_layout_file_set(layout,THEME_FILE,"elm/layout/roll");
-   elm_win_resize_object_add (win,layout);
-   evas_object_show(layout);
+   etwitt_twitt_bar_add(infos);
 
-   toolbar = elm_toolbar_add(win);
-   elm_toolbar_mode_shrink_set(toolbar, ELM_TOOLBAR_SHRINK_SCROLL);
-   elm_toolbar_item_append(toolbar, "refresh", "Roll",_refresh_roll, layout);
-   elm_toolbar_item_append(toolbar, "folder-new", "Accounts",_configuration, layout);
-   elm_layout_content_set(layout,"toolbar",toolbar);
-   evas_object_show(toolbar);
+   etwitt_roll_add(infos);
 
-
-   tw_box = elm_box_add(win);
-   elm_box_horizontal_set(tw_box,EINA_TRUE);
-   elm_box_homogeneous_set(tw_box,EINA_TRUE);
-   evas_object_size_hint_weight_set(tw_box,EVAS_HINT_EXPAND,0.0);
-
-   tw_entry = elm_entry_add(win);
-   infos->entry = tw_entry;
-   evas_object_size_hint_weight_set(tw_entry, EVAS_HINT_EXPAND, 0.0);
-   evas_object_size_hint_align_set(tw_entry, EVAS_HINT_FILL, EVAS_HINT_FILL);
-   elm_box_pack_end(tw_box,tw_entry);
-   elm_entry_scrollable_set(tw_entry,EINA_TRUE);
-   evas_object_show(tw_entry);
-
-   tw_bt = elm_button_add(win);
-   elm_object_text_set(tw_bt,"Twitt!");
-//   evas_object_size_hint_weight_set(tw_bt, EVAS_HINT_EXPAND, 0.0);
-//   evas_object_size_hint_align_set(tw_bt, EVAS_HINT_FILL, 0.0);
-   elm_box_pack_end(tw_box,tw_bt);
-   evas_object_smart_callback_add(tw_bt, "clicked", _twitt_bt_press, infos);
-   evas_object_show(tw_bt);
-
-   elm_layout_content_set(layout,"entry",tw_box);
-
-   list = elm_genlist_add(win);
-   evas_object_show(list);
-   elm_layout_content_set(layout,"roll",list);
-   infos->list = list;
    
-   
-
-   /* scroll = elm_scroller_add(win); */
-   /* infos->scroller = scroll; */
-   /* evas_object_size_hint_weight_set(scroll,EVAS_HINT_EXPAND,EVAS_HINT_EXPAND); */
-   /* roll = elm_box_add(win); */
-   /* infos->roll = roll; */
-   /* evas_object_size_hint_weight_set(roll, EVAS_HINT_EXPAND, 0.0); */
-   /* evas_object_size_hint_align_set(roll, EVAS_HINT_FILL, EVAS_HINT_FILL); */
-   /* evas_object_show(roll); */
-
-
-   /* elm_scroller_content_set(scroll, roll); */
-   /* elm_layout_content_set(layout,"roll",scroll); */
-/*
-
-   scroll = elm_gengrid_add(win);
-   elm_gengrid_item_size_set(scroll,1,10);
-   evas_object_size_hint_weight_set(scroll, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-   evas_object_size_hint_min_set(scroll, 200, 100);
-   elm_layout_content_set(layout,"roll",scroll);
-
-*/
-
-   ///evas_object_show(scroll);
-   evas_object_resize(win,460,540);
-   evas_object_show(win);
+   evas_object_resize(infos->win,460,540);
+   evas_object_show(infos->win);
 
    elm_run();
    elm_shutdown();
