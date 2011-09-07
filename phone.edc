@@ -13,7 +13,7 @@ collections {
       data.item: "icons" "elm.swallow.icon";
       data.item: "treesize" "5";
       images {
-         image: "list_bg.png" COMP;
+         image: "list_bg3.png" COMP;
          image: "list_selected.png" COMP;
       }
       parts {
@@ -32,7 +32,7 @@ collections {
 
             mouse_events: 0;
             description { state: "default" 0.0;
-               image.normal: "list_bg.png";
+               image.normal: "list_bg3.png";
                image.border: 36 11 10 19;
                //image.normal: "list_bg2.png";
                //image.border: 8 8 8 8;
@@ -276,7 +276,7 @@ collections {
                state: "default" 0.0;
                rel1.to: "entry";
                rel2.to: "entry";
-               color: 0 0 0 75;
+               color: 0 0 0 50;
             }
          }
 
