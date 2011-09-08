@@ -130,7 +130,6 @@ _show_configuration(void *data, Evas_Object *obj, void *event_info)
 {
    Etwitt_Iface *iface = data;
    edje_object_signal_emit(elm_layout_edje_get(iface->layout),"SHOW_CONFIG","code");
-   edje_object_signal_emit(elm_layout_edje_get(iface->config->layout),"SHOW_CONFIG","code");
    //evas_object_show(iface->cfg_bx);
    printf("Callback _show_configuration\n");
 }
@@ -142,7 +141,6 @@ _show_roll(void *data, Evas_Object *obj, void *event_info)
     evas_object_show(iface->list);
     evas_object_show(iface->tw_box);
     edje_object_signal_emit(elm_layout_edje_get(iface->layout),"HIDE_CONFIG","code");
-    edje_object_signal_emit(elm_layout_edje_get(iface->config->layout),"HIDE_CONFIG","code");
     printf("Callback _refresh_roll\n");
 }
 
@@ -210,7 +208,7 @@ etwitt_main_toolbar_add(Etwitt_Iface *interface)
    evas_object_size_hint_align_set(interface->toolbar, EVAS_HINT_FILL, EVAS_HINT_FILL);
    evas_object_show(interface->toolbar);
 
-   elm_toolbar_item_append(interface->toolbar, "refresh", "Roll",_show_roll, interface);
+   elm_toolbar_item_append(interface->toolbar, "refresh", "TwittRoll",_show_roll, interface);
    elm_toolbar_item_append(interface->toolbar, "folder-new", "Accounts",_show_configuration, interface);
 
    //elm_panel_content_set(interface->panel, interface->toolbar);
@@ -236,7 +234,7 @@ etwitt_twitt_bar_add(Etwitt_Iface *interface)
    evas_object_size_hint_weight_set(interface->tw_box,EVAS_HINT_EXPAND,0.0);
 
    icon = elm_icon_add(interface->win);
-   snprintf(buf, sizeof(buf), "twitt.png");
+   snprintf(buf, sizeof(buf), "data/images/twitt.png");
    elm_icon_file_set(icon, buf, NULL);
    elm_icon_scale_set(icon, 0.5, 0.5);
    evas_object_size_hint_aspect_set(icon, EVAS_ASPECT_CONTROL_HORIZONTAL, 1, 1);
@@ -275,15 +273,20 @@ etwitt_roll_add(Etwitt_Iface *interface)
 static void
 etwitt_config_iface_add(Etwitt_Iface *iface)
 {
-    iface->config->layout = elm_layout_add(iface->win);
-    elm_layout_file_set(iface->config->layout,THEME_FILE,"elm/layout/config");
-    elm_win_resize_object_add (iface->win,iface->config->layout);
-
     iface->config->lb_name = elm_label_add(iface->win);
-    elm_object_text_set(iface->config->lb_name,"User name");
+    elm_object_text_set(iface->config->lb_name,"Username :");
     evas_object_show(iface->config->lb_name);
-    elm_layout_content_set(iface->layout,"label/name",iface->config->lb_name);
-    evas_object_show(iface->config->layout);
+    elm_layout_content_set(iface->layout,"config:label/name",iface->config->lb_name);
+
+    iface->config->lb_passwd = elm_label_add(iface->win);
+    elm_object_text_set(iface->config->lb_passwd,"Password :");
+    evas_object_show(iface->config->lb_passwd);
+    elm_layout_content_set(iface->layout,"config:label/password",iface->config->lb_passwd);
+
+    iface->config->lb_rename = elm_label_add(iface->win);
+    elm_object_text_set(iface->config->lb_rename,"Real name :");
+    evas_object_show(iface->config->lb_rename);
+    elm_layout_content_set(iface->layout,"config:label/realname",iface->config->lb_rename);
 }
 
 /*

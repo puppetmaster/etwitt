@@ -3,6 +3,9 @@ images{
 }
 
 collections {
+   /*
+   	*  Redefine the elm_genlist theme
+   	*/
    group {	name: "elm/genlist/item/twitt/default";
       alias: "elm/genlist/item_odd/twitt/default";
       alias: "elm/genlist/item_compress/twitt/default";
@@ -232,6 +235,74 @@ collections {
    }
 
    group {
+       name: "etwitt/config";
+       parts {
+           part {
+               type: RECT;
+               name: "label_bg";
+               mouse_events: 0;
+               description {
+                   state: "default" 0.0;
+                   rel1.to: "label/name";
+                   rel2.to: "label/name";
+                   color: 0 255 0 50;
+               }
+           }
+           part {
+               type: RECT;
+               name: "passwd_bg";
+               mouse_events: 0;
+               description {
+                   state: "default" 0.0;
+                   rel1.to: "label/password";
+                   rel2.to: "label/password";
+                   color: 255 0 0 50;
+               }
+           }
+           part {
+               type: RECT;
+               name: "realname_bg";
+               mouse_events: 0;
+               description {
+                   state: "default" 0.0;
+                   rel1.to: "label/realname";
+                   rel2.to: "label/realname";
+                   color: 0 0 255 50;
+               }
+           }
+           part {
+               type: SWALLOW;
+               name: "label/name";
+               description {
+                   state: "default" 0.0;
+                   rel1.relative: 0.35 0.15;
+                   rel2.relative: 0.65 0.2;
+               }
+           }
+           part {
+               type: SWALLOW;
+               name: "label/password";
+               description {
+                   state: "default" 0.0;
+                   rel1.relative: 0.35 0.2;
+                   rel2.relative: 0.65 0.25;
+               }
+           }
+           part {
+               type: SWALLOW;
+               name: "label/realname";
+               description {
+                   state: "default" 0.0;
+                   rel1.relative: 0.35 0.25;
+                   rel2.relative: 0.65 0.30;
+               }
+           }
+       }
+
+   }
+
+
+   group {
       name: "elm/layout/roll";
       parts {
          part {
@@ -327,23 +398,25 @@ collections {
          }
 
          part {
-            type: SWALLOW;
-            name: "config";
-            description {
-               visible: 0;
-               state: "default" 0.0;
-               rel1.relative: 0 1;
-               rel1.to: "toolbar";
-               rel2.relative: 1 0;
-               rel2.to: "entry";
-               fixed: 1 1;
-            }
-            description {
-                state: "visible" 0.0;
-                inherit: "default" 0.0;
-                visible: 1;
-            }
+             type: GROUP;
+             name: "config";
+             repeat_events: 1;
+             source: "etwitt/config";
+             description {
+                 visible: 0;
+                 state: "default" 0.0;
+                 rel1.relative: 0 1;
+                 rel1.to: "toolbar";
+                 rel2.relative: 1 1;
+                 fixed: 1 1;
+             }
+             description {
+                 state: "visible" 0.0;
+                 inherit: "default" 0.0;
+                 visible: 1;
+             }
          }
+
       }
       programs {
           program {
@@ -375,95 +448,5 @@ collections {
       }
    }
 
-   group {
-       name: "elm/layout/config";
-       parts {
-           part {
-               type: RECT;
-               name: "label_bg";
-               mouse_events: 0;
-               description {
-                   visible: 0;
-                   state: "default" 0.0;
-                   rel1.to: "label/name";
-                   rel2.to: "label/name";
-                   color: 0 255 0 255;
-               }
-               description {
-                   state: "visible" 0.0;
-                   inherit: "default" 0.0;
-                   visible: 1;
-               }
-           }
-           part {
-               type: RECT;
-               name: "passwd_bg";
-               mouse_events: 0;
-               description {
-                   visible: 0;
-                   state: "default" 0.0;
-                   rel1.to: "label/password";
-                   rel2.to: "label/password";
-                   color: 255 0 0 255;
-               }
-               description {
-                   state: "visible" 0.0;
-                   inherit: "default" 0.0;
-                   visible: 1;
-               }
-           }
-           part {
-               type: SWALLOW;
-               name: "label/name";
-               description {
-                   visible: 0;
-                   state: "default" 0.0;
-                   rel1.relative: 0.35 0.15;
-                   rel2.relative: 0.65 0.2;
-               }
-               description {
-                   state: "visible" 0.0;
-                   inherit: "default" 0.0;
-                   visible: 1;
-               }
-           }
-           part {
-               type: SWALLOW;
-               name: "label/password";
-               description {
-                   visible: 0;
-                   state: "default" 0.0;
-                   rel1.relative: 0.65 0.2;
-                   rel2.relative: 1 0;
-               }
-               description {
-                   state: "visible" 0.0;
-                   inherit: "default" 0.0;
-                   visible: 1;
-               }
-           }
-       }
-       programs {
-           program {
-               source: "code";
-               signal: "SHOW_CONFIG";
-               action: STATE_SET "visible" 0.0;
-               target: "label_bg";
-               target: "passwd_bg";
-               target: "label/name";
-               target: "label/password";
-           }
-           program {
-               source: "code";
-               signal: "HIDE_CONFIG";
-               action: STATE_SET "default" 0.0;
-               target: "label_bg";
-               target: "passwd_bg";
-               target: "label/name";
-               target: "label/password";
-           }
-       }
-
-   }
 
 }
