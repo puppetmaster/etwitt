@@ -31,7 +31,6 @@ struct _Interface
    Evas_Object *toolbar;
    Evas_Object *panel;
    Evas_Object *roll;
-   Evas_Object *cfg_bx;
    Evas_Object *entry;
    Evas_Object *tw_box;
    Evas_Object *list;
@@ -51,9 +50,12 @@ struct _ConfigIface
     Evas_Object *en_passwd;
     Evas_Object *lb_rename;
     Evas_Object *en_rename;
+    Evas_Object *bx_button_bar;
     Evas_Object *bt_save;
     Evas_Object *bt_clear;
     Evas_Object *bt_ok;
+    Evas_Object *bx_avatar;
+    Evas_Object *bt_avatar;
 };
 
 
@@ -130,7 +132,6 @@ _show_configuration(void *data, Evas_Object *obj, void *event_info)
 {
    Etwitt_Iface *iface = data;
    edje_object_signal_emit(elm_layout_edje_get(iface->layout),"SHOW_CONFIG","code");
-   //evas_object_show(iface->cfg_bx);
    printf("Callback _show_configuration\n");
 }
 
@@ -273,20 +274,84 @@ etwitt_roll_add(Etwitt_Iface *interface)
 static void
 etwitt_config_iface_add(Etwitt_Iface *iface)
 {
+
+    Evas_Object *ic;
+
     iface->config->lb_name = elm_label_add(iface->win);
     elm_object_text_set(iface->config->lb_name,"Username :");
     evas_object_show(iface->config->lb_name);
     elm_layout_content_set(iface->layout,"config:label/name",iface->config->lb_name);
+
+    iface->config->en_name = elm_entry_add(iface->win);
+    evas_object_size_hint_weight_set(iface->config->en_name, EVAS_HINT_FILL, 0.0);
+    evas_object_size_hint_align_set(iface->config->en_name, EVAS_HINT_FILL, EVAS_HINT_FILL);
+    elm_entry_scrollable_set(iface->config->en_name,EINA_FALSE);
+    elm_entry_single_line_set(iface->config->en_name,EINA_TRUE);
+    elm_layout_content_set(iface->layout,"config:entry/name",iface->config->en_name);
+    evas_object_show(iface->config->en_name);
 
     iface->config->lb_passwd = elm_label_add(iface->win);
     elm_object_text_set(iface->config->lb_passwd,"Password :");
     evas_object_show(iface->config->lb_passwd);
     elm_layout_content_set(iface->layout,"config:label/password",iface->config->lb_passwd);
 
+    iface->config->en_passwd = elm_entry_add(iface->win);
+    evas_object_size_hint_weight_set(iface->config->en_passwd, EVAS_HINT_FILL, 0.0);
+    evas_object_size_hint_align_set(iface->config->en_passwd, EVAS_HINT_FILL, EVAS_HINT_FILL);
+    elm_entry_password_set(iface->config->en_passwd, EINA_TRUE);
+    elm_layout_content_set(iface->layout,"config:entry/password",iface->config->en_passwd);
+    evas_object_show(iface->config->en_passwd);
+
     iface->config->lb_rename = elm_label_add(iface->win);
     elm_object_text_set(iface->config->lb_rename,"Real name :");
     evas_object_show(iface->config->lb_rename);
     elm_layout_content_set(iface->layout,"config:label/realname",iface->config->lb_rename);
+
+    iface->config->en_rename = elm_entry_add(iface->win);
+    evas_object_size_hint_weight_set(iface->config->en_rename, EVAS_HINT_EXPAND, 0.0);
+    evas_object_size_hint_align_set(iface->config->en_rename, EVAS_HINT_FILL, EVAS_HINT_FILL);
+    elm_entry_scrollable_set(iface->config->en_rename,EINA_FALSE);
+    elm_entry_single_line_set(iface->config->en_rename,EINA_TRUE);
+    elm_layout_content_set(iface->layout,"config:entry/realname",iface->config->en_rename);
+    evas_object_show(iface->config->en_rename);
+
+    iface->config->bx_avatar = elm_box_add(iface->win);
+    elm_box_horizontal_set(iface->config->bx_avatar,EINA_TRUE);
+    elm_box_homogeneous_set(iface->config->bx_avatar,EINA_FALSE);
+    elm_layout_content_set(iface->layout,"config:avatarselector",iface->config->bx_avatar);
+    evas_object_show(iface->config->bx_avatar);
+
+    ic = elm_icon_add(iface->win);
+    elm_icon_standard_set(ic, "file");
+    evas_object_size_hint_aspect_set(ic, EVAS_ASPECT_CONTROL_VERTICAL, 1, 1);
+
+    iface->config->bt_avatar = elm_fileselector_button_add(iface->win);
+    elm_fileselector_button_path_set(iface->config->bt_avatar, "~");
+    elm_object_text_set(iface->config->bt_avatar,"Select a file");
+    elm_fileselector_button_icon_set(iface->config->bt_avatar, ic);
+    elm_fileselector_button_inwin_mode_set(iface->config->bt_avatar,EINA_FALSE);
+    evas_object_smart_callback_add(iface->config->bt_avatar, "file,chosen", _file_chosen, iface->config->avatar);
+    evas_object_show(iface->config->bt_avatar);
+    elm_box_pack_end(iface->config->bx_avatar,iface->config->bt_avatar);
+
+    iface->config->bx_button_bar = elm_box_add(iface->win);
+    elm_box_horizontal_set(iface->config->bx_button_bar,EINA_TRUE);
+    elm_box_homogeneous_set(iface->config->bx_button_bar,EINA_FALSE);
+    elm_layout_content_set(iface->layout,"config:actionbar",iface->config->bx_button_bar);
+
+    iface->config->bt_save = elm_button_add(iface->win);
+    evas_object_size_hint_weight_set(iface->config->bt_save, EVAS_HINT_EXPAND, 0.5);
+    evas_object_size_hint_align_set(iface->config->bt_save, EVAS_HINT_FILL, EVAS_HINT_FILL);
+    elm_object_text_set(iface->config->bt_save,"Save");
+    elm_box_pack_end(iface->config->bx_button_bar,iface->config->bt_save);
+    evas_object_show(iface->config->bt_save);
+
+    iface->config->bt_clear = elm_button_add(iface->win);
+    elm_object_text_set(iface->config->bt_clear,"Clear");
+    evas_object_size_hint_weight_set(iface->config->bt_clear, EVAS_HINT_EXPAND, 0.0);
+    evas_object_size_hint_align_set(iface->config->bt_clear, EVAS_HINT_FILL, EVAS_HINT_FILL);
+    elm_box_pack_end(iface->config->bx_button_bar,iface->config->bt_clear);
+    evas_object_show(iface->config->bt_clear);
 }
 
 /*
