@@ -266,7 +266,9 @@ etwitt_roll_add(Etwitt_Iface *interface)
 {
 
    interface->list = elm_genlist_add(interface->win);
+   elm_genlist_height_for_width_mode_set(interface->list, EINA_TRUE);
    evas_object_show(interface->list);
+   elm_genlist_homogeneous_set(interface->list, EINA_FALSE);
    elm_layout_content_set(interface->layout,"roll",interface->list);
 }
 
