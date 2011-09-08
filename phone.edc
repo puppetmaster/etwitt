@@ -1,5 +1,5 @@
 images{
-   image: "bg.jpg" COMP;
+   image: "data/images/bg.jpg" COMP;
 }
 
 collections {
@@ -28,8 +28,8 @@ collections {
 
 
       images {
-         image: "list_bg.png" COMP;
-         image: "list_selected.png" COMP;
+         image: "data/images/list_bg.png" COMP;
+         image: "data/images/list_selected.png" COMP;
 
       }
 
@@ -145,9 +145,9 @@ collections {
                   offset: 0 -5;
                }
                image {
-                  //normal: "bubble_3.png";
+                  //normal: "data/images/bubble_3.png";
                   //border: 36 11 18 9;
-                  normal: "list_bg.png";
+                  normal: "data/images/list_bg.png";
                   border: 36 11 18 9;
                                            
                   middle: SOLID;
@@ -219,13 +219,13 @@ collections {
       min: 32 32;
       parts {
          images {
-            image: "avatar.png" COMP;
+            image: "data/images/avatar.png" COMP;
          }
          part {
             name: "icon";
             mouse_events: 0;
             description {
-               image.normal: "avatar.png";
+               image.normal: "data/images/avatar.png";
             }
          }
       }
@@ -239,7 +239,7 @@ collections {
             mouse_events: 0;
             description {
                state: default 0.0;
-               image.normal: "bg.jpg";
+               image.normal: "data/images/bg.jpg";
                fill.size.relative: 0 0;
                fill.size.offset: 400 300;
             };
