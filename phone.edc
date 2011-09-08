@@ -317,7 +317,7 @@ collections {
                     state: "default" 0.0;
                     rel1.to: "avatarselector";
                     rel2.to: "avatarselector";
-                    color: 255 255 255 255;
+                    color: 0 0 0 25;
                 }
             }
             part {
@@ -328,7 +328,7 @@ collections {
                     state: "default" 0.0;
                     rel1.to: "actionbar";
                     rel2.to: "actionbar";
-                    color: 255 255 255 255;
+                    color: 255 255 255 25;
                 }
             }
             part {

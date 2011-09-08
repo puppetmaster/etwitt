@@ -56,6 +56,7 @@ struct _ConfigIface
     Evas_Object *bt_ok;
     Evas_Object *bx_avatar;
     Evas_Object *bt_avatar;
+    Evas_Object *ph_avatar;
 };
 
 
@@ -125,6 +126,28 @@ etwitt_add_twitt(Etwitt_Iface *interface, char* message)
     egi = elm_genlist_item_append(interface->list, &itc_default, twitt, NULL,
 				  ELM_GENLIST_ITEM_NONE, NULL, NULL);
     elm_genlist_item_show(egi);
+}
+
+static void
+_file_chosen(void *data, Evas_Object *obj, void *event_info)
+{
+    Evas_Object *photo = data;
+    const char *file = event_info;
+    elm_photo_file_set(photo,file);
+    printf("File chosen : %s\n",file);
+}
+
+static void
+_cfg_clear_bt_cb(void *data, Evas_Object *obj, void *event_info)
+{
+    Etwitt_Config_Iface *iface;
+
+    iface = data;
+
+    elm_photo_file_set(iface->ph_avatar,"");
+    elm_object_text_set(iface->en_name,"");
+    elm_object_text_set(iface->en_rename,"");
+    elm_object_text_set(iface->en_passwd,"");
 }
 
 static void
@@ -316,7 +339,7 @@ etwitt_config_iface_add(Etwitt_Iface *iface)
     evas_object_show(iface->config->en_rename);
 
     iface->config->bx_avatar = elm_box_add(iface->win);
-    elm_box_horizontal_set(iface->config->bx_avatar,EINA_TRUE);
+    elm_box_horizontal_set(iface->config->bx_avatar,EINA_FALSE);
     elm_box_homogeneous_set(iface->config->bx_avatar,EINA_FALSE);
     elm_layout_content_set(iface->layout,"config:avatarselector",iface->config->bx_avatar);
     evas_object_show(iface->config->bx_avatar);
@@ -325,18 +348,26 @@ etwitt_config_iface_add(Etwitt_Iface *iface)
     elm_icon_standard_set(ic, "file");
     evas_object_size_hint_aspect_set(ic, EVAS_ASPECT_CONTROL_VERTICAL, 1, 1);
 
+    iface->config->ph_avatar = elm_photo_add(iface->win);
+    elm_photo_fill_inside_set(iface->config->ph_avatar, EINA_TRUE);
+    elm_photo_size_set(iface->config->ph_avatar,100);
+//    elm_object_style_set(iface->config->ph_avatar, "shadow");
+    elm_box_pack_end(iface->config->bx_avatar,iface->config->ph_avatar);
+    evas_object_show(iface->config->ph_avatar);
+
     iface->config->bt_avatar = elm_fileselector_button_add(iface->win);
-    elm_fileselector_button_path_set(iface->config->bt_avatar, "~");
+    elm_fileselector_button_path_set(iface->config->bt_avatar, "/home");
     elm_object_text_set(iface->config->bt_avatar,"Select a file");
     elm_fileselector_button_icon_set(iface->config->bt_avatar, ic);
     elm_fileselector_button_inwin_mode_set(iface->config->bt_avatar,EINA_FALSE);
-    evas_object_smart_callback_add(iface->config->bt_avatar, "file,chosen", _file_chosen, iface->config->avatar);
+    evas_object_smart_callback_add(iface->config->bt_avatar, "file,chosen", _file_chosen, iface->config->ph_avatar);
     evas_object_show(iface->config->bt_avatar);
     elm_box_pack_end(iface->config->bx_avatar,iface->config->bt_avatar);
 
+
     iface->config->bx_button_bar = elm_box_add(iface->win);
     elm_box_horizontal_set(iface->config->bx_button_bar,EINA_TRUE);
-    elm_box_homogeneous_set(iface->config->bx_button_bar,EINA_FALSE);
+    elm_box_homogeneous_set(iface->config->bx_button_bar,EINA_TRUE);
     elm_layout_content_set(iface->layout,"config:actionbar",iface->config->bx_button_bar);
 
     iface->config->bt_save = elm_button_add(iface->win);
@@ -350,6 +381,7 @@ etwitt_config_iface_add(Etwitt_Iface *iface)
     elm_object_text_set(iface->config->bt_clear,"Clear");
     evas_object_size_hint_weight_set(iface->config->bt_clear, EVAS_HINT_EXPAND, 0.0);
     evas_object_size_hint_align_set(iface->config->bt_clear, EVAS_HINT_FILL, EVAS_HINT_FILL);
+    evas_object_smart_callback_add(iface->config->bt_clear, "clicked", _cfg_clear_bt_cb, iface->config);
     elm_box_pack_end(iface->config->bx_button_bar,iface->config->bt_clear);
     evas_object_show(iface->config->bt_clear);
 }
