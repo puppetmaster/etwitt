@@ -39,24 +39,24 @@ struct _oauth_token
 static void 
 ebird_request_token_get(OauthToken *request)
 {
-    int res;
-    int i;
+	int res;
+	int i;
 
-    request->url = oauth_sign_url2(EBIRD_REQUEST_TOKEN_URL, NULL, OA_HMAC, NULL, 
-                                        EBIRD_USER_CONSUMER_KEY,                     
-                                        EBIRD_USER_CONSUMER_SECRET, NULL, NULL);
-    request->token = oauth_http_get(request->url,NULL);
-    res = oauth_split_url_parameters(request->token,&request->token_prm);
+	request->url = oauth_sign_url2(EBIRD_REQUEST_TOKEN_URL, NULL, OA_HMAC, NULL, 
+                                   EBIRD_USER_CONSUMER_KEY,                     
+                                   EBIRD_USER_CONSUMER_SECRET, NULL, NULL);
+	request->token = oauth_http_get(request->url,NULL);
+	res = oauth_split_url_parameters(request->token,&request->token_prm);
 
-    if (res = 3)
-    {
-       request->key = strdup(&(request->token_prm[0][12]));
-       request->secret = strdup(&(request->token_prm[1][19]));
-    }
-    else
-    {
-        printf("Error on Request Token [%s]",request->token);
-    }
+	if (res = 3)
+	{
+		request->key = strdup(&(request->token_prm[0][12]));
+		request->secret = strdup(&(request->token_prm[1][19]));
+	}
+	else
+	{
+		printf("Error on Request Token [%s]",request->token);
+	}
 
 }
 
