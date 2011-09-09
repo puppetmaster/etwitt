@@ -233,7 +233,7 @@ etwitt_main_toolbar_add(Etwitt_Iface *interface)
    evas_object_show(interface->toolbar);
 
    elm_toolbar_item_append(interface->toolbar, "refresh", "TwittRoll",_show_roll, interface);
-   elm_toolbar_item_append(interface->toolbar, "folder-new", "Accounts",_show_configuration, interface);
+   elm_toolbar_item_append(interface->toolbar, "folder-new", "Account",_show_configuration, interface);
 
    //elm_panel_content_set(interface->panel, interface->toolbar);
    //elm_layout_content_set(interface->layout,"toolbar",interface->panel);
