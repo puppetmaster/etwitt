@@ -11,7 +11,7 @@
 
 #define EBIRD_USER_SCREEN_NAME "xxxxxxxx"
 #define EBIRD_USER_EMAIL "xxxxe@xxxx.com"
-#define EBIRD_USER_ID "xxxxx"
+#define EBIRD_USER_ID "xxxxxxxxx"
 #define EBIRD_USER_PASSWD "x-x-x-x-x"	//<< percent encode: char "+" => %2B
 #define EBIRD_USER_CONSUMER_KEY "xxxxxxxxxxxxxxxxxxxxx"
 #define EBIRD_USER_CONSUMER_SECRET "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
@@ -60,26 +60,33 @@ ebird_request_token_get(OauthToken *request)
 
 }
 
+char *
+ebird_authenticity_token_get(char *web_script)
+{
+    char *result;
+
+    result = strstr(web_script,"twttr.form_authenticity_token");
+    return result;
+}
+
 static void
-ebird_direct_token_get(OauthToken *request, OauthToken *direct)
+ebird_direct_token_get(char *key)
 {
 
-    char *script;
-    int res;
+   char *url = NULL;
+   char *script = NULL;
+   char buf[256];
+   char *authenticity_token;
 
-    direct->token = NULL;
-    direct->url = NULL;
+   snprintf(buf,sizeof(buf),"%s?oauth_token=%s",EBIRD_DIRECT_TOKEN_URL,key);
 
-    direct->url = strdup(EBIRD_DIRECT_TOKEN_URL);
-    direct->url = strcat(direct->url,"?oauth_token=");
-    direct->url = strcat(direct->url,request->key);
-
-    printf("[DEBUG][%s]\n",direct->url);
-    script = oauth_http_get(direct->url, NULL);
-    printf("VOILA !\n");
-
- //   res = oauth_split_url_parameters(direct->token,&direct->token_prm);
-
+   url = strdup(buf);
+   script = oauth_http_get(url, NULL);
+   authenticity_token = ebird_authenticity_token_get(script);
+   printf("=============================================================================\n");
+   printf("%s\n",authenticity_token);
+   printf("=============================================================================\n");
+   free(url);
 }
 
 int main(int argc, char **argv)
@@ -93,7 +100,7 @@ int main(int argc, char **argv)
     direct_token  = calloc(1,sizeof(OauthToken));
 
     ebird_request_token_get(request_token);
-    ebird_direct_token_get(request_token, direct_token);
+    ebird_direct_token_get(request_token->key);
 
     printf("*** REQUEST TOKEN ***\n");
     printf("* URL : %s\n",request_token->url);
