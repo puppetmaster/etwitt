@@ -32,6 +32,18 @@ struct _oauth_token
 };
 
 
+int 
+ebird_error_code_get(char *string)
+{
+	int compare_res;
+	
+	compare_res = strcmp(string,"Failed to validate oauth signature and token");
+	if (compare_res == 0)
+		return 500;
+	else
+		return 0;
+}
+
 /*
  *  FIXME Split into 2 functions
  *
@@ -41,35 +53,29 @@ ebird_request_token_get(OauthToken *request)
 {
 	int res;
 	int i;
+	int error_code;
 
-	printf("ici\n");
 	request->url = oauth_sign_url2(EBIRD_REQUEST_TOKEN_URL, NULL, OA_HMAC, NULL, 
                                    EBIRD_USER_CONSUMER_KEY,                     
                                    EBIRD_USER_CONSUMER_SECRET, NULL, NULL);
-	if (request->url)
+	request->token = oauth_http_get(request->url,NULL);
+    error_code = ebird_error_code_get(request->token);
+	if ( error_code != 0)
+		printf("Error !\n");
+	else
 	{
-		request->token = oauth_http_get(request->url,NULL);
-		if (strcmp(request->token,"Failed to validate oauth signature and token"))
-			printf("Error");
+		res = oauth_split_url_parameters(request->token,&request->token_prm);
+
+		if (res = 3)
+		{
+			request->key = strdup(&(request->token_prm[0][12]));
+			request->secret = strdup(&(request->token_prm[1][19]));
+		}
 		else
 		{
-			printf("DEBUG ICI%s\n",request->token);
-			res = oauth_split_url_parameters(request->token,&request->token_prm);
-
-			if (res = 3)
-			{
-				request->key = strdup(&(request->token_prm[0][12]));
-				request->secret = strdup(&(request->token_prm[1][19]));
-			}
-			else
-			{
-				printf("Error on Request Token [%s]",request->token);
-			}
+			printf("Error on Request Token [%s]",request->token);
 		}
-
 	}
-	else
-		printf("Error\n");
 
 }
 
