@@ -4,12 +4,14 @@
 #include <oauth.h>
 #include <sys/types.h>
 
+#define EBIRD_URL_MAX 1024
+
 #define EBIRD_REQUEST_TOKEN_URL "https://api.twitter.com/oauth/request_token"
 #define EBIRD_DIRECT_TOKEN_URL "https://api.twitter.com/oauth/authorize"
 #define EBIRD_ACCESS_TOKEN_URL "https://api.twitter.com/oauth/access_token"
 
 
-#define EBIRD_USER_SCREEN_NAME "xxxxxxxxxxxxxx"
+#define EBIRD_USER_SCREEN_NAME "xxxxxxxxxxxxx"
 #define EBIRD_USER_EMAIL "xxxxe@xxxx.com"
 #define EBIRD_USER_ID "xxxxxxxxx"
 #define EBIRD_USER_PASSWD "xxxxxxxx"	//<< percent encode: char "+" => %2B
@@ -101,6 +103,71 @@ ebird_authenticity_token_get(char *web_script)
 
 }
 
+char *
+ebird_authorisation_get(char *script, 
+                            char *authenticity_token,
+                            char *username,
+                            char *userpassword,
+                            char *direct_token_key)
+{
+    
+    char *auth_url;
+    char *auth_params;
+    char *out_script;
+    char buf[EBIRD_URL_MAX];
+    int retry = 4;
+    int i;
+
+    const char *authenticity_token_label = strdup("authenticity_token");
+    const char *oauth_token_label = strdup("oauth_token");
+
+    const char *username_label = strdup("session%5Busername_or_email%5D");
+    const char *password_label = strdup("session%5Bpassword%5D");
+
+    auth_url = strdup(EBIRD_DIRECT_TOKEN_URL);
+/*
+    printf("DEBUG\n");
+    printf("DEBUG [authenticity_token_label][%i][%s]\n",strlen(authenticity_token_label),authenticity_token_label);
+    printf("DEBUG [authenticity_token ][%i][%s]\n",strlen(authenticity_token),authenticity_token);
+    printf("DEBUG [oauth_token_label  ][%i][%s]\n",strlen(direct_token_key),direct_token_key);
+    printf("DEBUG [username_label     ][%i][%s]\n",strlen(username_label),username_label);
+    printf("DEBUG [username           ][%i][%s]\n",strlen(username),username);
+    printf("DEBUG [password_label     ][%i][%s]\n",strlen(password_label),password_label);
+    printf("DEBUG [userpassword       ][%i][%s]\n",strlen(userpassword),userpassword);
+*/
+
+    snprintf(buf,sizeof(buf),"%s=%s&%s=%s&%s=%s&%s=%s",
+             authenticity_token_label,
+             authenticity_token,
+             oauth_token_label,
+             direct_token_key,
+             username_label,
+             username,
+             password_label,
+             userpassword);
+
+    auth_params = strdup(buf);
+
+    for (i = 0 ; i <= retry; i++)
+    {
+        printf("DEBUG : Try [%i]\n",i);
+        out_script = oauth_http_get(auth_url,auth_params);
+        if (out_script) 
+        {
+            free(auth_url);
+            free(auth_params);
+            free(username_label);
+            free(authenticity_token_label);
+            free(oauth_token_label);
+            free(password_label);
+
+            return out_script;
+        }
+    }
+    return NULL;
+
+}
+
 static void
 ebird_direct_token_get(char *key)
 {
@@ -109,12 +176,18 @@ ebird_direct_token_get(char *key)
    char *script = NULL;
    char buf[256];
    char *authenticity_token;
+   char *authorisation;
 
    snprintf(buf,sizeof(buf),"%s?oauth_token=%s",EBIRD_DIRECT_TOKEN_URL,key);
 
    url = strdup(buf);
    script = oauth_http_get(url, NULL);
    authenticity_token = ebird_authenticity_token_get(script);
+   authorisation = ebird_authorisation_get(script,authenticity_token,EBIRD_USER_SCREEN_NAME,EBIRD_USER_PASSWD,key);
+   if (authorisation)
+       printf("%s\n",authorisation);
+   else
+       printf("AUTHORISATION_WEB_SCRIPT_IS_NULL\n");
    free(url);
 }
 
