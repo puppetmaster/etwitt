@@ -61,23 +61,28 @@ ebird_request_token_get(OauthToken *request)
                                    EBIRD_USER_CONSUMER_KEY,                     
                                    EBIRD_USER_CONSUMER_SECRET, NULL, NULL);
 	request->token = oauth_http_get(request->url,NULL);
-    error_code = ebird_error_code_get(request->token);
-	if ( error_code != 0)
-		printf("Error !\n");
-	else
-	{
-		res = oauth_split_url_parameters(request->token,&request->token_prm);
+	if (request->token)
+    {
+        error_code = ebird_error_code_get(request->token);
+        if ( error_code != 0)
+            printf("Error !\n");
+        else
+        {
+            res = oauth_split_url_parameters(request->token,&request->token_prm);
 
-		if (res = 3)
-		{
-			request->key = strdup(&(request->token_prm[0][12]));
-			request->secret = strdup(&(request->token_prm[1][19]));
-		}
-		else
-		{
-			printf("Error on Request Token [%s]",request->token);
-		}
-	}
+            if (res = 3)
+            {
+                request->key = strdup(&(request->token_prm[0][12]));
+                request->secret = strdup(&(request->token_prm[1][19]));
+            }
+            else
+            {
+                printf("Error on Request Token [%s]",request->token);
+            }
+        }
+    }
+    else
+        request->token = NULL;
 
 }
 
@@ -122,10 +127,10 @@ ebird_authorisation_get(char *script,
     const char *oauth_token_label = strdup("oauth_token");
 
     const char *username_label = strdup("session%5Busername_or_email%5D");
-    const char *password_label = strdup("session%5Bpassword%5D");
+    const char *password_label = strdup("session%5Bpassword%5");
 
     auth_url = strdup(EBIRD_DIRECT_TOKEN_URL);
-/*
+
     printf("DEBUG\n");
     printf("DEBUG [authenticity_token_label][%i][%s]\n",strlen(authenticity_token_label),authenticity_token_label);
     printf("DEBUG [authenticity_token ][%i][%s]\n",strlen(authenticity_token),authenticity_token);
@@ -134,7 +139,7 @@ ebird_authorisation_get(char *script,
     printf("DEBUG [username           ][%i][%s]\n",strlen(username),username);
     printf("DEBUG [password_label     ][%i][%s]\n",strlen(password_label),password_label);
     printf("DEBUG [userpassword       ][%i][%s]\n",strlen(userpassword),userpassword);
-*/
+    
 
     snprintf(buf,sizeof(buf),"%s=%s&%s=%s&%s=%s&%s=%s",
              authenticity_token_label,
@@ -154,6 +159,8 @@ ebird_authorisation_get(char *script,
         out_script = oauth_http_get(auth_url,auth_params);
         if (out_script) 
         {
+            printf("%s\n%s\n",auth_url,auth_params);
+
             free(auth_url);
             free(auth_params);
             free(username_label);
@@ -181,11 +188,13 @@ ebird_direct_token_get(char *key)
    snprintf(buf,sizeof(buf),"%s?oauth_token=%s",EBIRD_DIRECT_TOKEN_URL,key);
 
    url = strdup(buf);
+   printf("DEBUG : Step 3 Get Authenticity token\n");
    script = oauth_http_get(url, NULL);
    authenticity_token = ebird_authenticity_token_get(script);
+   printf("DEBUG : Step 4 Get Authorisation page\n");
    authorisation = ebird_authorisation_get(script,authenticity_token,EBIRD_USER_SCREEN_NAME,EBIRD_USER_PASSWD,key);
    if (authorisation)
-       printf("%s\n",authorisation);
+       printf("nib\n",authorisation);
    else
        printf("AUTHORISATION_WEB_SCRIPT_IS_NULL\n");
    free(url);
@@ -201,16 +210,28 @@ int main(int argc, char **argv)
     request_token = calloc(1,sizeof(OauthToken));
     direct_token  = calloc(1,sizeof(OauthToken));
 
+    printf("DEBUG : Step 1 Request TOken\n");
     ebird_request_token_get(request_token);
-    ebird_direct_token_get(request_token->key);
+    if (request_token->token)
+    {
+        printf("DEBUG : Step 2 Request Direct Token\n");
+        ebird_direct_token_get(request_token->key);
 
-    printf("*** REQUEST TOKEN ***\n");
-    printf("* URL : %s\n",request_token->url);
-    printf("* TOKEN : %s\n",request_token->token);
-    printf("* TOKEN KEY    : %s\n",request_token->key);
-    printf("* TOKEN SECRET : %s\n",request_token->secret);
-    printf("**********************\n");
+        printf("*** REQUEST TOKEN ***\n");
+        printf("* URL : %s\n",request_token->url);
+        printf("* TOKEN : %s\n",request_token->token);
+        printf("* TOKEN KEY    : %s\n",request_token->key);
+        printf("* TOKEN SECRET : %s\n",request_token->secret);
+        printf("**********************\n");
 
-    free(request_token);
-    exit(0);
+        free(request_token);
+        exit(0);
+    }
+    else
+    {
+        printf("Error on request token get\n");
+        printf("DEBUG : END");
+        exit(1);
+    }
+
 }
