@@ -26,6 +26,7 @@
 #define EBIRD_USER_ACCESS_TOKEN_SECRET "xxxx"
 
 
+
 typedef struct _oauth_token OauthToken;
 
 struct _oauth_token
@@ -103,7 +104,7 @@ ebird_http_get(char *url)
                             data);
     ecore_con_url_get(ec_url);
     
-    printf("DEBUG DATA [%s]\n",data);
+    printf("\nDEBUG DATA [%s]\n",data);
     ecore_con_url_free(ec_url);
     ecore_main_loop_begin();
     return data;
@@ -140,12 +141,14 @@ ebird_request_token_get(OauthToken *request)
                                    EBIRD_USER_CONSUMER_SECRET, NULL, NULL);
 //    request->token = ebird_http_get(request->url);
 	request->token = oauth_http_get(request->url,NULL);
-    printf("DEBUG----->[%s]\n",request->token);
 	if (request->token)
     {
         error_code = ebird_error_code_get(request->token);
         if ( error_code != 0)
+        {
             printf("Error !\n");
+            request->token = NULL;
+        }
         else
         {
             res = oauth_split_url_parameters(request->token,&request->token_prm);
@@ -153,9 +156,7 @@ ebird_request_token_get(OauthToken *request)
             if (res = 3)
             {
                 request->key = strdup(&(request->token_prm[0][12]));
-                printf("[%i][%s]\n",strlen(request->key),request->key);
                 request->secret = strdup(&(request->token_prm[1][19]));
-                printf("[%s]\n",request->secret);
             }
             else
             {
@@ -166,7 +167,7 @@ ebird_request_token_get(OauthToken *request)
     }
     else
     {
-        printf("DEBUG : [%s]\n",request->url);
+        printf("\nDEBUG : [%s]\n",request->url);
         printf("Error on Request Token [%s]\n",request->token);
         request->token = NULL;
     }
@@ -184,7 +185,6 @@ ebird_authenticity_token_get(char *web_script)
 	keyword = strdup("twttr.form_authenticity_token");
 
     page = strstr(web_script,keyword);
-    printf("ICI\n");
 	if (page)
 	{
 		result = strtok(page,"'");
@@ -219,16 +219,18 @@ ebird_authorisation_get(char *script,
 
     auth_url = strdup(EBIRD_DIRECT_TOKEN_URL);
 
-    printf("DEBUG [authenticity_token_label][%i][%s]\n",strlen(authenticity_token_label),authenticity_token_label);
-    printf("DEBUG [authenticity_token ][%i][%s]\n",strlen(authenticity_token),authenticity_token);
-    printf("DEBUG [oauth_token_label  ][%i][%s]\n",strlen(direct_token_key),direct_token_key);
-    printf("DEBUG [username_label     ][%i][%s]\n",strlen(username_label),username_label);
-    printf("DEBUG [username           ][%i][%s]\n",strlen(username),username);
-    printf("DEBUG [password_label     ][%i][%s]\n",strlen(password_label),password_label);
-    printf("DEBUG [userpassword       ][%i][%s]\n",strlen(userpassword),userpassword);
+    /*
+    printf("\nDEBUG[ebird_authorisation_get] [authenticity_token_label][%i][%s]\n",strlen(authenticity_token_label),authenticity_token_label);
+    printf("\nDEBUG[ebird_authorisation_get] [authenticity_token ][%i][%s]\n",strlen(authenticity_token),authenticity_token);
+    printf("\nDEBUG[ebird_authorisation_get] [oauth_token_label  ][%i][%s]\n",strlen(direct_token_key),direct_token_key);
+    printf("\nDEBUG[ebird_authorisation_get] [username_label     ][%i][%s]\n",strlen(username_label),username_label);
+    printf("\nDEBUG[ebird_authorisation_get] [username           ][%i][%s]\n",strlen(username),username);
+    printf("\nDEBUG[ebird_authorisation_get] [password_label     ][%i][%s]\n",strlen(password_label),password_label);
+    printf("\nDEBUG[ebird_authorisation_get] [userpassword       ][%i][%s]\n",strlen(userpassword),userpassword);
+    */
     
 
-    snprintf(buf,sizeof(buf),"%s=%s&%s=%s&%s=%s&%s=%s",
+    snprintf(buf,sizeof(buf),"%s=%s&%s=%s&%s=%s&%s=%s&allow=true",
              authenticity_token_label,
              authenticity_token,
              oauth_token_label,
@@ -242,11 +244,11 @@ ebird_authorisation_get(char *script,
 
     for (i = 0 ; i <= retry; i++)
     {
-        printf("DEBUG : Try [%i]\n",i);
+        printf("\nDEBUG[ebird_authorisation_get] TRY[%i]\n",i);
         out_script = oauth_http_get(auth_url,auth_params);
         if (out_script) 
         {
-            printf("%s\n%s\n",auth_url,auth_params);
+            printf("\nDEBUG[ebird_authorisation_get] TRY[%i][SUCCESS]\n* %s?%s\n",i,auth_url,auth_params);
 
             free(auth_url);
             free(auth_params);
@@ -260,7 +262,7 @@ ebird_authorisation_get(char *script,
         }
         else
         {
-            printf("Try [%i] failed [%s?%s]\n",i,auth_url,auth_params);
+            printf("\nDEBUG[ebird_authorisation_get] TRY[%i][FAILED][%s?%s]\n",i,auth_url,auth_params);
             out_script = NULL;
         }
     }
@@ -274,7 +276,7 @@ ebird_authorisation_pin_get(char *webscript)
 
    //printf("%s\n",webscript);
 
-   ret = strdup(" ");
+   ret = "";
    return ret;
 }
 
@@ -287,11 +289,17 @@ ebird_access_token_get(char *url,char *con_key,char *con_secret,OauthToken *requ
    char buf[EBIRD_URL_MAX];
 
 
-   acc_url = oauth_sign_url2(url,NULL, OA_HMAC, NULL,con_key,con_secret,request_token->key,request_token->secret);
+   acc_url = oauth_sign_url2(url, NULL, OA_HMAC, NULL, 
+                             con_key,
+                             con_secret,
+                             request_token->key,
+                             request_token->secret);
+
    snprintf(buf,sizeof(buf),"%s&oauth_verifier=%s",acc_url,pin);
 
    acc_token = oauth_http_get(buf,NULL);
-   printf("\n\n\nURL : %s\n\n{%s}\n\n\n",buf,acc_token);
+   printf("\nDEBUG[ebird_access_token_get][URL][%s]\n",buf);
+   printf("\nDEBUG[ebird_access_token_get][RESULT]{%s}\n",acc_token);
    free(acc_url);
    return buf;
 }
@@ -311,12 +319,10 @@ ebird_direct_token_get(OauthToken *request_token)
    snprintf(buf,sizeof(buf),"%s?oauth_token=%s",EBIRD_DIRECT_TOKEN_URL,request_token->key);
 
    url = strdup(buf);
-   printf("DEBUG : Step 3 Get Authenticity token\n");
+   printf("\nDEBUG[ebird_direct_token_get] Step[2.1][Get Authenticity token]\n");
    script = oauth_http_get(url, NULL);
-   printf("DEBUG : 3.1\n");
    authenticity_token = ebird_authenticity_token_get(script);
-   printf("DEBUG : Step 4 Get Authorisation page\n");
-   printf("DEBUG : key [%i][%s]\n",strlen(request_token->key),request_token->key);
+   printf("\nDEBUG[ebird_direct_token_get] Step[2.2][Get Authorisation page\n");
    authorisation = ebird_authorisation_get(script,authenticity_token,EBIRD_USER_SCREEN_NAME,EBIRD_USER_PASSWD,request_token->key);
    authorisation_pin = ebird_authorisation_pin_get(authorisation);
    access_token = ebird_access_token_get(EBIRD_ACCESS_TOKEN_URL,
@@ -345,20 +351,18 @@ int main(int argc, char **argv)
     ecore_con_url_init();
 */
 
-    printf("DEBUG : Step 1 Request TOken\n");
+    printf("\nDEBUG[main] Step[1][Request Token]\n");
     ebird_request_token_get(request_token);
     if (request_token->token)
     {
-        printf("DEBUG : Step 2 Request Direct Token\n");
-        printf("DEBUG : Token Key [%i][%s]\n",strlen(request_token->key),request_token->key);
-        ebird_direct_token_get(request_token);
 
-        printf("*** REQUEST TOKEN ***\n");
-        printf("* URL : %s\n",request_token->url);
-        printf("* TOKEN : %s\n",request_token->token);
-        printf("* TOKEN KEY    : %s\n",request_token->key);
-        printf("* TOKEN SECRET : %s\n",request_token->secret);
-        printf("**********************\n");
+        printf("\nDEBUG[main] Step[1][URL][%s]\n",request_token->url);
+        printf("\nDEBUG[main] Step[1][TOKEN][%s]\n",request_token->token);
+        printf("\nDEBUG[main] Step[1][TOKEN KEY][%s]\n",request_token->key);
+        printf("\nDEBUG[main] Step[1][TOKEN SECRET][%s]\n",request_token->secret);
+        printf("*****************************************\n");
+        printf("\nDEBUG[main] Step[2][Request Direct Token]\n");
+        ebird_direct_token_get(request_token);
 
         free(request_token);
         return 0;
@@ -366,7 +370,7 @@ int main(int argc, char **argv)
     else
     {
         printf("Error on request token get\n");
-        printf("DEBUG : END\n");
+        printf("\nDEBUG : END\n");
         return 1;;
     }
 }
