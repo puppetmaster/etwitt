@@ -31,7 +31,6 @@
 #define EBIRD_USER_ACCESS_TOKEN_SECRET "xxxx"
 
 
-
 typedef struct _oauth_token OauthToken;
 
 struct _oauth_token
@@ -216,9 +215,7 @@ ebird_authenticity_token_get(char *web_script)
 }
 
 char *
-ebird_authorisation_url_get(char *script, 
-                            char *authenticity_token,
-                            char *direct_token_key)
+ebird_authorisation_url_get(char *authenticity_token, char *direct_token_key)
 {
     char *auth_url;
     char *full_url;
@@ -250,43 +247,24 @@ ebird_authorisation_url_get(char *script,
 }
 
 char *
-ebird_authorisation_get(char *script __UNUSED__,
-                            char *authenticity_token,
+ebird_authorisation_pin_get(char *url,
                             char *username,
-                            char *userpassword,
-                            char *direct_token_key)
+                            char *userpassword)
 {
     char *auth_url;
     char *auth_params;
     char *out_script;
+    char *result;
     char buf[EBIRD_URL_MAX];
     int retry = 4;
     int i;
 
-    char *authenticity_token_label = strdup("authenticity_token");
-    char *oauth_token_label = strdup("oauth_token");
-
     char *username_label = strdup("session%5Busername_or_email%5D");
     char *password_label = strdup("session%5Bpassword%5D");
 
-    auth_url = strdup(EBIRD_DIRECT_TOKEN_URL);
+    auth_url = strdup(url);
 
-    /*
-    printf("\nDEBUG[ebird_authorisation_get] [authenticity_token_label][%i][%s]\n",strlen(authenticity_token_label),authenticity_token_label);
-    printf("\nDEBUG[ebird_authorisation_get] [authenticity_token ][%i][%s]\n",strlen(authenticity_token),authenticity_token);
-    printf("\nDEBUG[ebird_authorisation_get] [oauth_token_label  ][%i][%s]\n",strlen(direct_token_key),direct_token_key);
-    printf("\nDEBUG[ebird_authorisation_get] [username_label     ][%i][%s]\n",strlen(username_label),username_label);
-    printf("\nDEBUG[ebird_authorisation_get] [username           ][%i][%s]\n",strlen(username),username);
-    printf("\nDEBUG[ebird_authorisation_get] [password_label     ][%i][%s]\n",strlen(password_label),password_label);
-    printf("\nDEBUG[ebird_authorisation_get] [userpassword       ][%i][%s]\n",strlen(userpassword),userpassword);
-    */
-
-
-    snprintf(buf,sizeof(buf),"%s=%s&%s=%s&%s=%s&%s=%s&allow=true",
-             authenticity_token_label,
-             authenticity_token,
-             oauth_token_label,
-             direct_token_key,
+    snprintf(buf,sizeof(buf),"%s=%s&%s=%s",
              username_label,
              username,
              password_label,
@@ -305,38 +283,24 @@ ebird_authorisation_get(char *script __UNUSED__,
             free(auth_url);
             free(auth_params);
             free(username_label);
-            free(authenticity_token_label);
-            free(oauth_token_label);
             free(password_label);
-
-            return out_script;
-
+            printf("========================================================================================================\n");
+            printf("\n\n%s\n\n\n",out_script);
+            printf("========================================================================================================\n");
+            /*FIXME get the PIN */
+            result = strdup("123456789");
+            i = retry + 1;
         }
         else
         {
             printf("\nDEBUG[ebird_authorisation_get] TRY[%i][FAILED][%s?%s]\n",i,auth_url,auth_params);
             out_script = NULL;
+            result = NULL;
         }
     }
-    return NULL;
+    return result;
 }
 
-char *
-ebird_authorisation_pin_get(char *url__UNUSED__)
-{
-   /*
-   	*
-   	*  TODO : http_get on url parsing result get pin
-   	*
-   	*
-   	*/ 
-   char *ret;
-
-   //printf("%s\n",webscript);
-
-   ret = "";
-   return ret;
-}
 
 char *
 ebird_access_token_get(char *url,char *con_key,char *con_secret,OauthToken *request_token)
@@ -387,9 +351,6 @@ ebird_direct_token_get(OauthToken *request_token)
    char *script = NULL;
    char buf[256];
    char *authenticity_token;
-   char *authorisation;
-   char *authorisation_pin;
-   char *access_token;
 
    snprintf(buf,sizeof(buf),"%s?oauth_token=%s",EBIRD_DIRECT_TOKEN_URL,request_token->key);
 
@@ -399,18 +360,8 @@ ebird_direct_token_get(OauthToken *request_token)
    authenticity_token = ebird_authenticity_token_get(script);
    printf("\nDEBUG[ebird_direct_token_get] Step[2.2][Get Authorisation page\n");
 
-   request_token->authorisation_url = ebird_authorisation_url_get(script,authenticity_token,request_token->key);
+   request_token->authorisation_url = ebird_authorisation_url_get(authenticity_token,request_token->key);
 
-   /*
-   request_token->authorisation_pin = ebird_authorisation_pin_get(request_token->authorisation_url);
-   authorisation_pin = ebird_authorisation_pin_get(authorisation);
-   access_token = ebird_access_token_get(EBIRD_ACCESS_TOKEN_URL,
-                                         EBIRD_USER_CONSUMER_KEY,
-                                         EBIRD_USER_CONSUMER_SECRET,
-                                         request_token,
-                                         authorisation_pin);
-   free(access_token);
-   */
    //free(url);
    //free(authorisation_pin);
 }
@@ -421,7 +372,7 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
 
     OauthToken *request_token;
     OauthToken *direct_token;
-    char buffer[EBIRD_PIN_SIZE];
+    //char buffer[EBIRD_PIN_SIZE];
 
     request_token = calloc(1,sizeof(OauthToken));
     direct_token  = calloc(1,sizeof(OauthToken));
@@ -445,6 +396,9 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
         printf("*****************************************\n");
         printf("\nDEBUG[main] Step[2][Request Direct Token]\n");
         ebird_direct_token_get(request_token);
+ 
+        /* Manual actions 
+          
         printf("Open this url in a web browser to authorize ebird on access to your account.\n%s\n",
                request_token->authorisation_url);
         printf("Please paste PIN here :\n");
@@ -452,6 +406,14 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
         buffer[strlen(buffer)-1] = '\0';
         request_token->authorisation_pin = strdup(buffer);
         printf("You pin is [%s]\n",request_token->authorisation_pin);
+
+        */
+
+        /* AUTOMATIC PIN RETREIVE */
+        request_token->authorisation_pin = ebird_authorisation_pin_get(request_token->authorisation_url,
+                                                                       EBIRD_USER_SCREEN_NAME,
+                                                                       EBIRD_USER_PASSWD);
+        
         request_token->access_token = ebird_access_token_get(EBIRD_ACCESS_TOKEN_URL,
                                                              EBIRD_USER_CONSUMER_KEY,
                                                              EBIRD_USER_CONSUMER_SECRET,
