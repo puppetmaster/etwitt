@@ -10,6 +10,10 @@
 #include <Ecore_Con.h>
 */
 
+#ifndef __UNUSED__
+#define __UNUSED__ __attribute__((unused))
+#endif
+
 #define EBIRD_URL_MAX 1024
 
 #define EBIRD_REQUEST_TOKEN_URL "https://api.twitter.com/oauth/request_token"
@@ -36,7 +40,6 @@ struct _oauth_token
     char **token_prm;
     char *key;
     char *secret;
-    
 };
 
 /*
@@ -79,7 +82,7 @@ _ebird_url_complete_cb(void *data, int type, void *event)
    //int fd = open("./elm.png", O_CREAT);
    //write(fd, ptr, size);
    //close(fd);
-  
+
    // free it when done.
    eina_strbuf_free(data);
    free(data);
@@ -89,7 +92,7 @@ _ebird_url_complete_cb(void *data, int type, void *event)
    return EINA_TRUE;
 }
 
-char * 
+char *
 ebird_http_get(char *url)
 {
 	Ecore_Con_Url *ec_url;
@@ -104,7 +107,7 @@ ebird_http_get(char *url)
                             _ebird_url_progress_cb,
                             data);
     ecore_con_url_get(ec_url);
-    
+
     printf("\nDEBUG DATA [%s]\n",data);
     ecore_con_url_free(ec_url);
     ecore_main_loop_begin();
@@ -119,12 +122,12 @@ ebird_http_get(char *url)
  * @param : web script retruned by oauth_http_get()
  * @return : Error code
  */
- 
-int 
+
+int
 ebird_error_code_get(char *string)
 {
 	int compare_res;
-	
+
 	compare_res = strcmp(string,"Failed to validate oauth signature and token");
 	if (compare_res == 0)
 		return 500;
@@ -138,15 +141,14 @@ ebird_error_code_get(char *string)
  * @return : none
  * @rem : FIXME Split into 2 functions
  */
-static void 
+static void
 ebird_request_token_get(OauthToken *request)
 {
 	int res;
-	int i;
 	int error_code;
 
-	request->url = oauth_sign_url2(EBIRD_REQUEST_TOKEN_URL, NULL, OA_HMAC, NULL, 
-                                   EBIRD_USER_CONSUMER_KEY,                     
+	request->url = oauth_sign_url2(EBIRD_REQUEST_TOKEN_URL, NULL, OA_HMAC, NULL,
+                                   EBIRD_USER_CONSUMER_KEY,
                                    EBIRD_USER_CONSUMER_SECRET, NULL, NULL);
 //    request->token = ebird_http_get(request->url);
 	request->token = oauth_http_get(request->url,NULL);
@@ -162,7 +164,7 @@ ebird_request_token_get(OauthToken *request)
         {
             res = oauth_split_url_parameters(request->token,&request->token_prm);
 
-            if (res = 3)
+            if (res == 3)
             {
                 request->key = strdup(&(request->token_prm[0][12]));
                 request->secret = strdup(&(request->token_prm[1][19]));
@@ -186,7 +188,6 @@ ebird_request_token_get(OauthToken *request)
 char *
 ebird_authenticity_token_get(char *web_script)
 {
-    char *result;
 	char *keyword;
 	char *page;
 	char *key;
@@ -196,7 +197,7 @@ ebird_authenticity_token_get(char *web_script)
     page = strstr(web_script,keyword);
 	if (page)
 	{
-		result = strtok(page,"'");
+		strtok(page,"'");
 		key = strtok(NULL,"'");
 		return key;
 	}
@@ -206,13 +207,12 @@ ebird_authenticity_token_get(char *web_script)
 }
 
 char *
-ebird_authorisation_get(char *script, 
+ebird_authorisation_get(char *script __UNUSED__,
                             char *authenticity_token,
                             char *username,
                             char *userpassword,
                             char *direct_token_key)
 {
-    
     char *auth_url;
     char *auth_params;
     char *out_script;
@@ -220,11 +220,11 @@ ebird_authorisation_get(char *script,
     int retry = 4;
     int i;
 
-    const char *authenticity_token_label = strdup("authenticity_token");
-    const char *oauth_token_label = strdup("oauth_token");
+    char *authenticity_token_label = strdup("authenticity_token");
+    char *oauth_token_label = strdup("oauth_token");
 
-    const char *username_label = strdup("session%5Busername_or_email%5D");
-    const char *password_label = strdup("session%5Bpassword%5D");
+    char *username_label = strdup("session%5Busername_or_email%5D");
+    char *password_label = strdup("session%5Bpassword%5D");
 
     auth_url = strdup(EBIRD_DIRECT_TOKEN_URL);
 
@@ -237,7 +237,7 @@ ebird_authorisation_get(char *script,
     printf("\nDEBUG[ebird_authorisation_get] [password_label     ][%i][%s]\n",strlen(password_label),password_label);
     printf("\nDEBUG[ebird_authorisation_get] [userpassword       ][%i][%s]\n",strlen(userpassword),userpassword);
     */
-    
+
 
     snprintf(buf,sizeof(buf),"%s=%s&%s=%s&%s=%s&%s=%s&allow=true",
              authenticity_token_label,
@@ -255,7 +255,7 @@ ebird_authorisation_get(char *script,
     {
         printf("\nDEBUG[ebird_authorisation_get] TRY[%i]\n",i);
         out_script = oauth_http_get(auth_url,auth_params);
-        if (out_script) 
+        if (out_script)
         {
             printf("\nDEBUG[ebird_authorisation_get] TRY[%i][SUCCESS]\n* %s?%s\n",i,auth_url,auth_params);
 
@@ -275,11 +275,11 @@ ebird_authorisation_get(char *script,
             out_script = NULL;
         }
     }
-//    return NULL;
-
+    return NULL;
 }
+
 char *
-ebird_authorisation_pin_get(char *webscript)
+ebird_authorisation_pin_get(char *webscript __UNUSED__)
 {
    char *ret;
 
@@ -298,7 +298,7 @@ ebird_access_token_get(char *url,char *con_key,char *con_secret,OauthToken *requ
    char buf[EBIRD_URL_MAX];
 
 
-   acc_url = oauth_sign_url2(url, NULL, OA_HMAC, NULL, 
+   acc_url = oauth_sign_url2(url, NULL, OA_HMAC, NULL,
                              con_key,
                              con_secret,
                              request_token->key,
@@ -310,7 +310,8 @@ ebird_access_token_get(char *url,char *con_key,char *con_secret,OauthToken *requ
    printf("\nDEBUG[ebird_access_token_get][URL][%s]\n",buf);
    printf("\nDEBUG[ebird_access_token_get][RESULT]{%s}\n",acc_token);
    free(acc_url);
-   return buf;
+
+   return strdup(buf);
 }
 
 static void
@@ -339,11 +340,12 @@ ebird_direct_token_get(OauthToken *request_token)
                                          EBIRD_USER_CONSUMER_SECRET,
                                          request_token,
                                          authorisation_pin);
+   free(access_token);
    //free(url);
    //free(authorisation_pin);
 }
 
-int main(int argc, char **argv)
+int main(int argc __UNUSED__, char **argv __UNUSED__)
 {
     /* Request Token */
 
@@ -374,12 +376,17 @@ int main(int argc, char **argv)
         ebird_direct_token_get(request_token);
 
         free(request_token);
+        free(direct_token);
         return 0;
     }
     else
     {
         printf("Error on request token get\n");
         printf("\nDEBUG : END\n");
-        return 1;;
+
+        free(request_token);
+        free(direct_token);
+
+        return 1;
     }
 }

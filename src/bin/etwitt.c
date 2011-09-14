@@ -1,6 +1,10 @@
 #include <Elementary.h>
 #include <time.h>
 
+#ifndef __UNUSED__
+#define __UNUSED__ __attribute__((unused))
+#endif
+
 typedef struct _Twitt Twitt;
 typedef struct _Account Account;
 typedef struct _Interface Etwitt_Iface;
@@ -61,7 +65,8 @@ struct _ConfigIface
 
 
 static char *
-_list_item_default_label_get(void *data, Evas_Object *obj, const char *part)
+_list_item_default_label_get(void *data, Evas_Object *obj __UNUSED__,
+                             const char *part)
 {
     Twitt *twitt = data;
     if (!strcmp(part, "elm.text"))
@@ -98,8 +103,10 @@ static Elm_Genlist_Item_Class itc_default = {
     _list_item_default_label_get,
     _list_item_default_icon_get,
     NULL,
+    NULL,
     NULL
-  }
+  },
+  NULL
 };
 
 static void
@@ -122,14 +129,14 @@ etwitt_add_twitt(Etwitt_Iface *interface, char* message)
     twitt->date = eina_stringshare_add(date);
     twitt->icon = eina_stringshare_add(interface->account->avatar);
     twitt->name = eina_stringshare_add(interface->account->realname);
-    
+
     egi = elm_genlist_item_append(interface->list, &itc_default, twitt, NULL,
 				  ELM_GENLIST_ITEM_NONE, NULL, NULL);
     elm_genlist_item_show(egi);
 }
 
 static void
-_file_chosen(void *data, Evas_Object *obj, void *event_info)
+_file_chosen(void *data, Evas_Object *obj __UNUSED__, void *event_info)
 {
     Evas_Object *photo = data;
     const char *file = event_info;
@@ -138,7 +145,8 @@ _file_chosen(void *data, Evas_Object *obj, void *event_info)
 }
 
 static void
-_cfg_clear_bt_cb(void *data, Evas_Object *obj, void *event_info)
+_cfg_clear_bt_cb(void *data, Evas_Object *obj __UNUSED__,
+                 void *event_info __UNUSED__)
 {
     Etwitt_Config_Iface *iface;
 
@@ -151,7 +159,9 @@ _cfg_clear_bt_cb(void *data, Evas_Object *obj, void *event_info)
 }
 
 static void
-_show_configuration(void *data, Evas_Object *obj, void *event_info)
+_show_configuration(void *data,
+                    Evas_Object *obj __UNUSED__,
+                    void *event_info __UNUSED__)
 {
    Etwitt_Iface *iface = data;
    edje_object_signal_emit(elm_layout_edje_get(iface->layout),"SHOW_CONFIG","code");
@@ -159,7 +169,8 @@ _show_configuration(void *data, Evas_Object *obj, void *event_info)
 }
 
 static void
-_show_roll(void *data, Evas_Object *obj, void *event_info)
+_show_roll(void *data, Evas_Object *obj __UNUSED__,
+           void *event_info __UNUSED__)
 {
     Etwitt_Iface *iface = data;
     evas_object_show(iface->list);
@@ -169,7 +180,8 @@ _show_roll(void *data, Evas_Object *obj, void *event_info)
 }
 
 static void
-_win_del(void *data, Evas_Object *obj, void *event_info)
+_win_del(void *data, Evas_Object *obj __UNUSED__,
+         void *event_info __UNUSED__)
 {
    Etwitt_Iface *iface = data;
 
@@ -184,7 +196,8 @@ _win_del(void *data, Evas_Object *obj, void *event_info)
 }
 
 static void
-_twitt_bt_press(void *data, Evas_Object *obj,void *event_info)
+_twitt_bt_press(void *data, Evas_Object *obj __UNUSED__,
+                void *event_info __UNUSED__)
 {
    Etwitt_Iface *infos = data;
    const char *entry = elm_entry_entry_get(infos->entry);
@@ -217,7 +230,7 @@ etwitt_win_add(Etwitt_Iface *interface)
 static void
 etwitt_main_toolbar_add(Etwitt_Iface *interface)
 {
-   /* 
+   /*
    interface->panel = elm_panel_add(interface->win);
    elm_panel_orient_set(interface->panel, ELM_PANEL_ORIENT_TOP);
    evas_object_size_hint_weight_set(interface->panel, EVAS_HINT_EXPAND, 0);
@@ -243,12 +256,10 @@ etwitt_main_toolbar_add(Etwitt_Iface *interface)
 }
 
 
-static void 
+static void
 etwitt_twitt_bar_add(Etwitt_Iface *interface)
 {
-   Evas_Object *box;
    Evas_Object *icon;
-   Evas_Object *entry;
    Evas_Object *button;
    char buf[PATH_MAX];
 
@@ -411,7 +422,7 @@ etwitt_config_iface_add(Etwitt_Iface *iface)
     elm_entry_scrollable_set(iface->config->en_name,EINA_TRUE);
     elm_table_pack(iface->config->table,iface->config->en_name,1,0,3,1);
     evas_object_show(iface->config->en_name);
-    
+
     iface->config->lb_passwd = elm_label_add(iface->win);
     elm_object_text_set(iface->config->lb_passwd,"Password");
     elm_table_pack(iface->config->table,iface->config->lb_passwd,0,1,1,1);
@@ -424,7 +435,7 @@ etwitt_config_iface_add(Etwitt_Iface *iface)
     elm_entry_password_set(iface->config->en_passwd, EINA_TRUE);
     elm_table_pack(iface->config->table,iface->config->en_passwd,1,1,3,1);
     evas_object_show(iface->config->en_passwd);
-    
+
     iface->config->lb_rename = elm_label_add(iface->win);
     elm_object_text_set(iface->config->lb_rename,"Real name");
     elm_table_pack(iface->config->table,iface->config->lb_rename,0,2,1,1);
@@ -456,12 +467,10 @@ etwitt_config_iface_add(Etwitt_Iface *iface)
 }
 */
 
-EAPI_MAIN 
+EAPI_MAIN int
 elm_main(int argc, char **argv)
 {
    Etwitt_Iface *iface;
-   Etwitt_Config_Iface *config_iface;
-   Account *account;
 
    elm_init(argc, argv);
 
@@ -477,7 +486,7 @@ elm_main(int argc, char **argv)
    iface->theme = elm_theme_new();
    elm_theme_extension_add(iface->theme, THEME_FILE);
    elm_theme_overlay_add(iface->theme, THEME_FILE);
-   
+
    // Main window creation
    etwitt_win_add(iface);
 
@@ -498,5 +507,7 @@ elm_main(int argc, char **argv)
 
    elm_run();
    elm_shutdown();
+
+   return 0;
 }
 ELM_MAIN();
