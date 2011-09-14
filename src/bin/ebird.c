@@ -134,13 +134,13 @@ ebird_http_get(char *url)
 int
 ebird_error_code_get(char *string)
 {
-	int compare_res;
+    int compare_res;
 
-	compare_res = strcmp(string,"Failed to validate oauth signature and token");
-	if (compare_res == 0)
-		return 500;
-	else
-		return 0;
+    compare_res = strcmp(string,"Failed to validate oauth signature and token");
+    if (compare_res == 0)
+        return 500;
+    else
+        return 0;
 }
 
  /*
@@ -152,15 +152,15 @@ ebird_error_code_get(char *string)
 static void
 ebird_request_token_get(OauthToken *request)
 {
-	int res;
-	int error_code;
+    int res;
+    int error_code;
 
-	request->url = oauth_sign_url2(EBIRD_REQUEST_TOKEN_URL, NULL, OA_HMAC, NULL,
+    request->url = oauth_sign_url2(EBIRD_REQUEST_TOKEN_URL, NULL, OA_HMAC, NULL,
                                    EBIRD_USER_CONSUMER_KEY,
                                    EBIRD_USER_CONSUMER_SECRET, NULL, NULL);
-//    request->token = ebird_http_get(request->url);
-	request->token = oauth_http_get(request->url,NULL);
-	if (request->token)
+    //    request->token = ebird_http_get(request->url);
+    request->token = oauth_http_get(request->url,NULL);
+    if (request->token)
     {
         error_code = ebird_error_code_get(request->token);
         if ( error_code != 0)
@@ -196,21 +196,21 @@ ebird_request_token_get(OauthToken *request)
 char *
 ebird_authenticity_token_get(char *web_script)
 {
-	char *keyword;
-	char *page;
-	char *key;
+    char *keyword;
+    char *page;
+    char *key;
 
-	keyword = strdup("twttr.form_authenticity_token");
+    keyword = strdup("twttr.form_authenticity_token");
 
     page = strstr(web_script,keyword);
-	if (page)
-	{
-		strtok(page,"'");
-		key = strtok(NULL,"'");
-		return key;
-	}
-	else
-		return NULL;
+    if (page)
+    {
+        strtok(page,"'");
+        key = strtok(NULL,"'");
+        return key;
+    }
+    else
+        return NULL;
 
 }
 
@@ -396,9 +396,9 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
         printf("*****************************************\n");
         printf("\nDEBUG[main] Step[2][Request Direct Token]\n");
         ebird_direct_token_get(request_token);
- 
-        /* Manual actions 
-          
+
+        /* Manual actions
+
         printf("Open this url in a web browser to authorize ebird on access to your account.\n%s\n",
                request_token->authorisation_url);
         printf("Please paste PIN here :\n");
@@ -413,7 +413,7 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
         request_token->authorisation_pin = ebird_authorisation_pin_get(request_token->authorisation_url,
                                                                        EBIRD_USER_SCREEN_NAME,
                                                                        EBIRD_USER_PASSWD);
-        
+
         request_token->access_token = ebird_access_token_get(EBIRD_ACCESS_TOKEN_URL,
                                                              EBIRD_USER_CONSUMER_KEY,
                                                              EBIRD_USER_CONSUMER_SECRET,
