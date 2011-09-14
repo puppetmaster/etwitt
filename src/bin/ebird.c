@@ -328,7 +328,7 @@ ebird_access_token_get(char *url,char *con_key,char *con_secret,OauthToken *requ
 
    if (res == 4)
    {
-       *request_token->access_token_key = strdup(&(request_token->access_token_prm[0][12]));                                                                                    
+       request_token->access_token_key = strdup(&(request_token->access_token_prm[0][12]));
 /*
        *out_access_token_secret = strdup(&(access_token_grant_prm_value[1][19]));
        *out_access_token_uscreen_name = strdup(&(access_token_grant_prm_value[2][12]));
