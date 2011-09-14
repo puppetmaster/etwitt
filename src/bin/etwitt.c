@@ -5,7 +5,7 @@ typedef struct _Twitt Twitt;
 typedef struct _Account Account;
 typedef struct _Interface Etwitt_Iface;
 typedef struct _ConfigIface Etwitt_Config_Iface;
-#define THEME_FILE "./phone.edj"
+#define THEME_FILE "./data/theme/phone.edj"
 #define MESSAGES_LIMIT 140
 
 struct _Account
