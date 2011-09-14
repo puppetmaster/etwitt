@@ -3,6 +3,7 @@
 #include <string.h>
 #include <oauth.h>
 #include <sys/types.h>
+
 /*
 #include <Eina.h>
 #include <Ecore.h>
@@ -15,10 +16,9 @@
 #define EBIRD_DIRECT_TOKEN_URL "https://api.twitter.com/oauth/authorize"
 #define EBIRD_ACCESS_TOKEN_URL "https://api.twitter.com/oauth/access_token"
 
-
-#define EBIRD_USER_SCREEN_NAME "xxxxxxxxxxxxx"
+#define EBIRD_USER_SCREEN_NAME "xxxxx"
 #define EBIRD_USER_EMAIL "xxxxe@xxxx.com"
-#define EBIRD_USER_ID "xxxxxxxxx"
+#define EBIRD_USER_ID "xxxxxxxx"
 #define EBIRD_USER_PASSWD "xxxxxxxx"	//<< percent encode: char "+" => %2B
 #define EBIRD_USER_CONSUMER_KEY "xxxxxxxxxxxxxxxxxxxxx"
 #define EBIRD_USER_CONSUMER_SECRET "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
@@ -39,11 +39,12 @@ struct _oauth_token
     
 };
 
+/*
 struct _request {
          long size;
 };
 
-/*
+
 static Eina_Bool
 _ebird_url_progress_cb(void *data, int type, void *event)
 {
@@ -113,6 +114,12 @@ ebird_http_get(char *url)
 */
 
 
+/*
+ * name: ebird_error_code_get
+ * @param : web script retruned by oauth_http_get()
+ * @return : Error code
+ */
+ 
 int 
 ebird_error_code_get(char *string)
 {
@@ -125,9 +132,11 @@ ebird_error_code_get(char *string)
 		return 0;
 }
 
-/*
- *  FIXME Split into 2 functions
- *
+ /*
+ * name: ebird_request_token_get
+ * @param : Request token variable to receive informations
+ * @return : none
+ * @rem : FIXME Split into 2 functions
  */
 static void 
 ebird_request_token_get(OauthToken *request)
