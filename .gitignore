@@ -2,6 +2,8 @@ test*
 /etwitt
 /ebird
 out.*
+id.eet
+mkid
 *.edj
 *.lo
 *.o

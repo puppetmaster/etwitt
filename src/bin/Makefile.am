@@ -17,11 +17,13 @@ ebird_SOURCES = \
 ebird_CPPFLAGS =          \
 	@OAUTH_CFLAGS@     \
 	@ECORE_CON_CFLAGS@ \
-	@OPENSSL_CFLAGS@
+	@OPENSSL_CFLAGS@ \
+    @EET_CFLAGS@
 ebird_LDADD =           \
 	@OAUTH_LIBS@     \
 	@ECORE_CON_LIBS@ \
-	@OPENSSL_LIBS@
+	@OPENSSL_LIBS@ \
+    @EET_LIBS@
 
 clean-local:
 	rm -rf *~

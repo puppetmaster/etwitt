@@ -3,6 +3,7 @@
 #include <string.h>
 #include <oauth.h>
 #include <sys/types.h>
+#include <Eet.h>
 
 /*
 #include <Eina.h>
@@ -16,6 +17,7 @@
 
 #define EBIRD_URL_MAX 1024
 #define EBIRD_PIN_SIZE 12
+#define EBIRD_ID_FILE "./id.eet"
 
 #define EBIRD_REQUEST_TOKEN_URL "https://api.twitter.com/oauth/request_token"
 #define EBIRD_DIRECT_TOKEN_URL "https://api.twitter.com/oauth/authorize"
@@ -25,17 +27,14 @@
 #define EBIRD_USER_EMAIL "xxxxe@xxxx.com"
 #define EBIRD_USER_ID "xxxxxxxx"
 #define EBIRD_USER_PASSWD "xxxxxxxx"    //<< percent encode: char "+" => %2B
-#define EBIRD_USER_CONSUMER_KEY "xxxxxxxxxxxxxxxxxxxxx"
-#define EBIRD_USER_CONSUMER_SECRET "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-#define EBIRD_USER_ACCESS_TOKEN_KEY "xxxxx"
-#define EBIRD_USER_ACCESS_TOKEN_SECRET "xxxx"
-
 
 
 typedef struct _oauth_token OauthToken;
 
 struct _oauth_token
 {
+    char *consumer_key;
+    char *consumer_secret;
     char *url;
     char *token;
     char **token_prm;
@@ -127,6 +126,24 @@ ebird_http_get(char *url)
 }
 */
 
+static int
+ebird_load_id(OauthToken *request_token)
+{
+    Eet_File *file;
+    int size;
+
+    eet_init();
+
+    file = eet_open(EBIRD_ID_FILE,EET_FILE_MODE_READ);
+    request_token->consumer_key = strdup(eet_read(file,"key",&size));
+    request_token->consumer_secret = strdup(eet_read(file,"secret",&size));
+    eet_close(file);
+
+    eet_shutdown();
+
+}
+
+
 
 /*
  * name: ebird_error_code_get
@@ -159,8 +176,8 @@ ebird_request_token_get(OauthToken *request)
     int error_code;
 
     request->url = oauth_sign_url2(EBIRD_REQUEST_TOKEN_URL, NULL, OA_HMAC,
-                                   NULL, EBIRD_USER_CONSUMER_KEY,
-                                   EBIRD_USER_CONSUMER_SECRET, NULL, NULL);
+                                   NULL, request->consumer_key,
+                                   request->consumer_secret, NULL, NULL);
     request->token = oauth_http_get(request->url, NULL);
     printf("request token: '%s'\n", request->token);
     if (request->token)
@@ -381,6 +398,9 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
     ecore_con_url_init();
 */
 
+
+    ebird_load_id(&request_token);
+
     printf("\nDEBUG[main] Step[1][Request Token]\n");
     ebird_request_token_get(&request_token);
     if (request_token.token)
@@ -415,8 +435,8 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
 
         request_token.access_token = ebird_access_token_get(&request_token,
                                                             EBIRD_ACCESS_TOKEN_URL,
-                                                            EBIRD_USER_CONSUMER_KEY,
-                                                            EBIRD_USER_CONSUMER_SECRET);
+                                                            request_token.consumer_key,
+                                                            request_token.consumer_secret);
 
         return 0;
     }
