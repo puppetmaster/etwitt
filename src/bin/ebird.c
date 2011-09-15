@@ -124,6 +124,7 @@ ebird_http_get(char *url)
 }
 */
 
+*/
 
 /*
  * name: ebird_error_code_get
