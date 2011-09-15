@@ -21,10 +21,10 @@
 #define EBIRD_DIRECT_TOKEN_URL "https://api.twitter.com/oauth/authorize"
 #define EBIRD_ACCESS_TOKEN_URL "https://api.twitter.com/oauth/access_token"
 
-#define EBIRD_USER_SCREEN_NAME "xxxxx"
+#define EBIRD_USER_SCREEN_NAME "xxxxxxx"
 #define EBIRD_USER_EMAIL "xxxxe@xxxx.com"
 #define EBIRD_USER_ID "xxxxxxxx"
-#define EBIRD_USER_PASSWD "xxxxxxxx"	//<< percent encode: char "+" => %2B
+#define EBIRD_USER_PASSWD "xxxxxxxx"    //<< percent encode: char "+" => %2B
 #define EBIRD_USER_CONSUMER_KEY "xxxxxxxxxxxxxxxxxxxxx"
 #define EBIRD_USER_CONSUMER_SECRET "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 #define EBIRD_USER_ACCESS_TOKEN_KEY "xxxxx"
