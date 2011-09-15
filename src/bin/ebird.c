@@ -99,7 +99,6 @@ _ebird_url_complete_cb(void *data, int type, void *event)
 
    return EINA_TRUE;
 }
-*/
 
 char *
 ebird_http_get(char *url)
@@ -123,6 +122,7 @@ ebird_http_get(char *url)
     return data;
 
 }
+*/
 
 
 /*
