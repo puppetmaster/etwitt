@@ -42,10 +42,12 @@ struct _oauth_token
     char *secret;
     char *authorisation_url;
     char *authorisation_pin;
+    char *authenticity_token;
     char *access_token;
     char **access_token_prm;
     char *access_token_key;
     char *access_token_secret;
+    char *callback_confirmed;
     char *userid;
     char *screen_name;
 };
@@ -155,11 +157,11 @@ ebird_request_token_get(OauthToken *request)
     int res;
     int error_code;
 
-    request->url = oauth_sign_url2(EBIRD_REQUEST_TOKEN_URL, NULL, OA_HMAC, NULL,
-                                   EBIRD_USER_CONSUMER_KEY,
+    request->url = oauth_sign_url2(EBIRD_REQUEST_TOKEN_URL, NULL, OA_HMAC,
+                                   NULL, EBIRD_USER_CONSUMER_KEY,
                                    EBIRD_USER_CONSUMER_SECRET, NULL, NULL);
-    //    request->token = ebird_http_get(request->url);
     request->token = oauth_http_get(request->url, NULL);
+    printf("request token: '%s'\n", request->token);
     if (request->token)
     {
         error_code = ebird_error_code_get(request->token);
@@ -170,16 +172,23 @@ ebird_request_token_get(OauthToken *request)
         }
         else
         {
-            res = oauth_split_url_parameters(request->token,&request->token_prm);
+            res = oauth_split_url_parameters(request->token,
+                                             &request->token_prm);
 
             if (res == 3)
             {
                 request->key = strdup(&(request->token_prm[0][12]));
                 request->secret = strdup(&(request->token_prm[1][19]));
+                request->callback_confirmed = strdup(&(request->token_prm[2][25]));
+                printf("request->key='%s', request->secret='%s',"
+                       " request->callback_confirmed='%s'\n",
+                       request->key, request->secret,
+                       request->callback_confirmed);
             }
             else
             {
-                printf("Error on Request Token [%s]\n",request->token);
+                printf("Error on Request Token [%s]\n",
+                       request->token);
                 request->token = NULL;
             }
         }
@@ -190,100 +199,75 @@ ebird_request_token_get(OauthToken *request)
         printf("Error on Request Token [%s]\n",request->token);
         request->token = NULL;
     }
-
 }
 
-static char *
-ebird_authenticity_token_get(char *web_script)
+static int
+ebird_authenticity_token_get(char *web_script, OauthToken *request_token)
 {
-    char *keyword;
-    char *page;
-    char *key;
+    char *key,
+         *end;
 
-    keyword = strdup("twttr.form_authenticity_token");
+    printf("webscript=%s\n", web_script);
+    key = strstr(web_script, "twttr.form_authenticity_token");
+    if (!key)
+        return -1;
 
-    page = strstr(web_script,keyword);
-    if (page)
-    {
-        strtok(page,"'");
-        key = strtok(NULL,"'");
-        return key;
-    }
-    else
-        return NULL;
+    key = strchr(key, '\'');
+    if (!key)
+        return -1;
+    key++;
+    end = strchr(key, '\'');
+    if (!end)
+        return -1;
 
+    *end = '\0';
+    request_token->authenticity_token = strdup(key);
+    *end = '\'';
+
+    return 0;
 }
 
-static char *
-ebird_authorisation_url_get(char *authenticity_token, char *direct_token_key)
+static int
+ebird_authorisation_url_get(OauthToken *request_token)
 {
-    char *auth_url;
-    char *full_url;
     char buf[EBIRD_URL_MAX];
 
-    const char *authenticity_token_label = strdup("authenticity_token");
-    const char *oauth_token_label = strdup("oauth_token");
+    snprintf(buf, sizeof(buf),
+             EBIRD_DIRECT_TOKEN_URL "?authenticity_token=%s&oauth_token=%s",
+             request_token->authenticity_token,
+             request_token->key);
 
-    auth_url = strdup(EBIRD_DIRECT_TOKEN_URL);
+    request_token->authorisation_url = strdup(buf);
 
-    snprintf(buf,sizeof(buf),"%s?%s=%s&%s=%s",
-             auth_url,
-             authenticity_token_label,
-             authenticity_token,
-             oauth_token_label,
-             direct_token_key);
-
-    full_url = strdup(buf);
-
-    if (full_url)
-        return full_url;
-    else
-    {
-        printf("Error [001]\n");
-        return strdup("Error [001]");
-    }
-
-
+    return 0;
 }
 
-static char *
-ebird_authorisation_pin_get(const char *url,
+static int
+ebird_authorisation_pin_get(OauthToken *request_token,
                             const char *username,
                             const char *userpassword)
 {
-    char *auth_url;
-    char *auth_params;
     char *out_script;
     char *result;
-    char buf[EBIRD_URL_MAX];
+    char auth_params[EBIRD_URL_MAX];
     int retry = 4;
     int i;
 
-    char *username_label = strdup("session%5Busername_or_email%5D");
-    char *password_label = strdup("session%5Bpassword%5D");
-
-    auth_url = strdup(url);
-
-    snprintf(buf,sizeof(buf),"%s=%s&%s=%s",
-             username_label,
+    snprintf(auth_params, sizeof(auth_params),
+             "session%5Busername_or_email%%5D=%s&session%%5Bpassword=%s",
              username,
-             password_label,
              userpassword);
-
-    auth_params = strdup(buf);
 
     for (i = 0 ; i <= retry; i++)
     {
         printf("\nDEBUG[ebird_authorisation_get] TRY[%i]\n",i);
-        out_script = oauth_http_get(auth_url,auth_params);
+        out_script = oauth_http_get(request_token->authorisation_url,
+                                    auth_params);
         if (out_script)
         {
-            printf("\nDEBUG[ebird_authorisation_get] TRY[%i][SUCCESS]\n* %s?%s\n",i,auth_url,auth_params);
+            printf("\nDEBUG[ebird_authorisation_get] TRY[%i][SUCCESS]\n* %s?%s\n",
+                   i, request_token->authorisation_url, auth_params);
 
-            free(auth_url);
-            free(auth_params);
-            free(username_label);
-            free(password_label);
             printf("========================================================================================================\n");
             printf("\n\n%s\n\n\n",out_script);
             printf("========================================================================================================\n");
@@ -293,20 +277,22 @@ ebird_authorisation_pin_get(const char *url,
         }
         else
         {
-            printf("\nDEBUG[ebird_authorisation_get] TRY[%i][FAILED][%s?%s]\n",i,auth_url,auth_params);
+            printf("\nDEBUG[ebird_authorisation_get] TRY[%i][FAILED][%s?%s]\n",
+                   i, request_token->authorisation_url, auth_params);
             out_script = NULL;
             result = NULL;
         }
     }
-    return result;
+
+    return 0;
 }
 
 
 static char *
-ebird_access_token_get(const char *url,
+ebird_access_token_get(OauthToken *request_token,
+                       const char *url,
                        const char *con_key,
-                       const char *con_secret,
-                       OauthToken *request_token)
+                       const char *con_secret)
 {
 
    char *acc_url;
@@ -346,27 +332,36 @@ ebird_access_token_get(const char *url,
    return strdup(buf);
 }
 
-static void
+static int
 ebird_direct_token_get(OauthToken *request_token)
 {
 
-   char *url = NULL;
    char *script = NULL;
    char buf[256];
    char *authenticity_token;
 
-   snprintf(buf,sizeof(buf),"%s?oauth_token=%s",EBIRD_DIRECT_TOKEN_URL,request_token->key);
+   snprintf(buf, sizeof(buf),
+            "%s?oauth_token=%s",
+            EBIRD_DIRECT_TOKEN_URL,
+            request_token->key);
 
-   url = strdup(buf);
    printf("\nDEBUG[ebird_direct_token_get] Step[2.1][Get Authenticity token]\n");
-   script = oauth_http_get(url, NULL);
-   authenticity_token = ebird_authenticity_token_get(script);
-   printf("\nDEBUG[ebird_direct_token_get] Step[2.2][Get Authorisation page\n");
+   script = oauth_http_get(buf, NULL);
+   printf("get '%s'", buf);
+   if (ebird_authenticity_token_get(script, request_token) < 0)
+       goto error;
 
-   request_token->authorisation_url = ebird_authorisation_url_get(authenticity_token,request_token->key);
+   printf("\nDEBUG[ebird_direct_token_get] Step[2.2][Get Authorisation page]\n");
 
-   //free(url);
-   //free(authorisation_pin);
+   if (ebird_authorisation_url_get(request_token) < 0)
+       goto error;
+
+   free(script);
+   return 0;
+
+error:
+   free(script);
+   return -1;
 }
 
 int main(int argc __UNUSED__, char **argv __UNUSED__)
@@ -411,14 +406,16 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
         */
 
         /* AUTOMATIC PIN RETREIVE */
-        request_token.authorisation_pin = ebird_authorisation_pin_get(request_token.authorisation_url,
-                                                                      EBIRD_USER_SCREEN_NAME,
-                                                                      EBIRD_USER_PASSWD);
+        if (ebird_authorisation_pin_get(&request_token,
+                                        EBIRD_USER_SCREEN_NAME,
+                                        EBIRD_USER_PASSWD) < 0) {
+            return 1;
+        }
 
-        request_token.access_token = ebird_access_token_get(EBIRD_ACCESS_TOKEN_URL,
+        request_token.access_token = ebird_access_token_get(&request_token,
+                                                            EBIRD_ACCESS_TOKEN_URL,
                                                             EBIRD_USER_CONSUMER_KEY,
-                                                            EBIRD_USER_CONSUMER_SECRET,
-                                                            &request_token);
+                                                            EBIRD_USER_CONSUMER_SECRET);
 
         return 0;
     }
