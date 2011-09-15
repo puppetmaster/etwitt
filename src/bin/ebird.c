@@ -31,6 +31,7 @@
 #define EBIRD_USER_ACCESS_TOKEN_SECRET "xxxx"
 
 
+
 typedef struct _oauth_token OauthToken;
 
 struct _oauth_token
@@ -124,7 +125,6 @@ ebird_http_get(char *url)
 }
 */
 
-*/
 
 /*
  * name: ebird_error_code_get
@@ -286,7 +286,7 @@ ebird_authorisation_pin_get(const char *url,
             free(username_label);
             free(password_label);
             printf("========================================================================================================\n");
-            printf("\n\n%s\n\n\n",out_script);
+            printf("%s\n",out_script);
             printf("========================================================================================================\n");
             /*FIXME get the PIN */
             result = strdup("123456789");
