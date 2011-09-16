@@ -279,24 +279,23 @@ ebird_authorisation_pin_get(OauthToken *request_token,
 {
     char *out_script;
     char *result;
-    char auth_params[EBIRD_URL_MAX];
+    char url[EBIRD_URL_MAX];
     int retry = 4;
     int i;
 
-    snprintf(auth_params, sizeof(auth_params),
-             "session%5Busername_or_email%%5D=%s&session%%5Bpassword=%s",
+    snprintf(url, sizeof(url),
+             "%s&session%5Busername_or_email%%5D=%s&session%%5Bpassword%%5D=%s",
+             request_token->authorisation_url,
              username,
              userpassword);
 
     for (i = 0 ; i <= retry; i++)
     {
-        printf("\nDEBUG[ebird_authorisation_get] TRY[%i]\n",i);
-        out_script = oauth_http_get(request_token->authorisation_url,
-                                    auth_params);
+        printf("\nDEBUG[ebird_authorisation_get] TRY[%i][%s]\n",i,url);
+        out_script = oauth_http_post(url,NULL);
         if (out_script)
         {
-            printf("\nDEBUG[ebird_authorisation_get] TRY[%i][SUCCESS]\n* %s?%s\n",
-                   i, request_token->authorisation_url, auth_params);
+            printf("\nDEBUG[ebird_authorisation_get] TRY[%i][SUCCESS]\n* %s\n",i,url);
 
             printf("========================================================================================================\n");
             printf("%s\n",out_script);
@@ -307,8 +306,7 @@ ebird_authorisation_pin_get(OauthToken *request_token,
         }
         else
         {
-            printf("\nDEBUG[ebird_authorisation_get] TRY[%i][FAILED][%s?%s]\n",
-                   i, request_token->authorisation_url, auth_params);
+            printf("\nDEBUG[ebird_authorisation_get] TRY[%i][FAILED][%s]\n",i, url);
             out_script = NULL;
             result = NULL;
         }
