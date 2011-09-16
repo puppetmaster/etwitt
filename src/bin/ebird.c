@@ -280,13 +280,13 @@ ebird_authorisation_pin_get(OauthToken *request_token,
     char url[EBIRD_URL_MAX];
     int retry = 4;
     int i;
-    const char *static_header = "Accept:text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n \
-Accept-Charset:ISO-8859-1,utf-8;q=0.7,*;q=0.7\r\n \
-Accept-Encoding:gzip, deflate\r\n \
-Accept-Language:fr,fr-fr;q=0.8,en;q=0.5,en-us;q=0.3\r\n \
-Connection:keep-alive\r\n \
-Host:api.twitter.com\r\n \
-User-Agent:Mozilla/5.0 (X11; Linux x86_64; rv:6.0.2) Gecko/20100101 Firefox/6.0.2\r\n";
+    const char *static_header = "Accept:text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\\r\\n\
+Accept-Charset:ISO-8859-1,utf-8;q=0.7,*;q=0.7\\r\\n\
+Accept-Encoding:gzip, deflate\\r\\n\
+Accept-Language:fr,fr-fr;q=0.8,en;q=0.5,en-us;q=0.3\\r\\n\
+Connection:keep-alive\\r\\n\
+Host:api.twitter.com\\r\\n\
+User-Agent:Mozilla/5.0 (X11; Linux x86_64; rv:6.0.2) Gecko/20100101 Firefox/6.0.2\\r\\n";
     char header[EBIRD_URL_MAX];
 
     snprintf(header, sizeof(header),"%sRefer:%s\r\n",static_header,request_token->authorisation_url);    
