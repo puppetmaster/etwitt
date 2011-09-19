@@ -111,10 +111,10 @@ ebird_load_account(EbirdAccount *account)
 
 
    file = eet_open(EBIRD_ACCOUNT_FILE,EET_FILE_MODE_READ);
-   account->username = strdup(eet_read(file,"username",&size));
-   account->passwd = strdup(eet_read(file,"passwd",&size));
-   account->access_token_key = strdup(eet_read(file,"access_token_key",&size));
-   account->access_token_secret = strdup(eet_read(file,"access_token_secret",&size));
+   account->username = eina_stringshare_add(eet_read(file,"username",&size));
+   account->passwd = eina_stringshare_add(eet_read(file,"passwd",&size));
+   account->access_token_key = eina_stringshare_add(eet_read(file,"access_token_key",&size));
+   account->access_token_secret = eina_stringshare_add(eet_read(file,"access_token_secret",&size));
 
    eet_close(file);
 
@@ -131,8 +131,8 @@ ebird_load_id(OauthToken *request_token)
 
 
     file = eet_open(EBIRD_ID_FILE,EET_FILE_MODE_READ);
-    request_token->consumer_key = strdup(eet_read(file,"key",&size));
-    request_token->consumer_secret = strdup(eet_read(file,"secret",&size));
+    request_token->consumer_key = eina_stringshare_add(eet_read(file,"key",&size));
+    request_token->consumer_secret = eina_stringshare_add(eet_read(file,"secret",&size));
     eet_close(file);
 
 
@@ -190,9 +190,9 @@ ebird_request_token_get(OauthToken *request)
 
             if (res == 3)
             {
-                request->key = strdup(&(request->token_prm[0][12]));
-                request->secret = strdup(&(request->token_prm[1][19]));
-                request->callback_confirmed = strdup(&(request->token_prm[2][25]));
+                request->key = eina_stringshare_add(&(request->token_prm[0][12]));
+                request->secret = eina_stringshare_add(&(request->token_prm[1][19]));
+                request->callback_confirmed = eina_stringshare_add(&(request->token_prm[2][25]));
                 printf("request->key='%s', request->secret='%s',"
                        " request->callback_confirmed='%s'\n",
                        request->key, request->secret,
@@ -234,7 +234,7 @@ ebird_authenticity_token_get(char *web_script, OauthToken *request_token)
         return -1;
 
     *end = '\0';
-    request_token->authenticity_token = strdup(key);
+    request_token->authenticity_token = eina_stringshare_add(key);
     *end = '\'';
 
     return 0;
@@ -250,7 +250,7 @@ ebird_authorisation_url_get(OauthToken *request_token)
              request_token->authenticity_token,
              request_token->key);
 
-    request_token->authorisation_url = strdup(buf);
+    request_token->authorisation_url = eina_stringshare_add(buf);
 
     return 0;
 }
