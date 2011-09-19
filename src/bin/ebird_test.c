@@ -60,6 +60,9 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
         {
             ebird_read_pin_from_stdin(&request_token);
             ebird_authorise_app(&request_token,&account);
+            timeline = ebird_home_timeline_get(&request_token, &account);
+            printf("%s\n",timeline);
+
         }
         
 
