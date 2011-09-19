@@ -38,6 +38,10 @@ mkid*
 /src/bin/ebird
 /src/bin/Makefile
 /src/bin/Makefile.in
+/src/lib/.deps/
+/src/lib/ebird
+/src/lib/Makefile
+/src/lib/Makefile.in
 /stamp-h1
 /compile
 /data/Makefile

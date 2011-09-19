@@ -13,7 +13,7 @@ etwitt_LDADD = \
 	@ELM_LIBS@
 
 ebird_SOURCES = \
-	ebird.c
+	ebird_test.c
 ebird_CPPFLAGS =          \
 	@OAUTH_CFLAGS@     \
 	@ECORE_CON_CFLAGS@ \
