@@ -9,19 +9,20 @@ bin_PROGRAMS = ebird_test etwitt
 etwitt_SOURCES = \
 	etwitt.c
 etwitt_CPPFLAGS = \
-	@ELM_CFLAGS@
+	@ELM_CFLAGS@ 
 etwitt_LDADD = \
-	@ELM_LIBS@
+	@ELM_LIBS@ \
+        $(top_builddir)/src/lib/libebird.la
 
-ebird_SOURCES = \
+ebird_test_SOURCES = \
 	ebird_test.c
-ebird_CPPFLAGS =          \
+ebird_test_CPPFLAGS =          \
 	@OAUTH_CFLAGS@     \
 	@ECORE_CON_CFLAGS@ \
 	@ECORE_FILE_CFLAGS@ \
 	@OPENSSL_CFLAGS@ \
     @EET_CFLAGS@
-ebird_LDADD =           \
+ebird_test_LDADD =           \
 	@OAUTH_LIBS@     \
 	@ECORE_CON_LIBS@ \
 	@ECORE_FILE_LIBS@  \

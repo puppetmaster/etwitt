@@ -1,9 +1,9 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <oauth.h>
 #include <sys/types.h>
+#include <Eina.h>
 #include <Ecore.h>
 #include <Ecore_Con.h>
 #include <Ecore_File.h>
@@ -56,6 +56,8 @@ struct _ebird_account
     char *userid;
     char *access_token_key;
     char *access_token_secret;
+    char *avatar;
+    char *realname;
 };
 
 

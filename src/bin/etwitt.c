@@ -1,4 +1,5 @@
 #include <Elementary.h>
+#include <ebird.h>
 #include <time.h>
 
 #ifndef __UNUSED__
@@ -39,7 +40,7 @@ struct _Interface
    Evas_Object *tw_box;
    Evas_Object *list;
    Elm_Theme *theme;
-   Account *account;
+   EbirdAccount *account;
    Etwitt_Config_Iface *config;
 
 };
@@ -322,6 +323,8 @@ etwitt_config_iface_add(Etwitt_Iface *iface)
     elm_entry_scrollable_set(iface->config->en_name,EINA_FALSE);
     elm_entry_single_line_set(iface->config->en_name,EINA_TRUE);
     elm_layout_content_set(iface->layout,"config:entry/name",iface->config->en_name);
+    if (iface->account->username)
+        elm_object_text_set(iface->config->en_name,iface->account->username);
     evas_object_show(iface->config->en_name);
 
     iface->config->lb_passwd = elm_label_add(iface->win);
@@ -386,6 +389,9 @@ etwitt_config_iface_add(Etwitt_Iface *iface)
     evas_object_size_hint_align_set(iface->config->bt_save, EVAS_HINT_FILL, EVAS_HINT_FILL);
     elm_object_text_set(iface->config->bt_save,"Save");
     elm_box_pack_end(iface->config->bx_button_bar,iface->config->bt_save);
+
+    //#FIXME event !!!
+
     evas_object_show(iface->config->bt_save);
 
     iface->config->bt_clear = elm_button_add(iface->win);
@@ -472,16 +478,28 @@ elm_main(int argc, char **argv)
 {
    Etwitt_Iface *iface;
 
+   OauthToken request_token;
+
    elm_init(argc, argv);
 
+   memset(&request_token, 0, sizeof(OauthToken));
+
    iface = calloc(1,sizeof(Etwitt_Iface));
-   iface->account = calloc(1,sizeof(Account));
+   iface->account = calloc(1,sizeof(EbirdAccount));
    iface->config  = calloc(1,sizeof(Etwitt_Config_Iface));
 
-   iface->account->username = eina_stringshare_add("ePuppetMaster");
-   iface->account->password = eina_stringshare_add("QUOI COMMENT OU ...");
-   iface->account->realname = eina_stringshare_add("Philippe Caseiro");
-   iface->account->avatar = eina_stringshare_add("avatar.png");
+   if (ecore_file_exists(EBIRD_ACCOUNT_FILE))
+   {
+       ebird_load_account(iface->account);
+       iface->account->avatar = eina_stringshare_add("avatar.png");
+   }
+   else
+   {
+       iface->account->username = eina_stringshare_add("ePuppetMaster");
+       iface->account->passwd = eina_stringshare_add("QUOI COMMENT OU ...");
+       // iface->account->realname = eina_stringshare_add("Philippe Caseiro");
+       // iface->account->avatar = eina_stringshare_add("avatar.png");
+   }
 
    iface->theme = elm_theme_new();
    elm_theme_extension_add(iface->theme, THEME_FILE);

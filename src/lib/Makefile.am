@@ -12,12 +12,14 @@ libebird_SOURCES = \
 	ebird.c
 libebird_CPPFLAGS =          \
 	@OAUTH_CFLAGS@     \
+	@EINA_CFLAGS@ \
 	@ECORE_CON_CFLAGS@ \
 	@ECORE_FILE_CFLAGS@ \
 	@OPENSSL_CFLAGS@ \
 	@EET_CFLAGS@
 libebird_LDADD =           \
 	@OAUTH_LIBS@     \
+	@EINA_LIBS@ \
 	@ECORE_CON_LIBS@ \
 	@ECORE_FILE_LIBS@  \
 	@OPENSSL_LIBS@ \
@@ -39,6 +41,7 @@ AM_CPPFLAGS = \
 -DPACKAGE_LIB_DIR=\"$(libdir)\" \
 -DPACKAGE_DATA_DIR=\"$(datadir)/$(PACKAGE)\" \
 @OAUTH_CFLAGS@     \
+@EINA_CFLAGS@ \
 @ECORE_CON_CFLAGS@ \
 @ECORE_FILE_CFLAGS@ \
 @OPENSSL_CFLAGS@ \
@@ -56,6 +59,7 @@ libebird_la_SOURCES = $(base_sources)
 
 libebird_la_LIBADD =\
 @OAUTH_LIBS@     \
+@EINA_LIBS@ \
 @ECORE_CON_LIBS@ \
 @ECORE_FILE_LIBS@  \
 @OPENSSL_LIBS@ \
