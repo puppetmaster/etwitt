@@ -17,11 +17,13 @@ ebird_SOURCES = \
 ebird_CPPFLAGS =          \
 	@OAUTH_CFLAGS@     \
 	@ECORE_CON_CFLAGS@ \
+	@ECORE_FILE_CFLAGS@ \
 	@OPENSSL_CFLAGS@ \
     @EET_CFLAGS@
 ebird_LDADD =           \
 	@OAUTH_LIBS@     \
 	@ECORE_CON_LIBS@ \
+	@ECORE_FILE_LIBS@  \
 	@OPENSSL_LIBS@ \
     @EET_LIBS@
 

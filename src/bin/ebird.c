@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <Ecore.h>
 #include <Ecore_Con.h>
+#include <Ecore_File.h>
 #include <Eet.h>
 
 /*
@@ -20,13 +21,18 @@
 #define EBIRD_URL_MAX 1024
 #define EBIRD_PIN_SIZE 12
 #define EBIRD_ID_FILE "./id.eet"
+#define EBIRD_ACCOUNT_FILE "./ebird_user.eet"
+
+#define EBIRD_STATUS_URL "http://api.twitter.com/statuses/update.xml"
+#define EBIRD_PUBLIC_TIMELINE_URL "http://twitter.com/statuses/public_timeline.xml"
+#define EBIRD_HOME_TIMELINE_URL "http://api.twitter.com/1/statuses/home_timeline.xml"
 
 #define EBIRD_REQUEST_TOKEN_URL "https://api.twitter.com/oauth/request_token"
 #define EBIRD_DIRECT_TOKEN_URL "https://api.twitter.com/oauth/authorize"
 #define EBIRD_ACCESS_TOKEN_URL "https://api.twitter.com/oauth/access_token"
 
-#define EBIRD_USER_SCREEN_NAME "xxxxxxx"
-#define EBIRD_USER_PASSWD "xxxxxxxx"    //<< percent encode: char "+" => %2B
+#define EBIRD_USER_SCREEN_NAME "EFLBird"
+#define EBIRD_USER_PASSWD "lisbonne"    //<< percent encode: char "+" => %2B
 
 
 typedef struct _oauth_token OauthToken;
@@ -58,10 +64,45 @@ struct _ebird_account
 {
     char *username;
     char *passwd;
-    char *email;
+    char *userid;
     char *access_token_key;
     char *access_token_secret;
 };
+
+static Eina_Bool
+ebird_init()
+{
+
+    /* Eina INIT */
+    eina_init();
+
+    /* Ecore INIT */
+    ecore_init();
+    ecore_con_init();
+    ecore_con_url_init();
+    ecore_file_init();
+
+    /* Eet INIT */
+    eet_init();
+
+    return EINA_TRUE;
+
+}
+
+static Eina_Bool
+ebird_shutdown()
+{
+    /* ECORE SHUTDOWN */
+    ecore_con_url_shutdown();
+    ecore_con_shutdown();
+    ecore_shutdown();
+
+    /* EINA SHUTDOWN */
+    eina_shutdown();
+
+    /* EET SHUTDOWN */
+    eet_shutdown();
+}
 
 
 static Eina_Bool
@@ -88,13 +129,6 @@ char
     Eina_Strbuf *data;
     char *ret;
 
-    /* Eina INIT */
-    eina_init();
-
-    /* Ecore INIT */
-    ecore_init();
-    ecore_con_init();
-    ecore_con_url_init();
 
 
     ec_url = ecore_con_url_new(url);
@@ -109,18 +143,54 @@ char
 
 
     ecore_con_url_free(ec_url);
-    /* ECORE SHUTDOWN */
-    ecore_con_url_shutdown();
-    ecore_con_shutdown();
-    ecore_shutdown();
 
     ret = strdup(eina_strbuf_string_get(data));
-    /* EINA SHUTDOWN */
-    eina_shutdown();
 
     return ret;
 }
 
+static Eina_Bool
+ebird_save_account(EbirdAccount *account)
+{
+   Eet_File *file;
+   int size;
+
+   printf("DEBUG ebird_save_account\n");
+
+   file = eet_open(EBIRD_ACCOUNT_FILE, EET_FILE_MODE_WRITE);
+   printf("ICI\n");
+
+   eet_write(file,"username",account->username,strlen(account->username) + 1, 0);
+   eet_write(file,"passwd",account->passwd,strlen(account->passwd) + 1, 1);
+   eet_write(file,"access_token_key",account->access_token_key,
+             strlen(account->access_token_key)+1,0);
+   eet_write(file,"access_token_secret",account->access_token_secret,
+             strlen(account->access_token_secret)+1, 0);
+
+   eet_close(file);
+
+
+   return EINA_TRUE;
+}
+
+static Eina_Bool
+ebird_load_account(EbirdAccount *account)
+{
+   Eet_File *file;
+   int size;
+
+
+   file = eet_open(EBIRD_ACCOUNT_FILE,EET_FILE_MODE_READ);
+   account->username = strdup(eet_read(file,"username",&size));
+   account->passwd = strdup(eet_read(file,"passwd",&size));
+   account->access_token_key = strdup(eet_read(file,"access_token_key",&size));
+   account->access_token_secret = strdup(eet_read(file,"access_token_secret",&size));
+
+   eet_close(file);
+
+   return EINA_TRUE;
+
+}
 
 
 static int
@@ -129,14 +199,12 @@ ebird_load_id(OauthToken *request_token)
     Eet_File *file;
     int size;
 
-    eet_init();
 
     file = eet_open(EBIRD_ID_FILE,EET_FILE_MODE_READ);
     request_token->consumer_key = strdup(eet_read(file,"key",&size));
     request_token->consumer_secret = strdup(eet_read(file,"secret",&size));
     eet_close(file);
 
-    eet_shutdown();
 
 }
 
@@ -313,7 +381,7 @@ User-Agent:Mozilla/5.0 (X11; Linux x86_64; rv:6.0.2) Gecko/20100101 Firefox/6.0.
 }
 
 
-static char *
+static int
 ebird_access_token_get(OauthToken *request_token,
                        const char *url,
                        const char *con_key,
@@ -340,24 +408,29 @@ ebird_access_token_get(OauthToken *request_token,
    if (acc_token)
    {
        printf("\nDEBUG[ebird_access_token_get][RESULT]{%s}\n",acc_token);
+       request_token->access_token = strdup(acc_token);
 
-       res = oauth_split_url_parameters(request_token->access_token,&request_token->access_token_prm);
-
+       res = oauth_split_url_parameters(acc_token, &request_token->access_token_prm);
        if (res == 4)
        {
            request_token->access_token_key = strdup(&(request_token->access_token_prm[0][12]));
-           /*
-            *out_access_token_secret = strdup(&(access_token_grant_prm_value[1][19]));
-            *out_access_token_uscreen_name = strdup(&(access_token_grant_prm_value[2][12]));
-            *out_access_token_user_id = strdup(&(access_token_grant_prm_value[3][8]));
-            */
-           printf("%s\n",request_token->access_token_key);
+           request_token->access_token_secret = strdup(&(request_token->access_token_prm[1][19]));
+           request_token->screen_name = strdup(&(request_token->access_token_prm[2][12]));
+           request_token->userid = strdup(&(request_token->access_token_prm[3][8]));
+       }
+       else
+       {
+           printf("Error on access_token split\n");
+           printf("%s\n",request_token->access_token);
+           printf("[%i]\n",res);
+
+           return 1;
        }
 
    }
 
    free(acc_url);
-   return strdup(buf);
+   return 0;
 }
 
 static int
@@ -402,7 +475,7 @@ ebird_auto_authorise_app(OauthToken *request_token, EbirdAccount *account)
         return 1;
     }
 
-    request_token->access_token = ebird_access_token_get(request_token,
+    ebird_access_token_get(request_token,
             EBIRD_ACCESS_TOKEN_URL,
             request_token->consumer_key,
             request_token->consumer_secret);
@@ -424,37 +497,69 @@ ebird_authorise_app(OauthToken *request_token, EbirdAccount *account)
     request_token->authorisation_pin = strdup(buffer);
     printf("You pin is [%s]\n",request_token->authorisation_pin);
 
-    request_token->access_token = ebird_access_token_get(request_token,
+    ebird_access_token_get(request_token,
             EBIRD_ACCESS_TOKEN_URL,
             request_token->consumer_key,
             request_token->consumer_secret);
     account->access_token_key = strdup(request_token->access_token_key);
     account->access_token_secret = strdup(request_token->access_token_secret);
+    account->username = strdup(request_token->screen_name);
+    account->userid = strdup(request_token->userid);
+    account->passwd = strdup("nill");
 
-    return 0;
+    if (ebird_save_account(account))
+        return 0;
+    else
+    {
+        printf("WARNING: Account not saved\n");
+        return 0;
+    }
+}
+
+char *
+ebird_home_timeline_get(OauthToken *request, EbirdAccount *acc)
+{
+
+    char *timeline;
+    char *timeline_url;
+
+    timeline_url =  oauth_sign_url2(EBIRD_HOME_TIMELINE_URL, 
+                                NULL, 
+                                OA_HMAC,
+                                NULL, 
+                                request->consumer_key,
+                                request->consumer_secret,
+                                acc->access_token_key,
+                                acc->access_token_secret);
+
+    timeline = ebird_http_get(timeline_url);
+
+    return timeline;
 }
 
 
 int main(int argc __UNUSED__, char **argv __UNUSED__)
 {
-    /* Request Token */
 
     OauthToken request_token;
     EbirdAccount account;
+    char *timeline;
 
 
     memset(&request_token, 0, sizeof(OauthToken));
     memset(&account, 0, sizeof(EbirdAccount));
-/*
-    eina_init();
-    ecore_init();
-    ecore_con_init();
-    ecore_con_url_init();
-*/
+
+    ebird_init();
 
     ebird_load_id(&request_token);
-    account.username = strdup(EBIRD_USER_SCREEN_NAME);
-    account.passwd   = strdup(EBIRD_USER_PASSWD);
+
+    if (ecore_file_exists(EBIRD_ACCOUNT_FILE))
+        ebird_load_account(&account);
+    else
+    {
+        account.username = strdup(EBIRD_USER_SCREEN_NAME);
+        account.passwd   = strdup(EBIRD_USER_PASSWD);
+    }
 
     printf("\nDEBUG[main] Step[1][Request Token]\n");
     ebird_request_token_get(&request_token);
@@ -468,7 +573,7 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
         printf("*****************************************\n");
         printf("\nDEBUG[main] Step[2][Request Direct Token]\n");
         ebird_direct_token_get(&request_token);
-
+/*
         if (ebird_auto_authorise_app(&request_token, &account) == 0)
             return 0;
         else
@@ -481,12 +586,27 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
             else
                 return 255;
         }
+*/
+        if (account.access_token_key)
+        {
+            printf("Account exists !\n");
+            timeline = ebird_home_timeline_get(&request_token, &account);
+            printf("%s\n",timeline);
+
+        }
+        else
+            ebird_authorise_app(&request_token,&account);
+        
+
+        ebird_shutdown();
+
     }
     else
     {
         printf("Error on request token get\n");
         printf("\nDEBUG : END\n");
 
+        ebird_shutdown();
         return 1;
     }
 }
