@@ -59,9 +59,9 @@ struct _ebird_account
 };
 
 
-static Eina_Bool ebird_init();
+Eina_Bool ebird_init();
 
-static Eina_Bool ebird_shutdown();
+Eina_Bool ebird_shutdown();
 
 static Eina_Bool _url_data_cb(void *data, int type, void *event_info);
 
@@ -69,33 +69,33 @@ static Eina_Bool _url_complete_cb(void *data, int type, void *event_info);
 
 char *ebird_http_get(char *url);
 
-static Eina_Bool ebird_save_account(EbirdAccount *account);
+Eina_Bool ebird_save_account(EbirdAccount *account);
 
-static Eina_Bool ebird_load_account(EbirdAccount *account);
+Eina_Bool ebird_load_account(EbirdAccount *account);
 
-static int ebird_load_id(OauthToken *request_token);
+int ebird_load_id(OauthToken *request_token);
 
-static int ebird_error_code_get(char *string);
+int ebird_error_code_get(char *string);
 
-static void ebird_request_token_get(OauthToken *request);
+void ebird_request_token_get(OauthToken *request);
 
-static int ebird_authenticity_token_get(char *web_script, OauthToken *request_token);
+int ebird_authenticity_token_get(char *web_script, OauthToken *request_token);
 
-static int ebird_authorisation_url_get(OauthToken *request_token);
+int ebird_authorisation_url_get(OauthToken *request_token);
 
-static int ebird_authorisation_pin_get(OauthToken *request_token, const char *username, const char *userpassword);
+int ebird_authorisation_pin_get(OauthToken *request_token, const char *username, const char *userpassword);
 
-static Eina_Bool ebird_authorisation_pin_set(OauthToken *request_token);
+Eina_Bool ebird_authorisation_pin_set(OauthToken *request_token);
 
-static Eina_Bool ebird_read_pin_from_stdin(OauthToken *request_token)
+Eina_Bool ebird_read_pin_from_stdin(OauthToken *request_token)
 
-static int ebird_access_token_get(OauthToken *request_token, const char *url, const char *con_key, const char *con_secret, EbirdAccount *account);
+int ebird_access_token_get(OauthToken *request_token, const char *url, const char *con_key, const char *con_secret, EbirdAccount *account);
 
-static int ebird_direct_token_get(OauthToken *request_token);
+int ebird_direct_token_get(OauthToken *request_token);
 
-static Eina_Bool ebird_auto_authorise_app(OauthToken *request_token, EbirdAccount *account);
+Eina_Bool ebird_auto_authorise_app(OauthToken *request_token, EbirdAccount *account);
 
-static int ebird_authorise_app(OauthToken *request_token, EbirdAccount *account);
+int ebird_authorise_app(OauthToken *request_token, EbirdAccount *account);
 
 char *ebird_home_timeline_get(OauthToken *request, EbirdAccount *acc);
 
