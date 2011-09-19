@@ -3,7 +3,7 @@ test*
 /ebird
 out.*
 id.eet
-mkid
+mkid*
 *.edj
 *.lo
 *.o

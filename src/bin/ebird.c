@@ -3,6 +3,8 @@
 #include <string.h>
 #include <oauth.h>
 #include <sys/types.h>
+#include <Ecore.h>
+#include <Ecore_Con.h>
 #include <Eet.h>
 
 /*
@@ -62,79 +64,64 @@ struct _ebird_account
 };
 
 
-/*
-struct _request {
-         long size;
-};
-
-
 static Eina_Bool
-_ebird_url_progress_cb(void *data, int type, void *event)
+_url_data_cb(void *data, int type, void *event_info)
 {
+    Ecore_Con_Event_Url_Data *url_data = event_info;
 
-   Ecore_Con_Event_Url_Data *url_data = event;
-   if ( url_data->size > 0)
-     {
-        // append data as it arrives - don't worry where or how it gets stored.
-        // Also don't worry about size, expanding, reallocing etc.
-        // just keep appending - size is automatically handled.
+    eina_strbuf_append_length(data, url_data->data,url_data->size);
 
-        eina_strbuf_append_length(data, url_data->data, url_data->size);
-
-        fprintf(stderr, "Appended %d \n", url_data->size);
-     }
-   return EINA_TRUE;
+    return EINA_TRUE;
 }
 
 static Eina_Bool
-_ebird_url_complete_cb(void *data, int type, void *event)
+_url_complete_cb(void *data, int type, void *event_info)
 {
-   Ecore_Con_Event_Url_Complete *url_complete = event;
-   printf("download completed with status code: %d\n", url_complete->status);
-
-   // get the data back from Eina_Binbuf
-   char *ptr = eina_strbuf_string_get(data);
-   size_t size = eina_strbuf_length_get(data);
-
-   // process data as required (write to file)
-   fprintf(stderr, "Size of data = %d bytes\n", size);
-   fprintf(stderr, "String of data = %s bytes\n", ptr);
-   //int fd = open("./elm.png", O_CREAT);
-   //write(fd, ptr, size);
-   //close(fd);
-
-   // free it when done.
-   eina_strbuf_free(data);
-   free(data);
-
-   ecore_main_loop_quit();
-
-   return EINA_TRUE;
+    ecore_main_loop_quit();
+    return EINA_TRUE;
 }
 
-char *
-ebird_http_get(char *url)
+char 
+*ebird_http_get(char *url)
 {
     Ecore_Con_Url *ec_url;
     Eina_Strbuf *data;
+    char *ret;
 
-    ec_url = ecore_con_url_new(NULL);
-    ecore_con_url_url_set(ec_url,url);
-    ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE,
-                            _ebird_url_complete_cb,
-                            data);
-    ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,
-                            _ebird_url_progress_cb,
-                            data);
+    /* Eina INIT */
+    eina_init();
+
+    /* Ecore INIT */
+    ecore_init();
+    ecore_con_init();
+    ecore_con_url_init();
+
+
+    ec_url = ecore_con_url_new(url);
+    data = eina_strbuf_new();
+
+    ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,_url_data_cb,data);
+    ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE,_url_complete_cb,NULL);
+
     ecore_con_url_get(ec_url);
 
-    printf("\nDEBUG DATA [%s]\n",data);
-    ecore_con_url_free(ec_url);
     ecore_main_loop_begin();
-    return data;
 
+
+    ecore_con_url_free(ec_url);
+    /* ECORE SHUTDOWN */
+    ecore_con_url_shutdown();
+    ecore_con_shutdown();
+    ecore_shutdown();
+
+    ret = strdup(eina_strbuf_string_get(data));
+    /* EINA SHUTDOWN */
+    eina_shutdown();
+
+    return ret;
 }
-*/
+
+
 
 static int
 ebird_load_id(OauthToken *request_token)
@@ -157,7 +144,7 @@ ebird_load_id(OauthToken *request_token)
 
 /*
  * name: ebird_error_code_get
- * @param : web script retruned by oauth_http_get()
+ * @param : web script retruned by ebird_http_get()
  * @return : Error code
  */
 
@@ -188,7 +175,7 @@ ebird_request_token_get(OauthToken *request)
     request->url = oauth_sign_url2(EBIRD_REQUEST_TOKEN_URL, NULL, OA_HMAC,
                                    NULL, request->consumer_key,
                                    request->consumer_secret, NULL, NULL);
-    request->token = oauth_http_get(request->url, NULL);
+    request->token = ebird_http_get(request->url);
     printf("request token: '%s'\n", request->token);
     if (request->token)
     {
@@ -347,7 +334,7 @@ ebird_access_token_get(OauthToken *request_token,
 
    snprintf(buf,sizeof(buf),"%s&oauth_verifier=%s",acc_url,request_token->authorisation_pin);
 
-   acc_token = oauth_http_get(buf,NULL);
+   acc_token = ebird_http_get(buf);
    printf("\nDEBUG[ebird_access_token_get][URL][%s]\n",buf);
 
    if (acc_token)
@@ -387,7 +374,7 @@ ebird_direct_token_get(OauthToken *request_token)
             request_token->key);
 
    printf("\nDEBUG[ebird_direct_token_get] Step[2.1][Get Authenticity token]\n");
-   script = oauth_http_get(buf, NULL);
+   script = ebird_http_get(buf);
    printf("get '%s'", buf);
    if (ebird_authenticity_token_get(script, request_token) < 0)
        goto error;
