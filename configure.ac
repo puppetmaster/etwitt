@@ -50,5 +50,6 @@ data/Makefile
 data/theme/Makefile
 src/Makefile
 src/bin/Makefile
+src/lib/Makefile
 ], [
 ])
