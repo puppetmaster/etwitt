@@ -48,3 +48,6 @@ mkid*
 /data/Makefile.in
 /data/theme/Makefile
 /data/theme/Makefile.in
+/src/lib/.libs/
+/src/lib/libebird.la
+

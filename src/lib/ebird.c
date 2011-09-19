@@ -3,7 +3,6 @@
 Eina_Bool
 ebird_init()
 {
-
     /* Eina INIT */
     eina_init();
 
@@ -256,8 +255,8 @@ ebird_authorisation_url_get(OauthToken *request_token)
     return 0;
 }
 
-static Eina_Bool
-ebird_authorisation_pin_set(OauthToken *request_token,char *pin)
+Eina_Bool
+ebird_authorisation_pin_set(OauthToken *request_token, char *pin)
 {
     request_token->authorisation_pin = strdup(pin);
     return EINA_TRUE;
@@ -409,14 +408,14 @@ error:
    return -1;
 }
 
-int
+Eina_Bool
 ebird_auto_authorise_app(OauthToken *request_token, EbirdAccount *account)
 {
     if (ebird_authorisation_pin_get(request_token,
                                     account->username,
                                     account->passwd) < 0) 
     {
-        return 1;
+        return EINA_FALSE;
     }
 
     ebird_access_token_get(request_token,
@@ -426,17 +425,22 @@ ebird_auto_authorise_app(OauthToken *request_token, EbirdAccount *account)
             account);
     account->access_token_key = strdup("xxx");
     account->access_token_secret = strdup("xxx");
-    return 0;
+    return EINA_TRUE;
 }
 
-Eina_Bool
+Eina_Bool 
 ebird_read_pin_from_stdin(OauthToken *request_token)
 {
-    printf("Open this url in a web browser to authorize ebird on access to your account.\n%s\n",
+
+    char buffer[EBIRD_PIN_SIZE];
+
+    printf("Open this url in a web browser to authorize ebird on access to your account.%s\n",
             request_token->authorisation_url);
+
     printf("Please paste PIN here :\n");
     fgets(buffer,sizeof(buffer),stdin);
     buffer[strlen(buffer)-1] = '\0';
+
     request_token->authorisation_pin = strdup(buffer);
 
     return EINA_TRUE;
@@ -445,7 +449,6 @@ ebird_read_pin_from_stdin(OauthToken *request_token)
 Eina_Bool
 ebird_authorise_app(OauthToken *request_token, EbirdAccount *account)
 {
-    char buffer[EBIRD_PIN_SIZE];
 
     if (request_token->authorisation_pin)
     {
@@ -468,7 +471,7 @@ ebird_authorise_app(OauthToken *request_token, EbirdAccount *account)
     else
     {
         printf("Error you have to set PIN before authorising app\n");
-        return EINA_FALSE
+        return EINA_FALSE;
     }
 }
 

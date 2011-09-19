@@ -4,7 +4,7 @@ INCLUDES = -I. \
 	   -I$(top_srcdir)/src/lib \
 	   -I$(includedir)
 
-bin_PROGRAMS = ebird etwitt
+bin_PROGRAMS = ebird_test etwitt
 
 etwitt_SOURCES = \
 	etwitt.c

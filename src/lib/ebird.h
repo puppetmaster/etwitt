@@ -85,9 +85,9 @@ int ebird_authorisation_url_get(OauthToken *request_token);
 
 int ebird_authorisation_pin_get(OauthToken *request_token, const char *username, const char *userpassword);
 
-Eina_Bool ebird_authorisation_pin_set(OauthToken *request_token);
+Eina_Bool ebird_authorisation_pin_set(OauthToken *request_token,char *pin);
 
-Eina_Bool ebird_read_pin_from_stdin(OauthToken *request_token)
+Eina_Bool ebird_read_pin_from_stdin(OauthToken *request_token);
 
 int ebird_access_token_get(OauthToken *request_token, const char *url, const char *con_key, const char *con_secret, EbirdAccount *account);
 
@@ -95,7 +95,7 @@ int ebird_direct_token_get(OauthToken *request_token);
 
 Eina_Bool ebird_auto_authorise_app(OauthToken *request_token, EbirdAccount *account);
 
-int ebird_authorise_app(OauthToken *request_token, EbirdAccount *account);
+Eina_Bool ebird_authorise_app(OauthToken *request_token, EbirdAccount *account);
 
 char *ebird_home_timeline_get(OauthToken *request, EbirdAccount *acc);
 
