@@ -50,13 +50,7 @@ struct _oauth_token
     char *authorisation_url;
     char *authorisation_pin;
     char *authenticity_token;
-    char *access_token;
-    char **access_token_prm;
-    char *access_token_key;
-    char *access_token_secret;
     char *callback_confirmed;
-    char *userid;
-    char *screen_name;
 };
 
 
@@ -385,14 +379,17 @@ static int
 ebird_access_token_get(OauthToken *request_token,
                        const char *url,
                        const char *con_key,
-                       const char *con_secret)
+                       const char *con_secret,
+                       EbirdAccount *account)
 {
 
    char *acc_url;
    char *acc_token;
+   char **access_token_prm;
    char buf[EBIRD_URL_MAX];
    int res;
 
+   access_token_prm = (char**) malloc(5*sizeof(char*));
 
    acc_url = oauth_sign_url2(url, NULL, OA_HMAC, NULL,
                              con_key,
@@ -408,20 +405,22 @@ ebird_access_token_get(OauthToken *request_token,
    if (acc_token)
    {
        printf("\nDEBUG[ebird_access_token_get][RESULT]{%s}\n",acc_token);
-       request_token->access_token = strdup(acc_token);
+       //request_token->access_token = strdup(acc_token);
 
-       res = oauth_split_url_parameters(acc_token, &request_token->access_token_prm);
+       res = oauth_split_url_parameters(acc_token, &access_token_prm);
        if (res == 4)
        {
-           request_token->access_token_key = strdup(&(request_token->access_token_prm[0][12]));
-           request_token->access_token_secret = strdup(&(request_token->access_token_prm[1][19]));
-           request_token->screen_name = strdup(&(request_token->access_token_prm[2][12]));
-           request_token->userid = strdup(&(request_token->access_token_prm[3][8]));
+           printf("DEBUG ICI\n");
+           account->access_token_key = strdup(&(access_token_prm[0][12]));
+           account->access_token_secret = strdup(&(access_token_prm[1][19]));
+           account->username = strdup(&(access_token_prm[2][12]));
+           account->userid = strdup(&(access_token_prm[3][8]));
+           account->passwd = strdup("nill");
        }
        else
        {
            printf("Error on access_token split\n");
-           printf("%s\n",request_token->access_token);
+           printf("%s\n",acc_token);
            printf("[%i]\n",res);
 
            return 1;
@@ -429,6 +428,7 @@ ebird_access_token_get(OauthToken *request_token,
 
    }
 
+   free(access_token_prm);
    free(acc_url);
    return 0;
 }
@@ -478,7 +478,8 @@ ebird_auto_authorise_app(OauthToken *request_token, EbirdAccount *account)
     ebird_access_token_get(request_token,
             EBIRD_ACCESS_TOKEN_URL,
             request_token->consumer_key,
-            request_token->consumer_secret);
+            request_token->consumer_secret,
+            account);
     account->access_token_key = strdup("xxx");
     account->access_token_secret = strdup("xxx");
     return 0;
@@ -500,12 +501,8 @@ ebird_authorise_app(OauthToken *request_token, EbirdAccount *account)
     ebird_access_token_get(request_token,
             EBIRD_ACCESS_TOKEN_URL,
             request_token->consumer_key,
-            request_token->consumer_secret);
-    account->access_token_key = strdup(request_token->access_token_key);
-    account->access_token_secret = strdup(request_token->access_token_secret);
-    account->username = strdup(request_token->screen_name);
-    account->userid = strdup(request_token->userid);
-    account->passwd = strdup("nill");
+            request_token->consumer_secret,
+            account);
 
     if (ebird_save_account(account))
         return 0;
