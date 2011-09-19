@@ -34,8 +34,9 @@ mkid*
 /src/Makefile
 /src/Makefile.in
 /src/bin/.deps/
+/src/bin/.libs/
 /src/bin/etwitt
-/src/bin/ebird
+/src/bin/ebird_test
 /src/bin/Makefile
 /src/bin/Makefile.in
 /src/lib/.deps/
@@ -50,4 +51,5 @@ mkid*
 /data/theme/Makefile.in
 /src/lib/.libs/
 /src/lib/libebird.la
+
 
