@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS     = 1.4 foreign
 MAINTAINERCLEANFILES = Makefile.in
 
-SUBDIRS = bin
+SUBDIRS = bin lib
 
 ACLOCAL_AMFLAGS = -I m4

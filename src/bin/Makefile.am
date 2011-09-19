@@ -1,6 +1,7 @@
 MAINTAINERCLEANFILES = Makefile.in
 INCLUDES = -I. \
 	   -I$(top_srcdir) \
+	   -I../lib \
 	   -I$(includedir)
 
 bin_PROGRAMS = ebird etwitt
