@@ -1,6 +1,7 @@
 MAINTAINERCLEANFILES = Makefile.in
 INCLUDES = -I. \
 	   -I$(top_srcdir) \
+	   -I$(top_srcdir)/src/lib \
 	   -I$(includedir)
 
 bin_PROGRAMS = ebird etwitt
@@ -25,7 +26,8 @@ ebird_LDADD =           \
 	@ECORE_CON_LIBS@ \
 	@ECORE_FILE_LIBS@  \
 	@OPENSSL_LIBS@ \
-    @EET_LIBS@
+        @EET_LIBS@ \
+        $(top_builddir)/src/lib/libebird.la
 
 clean-local:
 	rm -rf *~

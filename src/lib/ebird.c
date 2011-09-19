@@ -1,6 +1,6 @@
 #include <ebird.h>
 
-static Eina_Bool
+Eina_Bool
 ebird_init()
 {
 
@@ -20,7 +20,7 @@ ebird_init()
 
 }
 
-static Eina_Bool
+Eina_Bool
 ebird_shutdown()
 {
     /* ECORE SHUTDOWN */
@@ -80,7 +80,7 @@ char
     return ret;
 }
 
-static Eina_Bool
+Eina_Bool
 ebird_save_account(EbirdAccount *account)
 {
    Eet_File *file;
@@ -104,7 +104,7 @@ ebird_save_account(EbirdAccount *account)
    return EINA_TRUE;
 }
 
-static Eina_Bool
+Eina_Bool
 ebird_load_account(EbirdAccount *account)
 {
    Eet_File *file;
@@ -124,7 +124,7 @@ ebird_load_account(EbirdAccount *account)
 }
 
 
-static int
+int
 ebird_load_id(OauthToken *request_token)
 {
     Eet_File *file;
@@ -147,7 +147,7 @@ ebird_load_id(OauthToken *request_token)
  * @return : Error code
  */
 
-static int
+int
 ebird_error_code_get(char *string)
 {
     int compare_res;
@@ -165,7 +165,7 @@ ebird_error_code_get(char *string)
  * @return : none
  * @rem : FIXME Split into 2 functions
  */
-static void
+void
 ebird_request_token_get(OauthToken *request)
 {
     int res;
@@ -215,7 +215,7 @@ ebird_request_token_get(OauthToken *request)
     }
 }
 
-static int
+int
 ebird_authenticity_token_get(char *web_script, OauthToken *request_token)
 {
     char *key,
@@ -241,7 +241,7 @@ ebird_authenticity_token_get(char *web_script, OauthToken *request_token)
     return 0;
 }
 
-static int
+int
 ebird_authorisation_url_get(OauthToken *request_token)
 {
     char buf[EBIRD_URL_MAX];
@@ -256,7 +256,7 @@ ebird_authorisation_url_get(OauthToken *request_token)
     return 0;
 }
 
-static int
+int
 ebird_authorisation_pin_get(OauthToken *request_token,
                             const char *username,
                             const char *userpassword)
@@ -312,7 +312,7 @@ User-Agent:Mozilla/5.0 (X11; Linux x86_64; rv:6.0.2) Gecko/20100101 Firefox/6.0.
 }
 
 
-static int
+int
 ebird_access_token_get(OauthToken *request_token,
                        const char *url,
                        const char *con_key,
@@ -370,7 +370,7 @@ ebird_access_token_get(OauthToken *request_token,
    return 0;
 }
 
-static int
+int
 ebird_direct_token_get(OauthToken *request_token)
 {
 
@@ -402,7 +402,7 @@ error:
    return -1;
 }
 
-static int
+int
 ebird_auto_authorise_app(OauthToken *request_token, EbirdAccount *account)
 {
     if (ebird_authorisation_pin_get(request_token,
@@ -422,7 +422,7 @@ ebird_auto_authorise_app(OauthToken *request_token, EbirdAccount *account)
     return 0;
 }
 
-static int
+int
 ebird_authorise_app(OauthToken *request_token, EbirdAccount *account)
 {
     char buffer[EBIRD_PIN_SIZE];
