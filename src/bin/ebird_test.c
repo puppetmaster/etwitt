@@ -57,7 +57,10 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
 
         }
         else
+        {
+            ebird_read_pin_from_stdin(&request_token);
             ebird_authorise_app(&request_token,&account);
+        }
         
 
         ebird_shutdown();

@@ -256,6 +256,13 @@ ebird_authorisation_url_get(OauthToken *request_token)
     return 0;
 }
 
+static Eina_Bool
+ebird_authorisation_pin_set(OauthToken *request_token,char *pin)
+{
+    request_token->authorisation_pin = strdup(pin);
+    return EINA_TRUE;
+}
+
 static int
 ebird_authorisation_pin_get(OauthToken *request_token,
                             const char *username,
@@ -422,31 +429,44 @@ ebird_auto_authorise_app(OauthToken *request_token, EbirdAccount *account)
     return 0;
 }
 
-static int
-ebird_authorise_app(OauthToken *request_token, EbirdAccount *account)
+static Eina_Bool
+ebird_read_pin_from_stdin(OauthToken *request_token)
 {
-    char buffer[EBIRD_PIN_SIZE];
-
     printf("Open this url in a web browser to authorize ebird on access to your account.\n%s\n",
             request_token->authorisation_url);
     printf("Please paste PIN here :\n");
     fgets(buffer,sizeof(buffer),stdin);
     buffer[strlen(buffer)-1] = '\0';
     request_token->authorisation_pin = strdup(buffer);
-    printf("You pin is [%s]\n",request_token->authorisation_pin);
+}
 
-    ebird_access_token_get(request_token,
-            EBIRD_ACCESS_TOKEN_URL,
-            request_token->consumer_key,
-            request_token->consumer_secret,
-            account);
+static Eina_Bool
+ebird_authorise_app(OauthToken *request_token, EbirdAccount *account)
+{
+    char buffer[EBIRD_PIN_SIZE];
 
-    if (ebird_save_account(account))
-        return 0;
+    if (request_token->authorisation_pin)
+    {
+        printf("You pin is [%s]\n",request_token->authorisation_pin);
+
+        ebird_access_token_get(request_token,
+                EBIRD_ACCESS_TOKEN_URL,
+                request_token->consumer_key,
+                request_token->consumer_secret,
+                account);
+
+        if (ebird_save_account(account))
+            return EINA_TRUE;
+        else
+        {
+            printf("WARNING: Account not saved\n");
+            return EINA_TRUE;
+        }
+    }
     else
     {
-        printf("WARNING: Account not saved\n");
-        return 0;
+        printf("Error you have to set PIN before authorising app\n");
+        return EINA_FALSE
     }
 }
 
