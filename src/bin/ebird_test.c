@@ -1,5 +1,58 @@
 #include <ebird.h>
 
+static Eina_Bool
+_user_xml_cb(void *data, Eina_Simple_XML_Type type, const char *content, unsigned offset, unsigned length)
+{
+    if (type == EINA_SIMPLE_XML_OPEN)
+    {
+        printf("XML_OPEN\n");
+        printf("%s\n",content);
+    }
+    else if (type == EINA_SIMPLE_XML_DATA)
+    {
+        printf("XML_DATA\n");
+    }
+    return EINA_TRUE;
+
+}
+
+static Eina_Bool
+_timeline_xml_attribute_cb(void *data, const char *key, const char *value)
+{
+    printf("====> KEY   [%s]\n",key);
+    printf("====> VALUE [%s]\n",value);
+    return EINA_TRUE;
+
+}
+
+static Eina_Bool
+_timeline_xml_cb(void *data, Eina_Simple_XML_Type type, const char *content, unsigned offset, unsigned length)
+{
+   if (type == EINA_SIMPLE_XML_OPEN)
+   {
+      eina_simple_xml_attributes_parse(content,strlen(content)+1,_timeline_xml_attribute_cb,NULL);
+   }
+   else if (type == EINA_SIMPLE_XML_DATA)
+   {
+      eina_simple_xml_attributes_parse(content,strlen(content)+1,_timeline_xml_attribute_cb,NULL);
+   }
+   return EINA_TRUE;
+
+}
+
+
+static void
+ebird_user_xml_parse(char *xml)
+{
+    eina_simple_xml_parse(xml,strlen(xml)+1, EINA_TRUE ,_user_xml_cb,NULL);
+}
+
+static void
+ebird_home_timeline_xml_parse(char *xml)
+{
+    eina_simple_xml_parse(xml,strlen(xml)+1,EINA_TRUE,_timeline_xml_cb,NULL);
+}
+
 int main(int argc __UNUSED__, char **argv __UNUSED__)
 {
 
@@ -55,7 +108,11 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
             userinfo = ebird_user_show(&account);
             timeline = ebird_home_timeline_get(&request_token, &account);
             printf("%s\n",timeline);
-            printf("%s\n",userinfo);
+            printf("===%s\n===\n",userinfo);
+
+            //ebird_user_xml_parse(userinfo);
+            ebird_home_timeline_xml_parse(timeline);
+            
 
         }
         else
