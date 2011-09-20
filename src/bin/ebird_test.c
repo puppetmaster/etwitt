@@ -1,6 +1,23 @@
 #include <ebird.h>
 
-#define TAG_STATUS "status"
+#define TAG_STATUS "status>"
+#define TAG_USER "user>"
+
+typedef struct _ebird_status EbirdStatus;
+
+struct _ebird_status
+{
+
+  const char *created_at;
+  const char *id;
+  const char *text;
+  const char *truncated;
+  const char *favorited;
+  const char *retweet_count;
+  const char *retweeted;
+  EbirdAccount *user; 
+
+};
 
 static Eina_Bool
 _user_xml_cb(void *data, Eina_Simple_XML_Type type, const char *content, unsigned offset, unsigned length)
@@ -21,8 +38,25 @@ _user_xml_cb(void *data, Eina_Simple_XML_Type type, const char *content, unsigne
 static Eina_Bool
 _timeline_xml_attribute_cb(void *data, const char *key, const char *value)
 {
-    printf("====> KEY   [%s]\n",key);
-    printf("====> VALUE [%s]\n",value);
+    EbirdStatus *st = data;
+
+    printf("DEBUG _timeline_xml_attribute_cb CALLED\n");
+
+    if ( key == "created_at" )
+        st->created_at = eina_stringshare_add(value);
+    else if ( key == "text" )
+        st->text = eina_stringshare_add(value);
+    else if ( key == "retweet_count")
+        st->retweet_count = eina_stringshare_add(value);
+    else if ( key == "retweeted" )
+        st->retweeted = eina_stringshare_add(value);
+    else if ( key == "user" )
+    {
+        printf("DEBUG USER\n");
+    }
+    else
+        printf("DEBUG [%s][%s]\n",key,value);
+
     return EINA_TRUE;
 
 }
@@ -30,23 +64,33 @@ _timeline_xml_attribute_cb(void *data, const char *key, const char *value)
 static Eina_Bool
 _timeline_xml_cb(void *data, Eina_Simple_XML_Type type, const char *content, unsigned offset, unsigned length)
 {
-   const char *tag;
+    const char *tag;
+    Eina_Bool status;
+    Eina_Bool user;
 
+    if (type == EINA_SIMPLE_XML_OPEN)
+    {
+        if (!strncmp(TAG_STATUS, content, strlen(TAG_STATUS))) 
+           status = EINA_TRUE;
 
-   if (type == EINA_SIMPLE_XML_OPEN)
-   {
-      if (!strncmp(TAG_STATUS, content, strlen(TAG_STATUS))) 
-      {
-          tag = eina_simple_xml_tag_attributes_find(content,strlen(content)+1);
-          printf("{TAG}{%s}\n",tag);
-          eina_simple_xml_attributes_parse(tag, strlen(tag)+1, _timeline_xml_attribute_cb, NULL);
-      }
-   }
-   else if (type == EINA_SIMPLE_XML_DATA)
-   {
-      eina_simple_xml_attributes_parse(content,strlen(content)+1,_timeline_xml_attribute_cb,NULL);
-   }
-   return EINA_TRUE;
+        if (!strncmp(TAG_USER, content,strlen(TAG_USER)))
+        {
+           user = EINA_TRUE;
+           tag = eina_simple_xml_tag_attributes_find(content,strlen(content)+1);
+           eina_simple_xml_attributes_parse(tag,strlen(tag)+1,_timeline_xml_attribute_cb,NULL);
+        }
+
+    }
+    else if (type == EINA_SIMPLE_XML_DATA)
+    {
+       if (status)
+       {
+          printf("%s\n",content);
+          status = EINA_FALSE;
+       }
+    }
+//    printf("\n");
+    return EINA_TRUE;
 
 }
 
@@ -86,47 +130,33 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
         account.passwd   = strdup(EBIRD_USER_PASSWD);
     }
 
-    printf("\nDEBUG[main] Step[1][Request Token]\n");
+    //printf("\nDEBUG[main] Step[1][Request Token]\n");
     ebird_request_token_get(&request_token);
     if (request_token.token)
     {
 
-        printf("\nDEBUG[main] Step[1][URL][%s]\n", request_token.url);
-        printf("\nDEBUG[main] Step[1][TOKEN][%s]\n", request_token.token);
-        printf("\nDEBUG[main] Step[1][TOKEN KEY][%s]\n", request_token.key);
-        printf("\nDEBUG[main] Step[1][TOKEN SECRET][%s]\n", request_token.secret);
-        printf("*****************************************\n");
-        printf("\nDEBUG[main] Step[2][Request Direct Token]\n");
-        ebird_direct_token_get(&request_token);
-/*
-        if (ebird_auto_authorise_app(&request_token, &account) == 0)
-            return 0;
-        else
-        {
-            if (ebird_authorise_app(&request_token,&account) == 0)
-            {
-                printf("Manual sucess\n");
-                return 0;
-            }
-            else
-                return 255;
-        }
-*/
+      //  printf("\nDEBUG[main] Step[1][URL][%s]\n", request_token.url);
+      //  printf("\nDEBUG[main] Step[1][TOKEN][%s]\n", request_token.token);
+      //  printf("\nDEBUG[main] Step[1][TOKEN KEY][%s]\n", request_token.key);
+      //  printf("\nDEBUG[main] Step[1][TOKEN SECRET][%s]\n", request_token.secret);
+      //  printf("*****************************************\n");
+      //  printf("\nDEBUG[main] Step[2][Request Direct Token]\n");
+
         if (account.access_token_key)
         {
             printf("Account exists !\n");
             userinfo = ebird_user_show(&account);
             timeline = ebird_home_timeline_get(&request_token, &account);
-            printf("%s\n",timeline);
-            printf("===%s\n===\n",userinfo);
+//            printf("%s\n",timeline);
+//            printf("===%s\n===\n",userinfo);
 
-            //ebird_user_xml_parse(userinfo);
+            // ebird_user_xml_parse(userinfo);
             ebird_home_timeline_xml_parse(timeline);
-            
 
         }
         else
         {
+            ebird_direct_token_get(&request_token);
             ebird_read_pin_from_stdin(&request_token);
             ebird_authorise_app(&request_token,&account);
             timeline = ebird_home_timeline_get(&request_token, &account);

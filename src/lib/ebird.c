@@ -85,10 +85,9 @@ ebird_save_account(EbirdAccount *account)
    Eet_File *file;
    int size;
 
-   printf("DEBUG ebird_save_account\n");
+//   printf("DEBUG ebird_save_account\n");
 
    file = eet_open(EBIRD_ACCOUNT_FILE, EET_FILE_MODE_WRITE);
-   printf("ICI\n");
 
    eet_write(file,"username",account->username,strlen(account->username) + 1, 0);
    eet_write(file,"passwd",account->passwd,strlen(account->passwd) + 1, 1);
@@ -176,7 +175,7 @@ ebird_request_token_get(OauthToken *request)
                                    NULL, request->consumer_key,
                                    request->consumer_secret, NULL, NULL);
     request->token = ebird_http_get(request->url);
-    printf("request token: '%s'\n", request->token);
+//    printf("DEBUG request token: '%s'\n", request->token);
     if (request->token)
     {
         error_code = ebird_error_code_get(request->token);
@@ -195,10 +194,10 @@ ebird_request_token_get(OauthToken *request)
                 request->key = eina_stringshare_add(&(request->token_prm[0][12]));
                 request->secret = eina_stringshare_add(&(request->token_prm[1][19]));
                 request->callback_confirmed = eina_stringshare_add(&(request->token_prm[2][25]));
-                printf("request->key='%s', request->secret='%s',"
-                       " request->callback_confirmed='%s'\n",
-                       request->key, request->secret,
-                       request->callback_confirmed);
+                //printf("DEBUG request->key='%s', request->secret='%s',"
+                //       " request->callback_confirmed='%s'\n",
+                //       request->key, request->secret,
+                //       request->callback_confirmed);
             }
             else
             {
@@ -210,7 +209,7 @@ ebird_request_token_get(OauthToken *request)
     }
     else
     {
-        printf("\nDEBUG : [%s]\n",request->url);
+//        printf("\nDEBUG : [%s]\n",request->url);
         printf("Error on Request Token [%s]\n",request->token);
         request->token = NULL;
     }
@@ -222,7 +221,7 @@ ebird_authenticity_token_get(char *web_script, OauthToken *request_token)
     char *key,
          *end;
 
-    printf("webscript=%s\n", web_script);
+    //printf("DEBUG webscript=%s\n", web_script);
     key = strstr(web_script, "twttr.form_authenticity_token");
     if (!key)
         return -1;
@@ -293,24 +292,24 @@ User-Agent:Mozilla/5.0 (X11; Linux x86_64; rv:6.0.2) Gecko/20100101 Firefox/6.0.
 
     for (i = 0 ; i <= retry; i++)
     {
-        printf("\nDEBUG[ebird_authorisation_get] TRY[%i][%s]\n",i,url);
-        printf("%s\n",header);
+//        printf("\nDEBUG[ebird_authorisation_get] TRY[%i][%s]\n",i,url);
+//        printf("%s\n",header);
         out_script = oauth_http_post2(url,NULL, header);
         printf("DEBUG [%s]\n",out_script);
         if (out_script)
         {
-            printf("\nDEBUG[ebird_authorisation_get] TRY[%i][SUCCESS]\n* %s\n",i,url);
+//            printf("\nDEBUG[ebird_authorisation_get] TRY[%i][SUCCESS]\n* %s\n",i,url);
 
-            printf("========================================================================================================\n");
-            printf("%s\n",out_script);
-            printf("========================================================================================================\n");
+//            printf("========================================================================================================\n");
+//            printf("%s\n",out_script);
+//            printf("========================================================================================================\n");
             /*FIXME get the PIN */
             result = strdup("123456789");
             i = retry + 1;
         }
         else
         {
-            printf("\nDEBUG[ebird_authorisation_get] TRY[%i][FAILED][%s]\n",i, url);
+//            printf("\nDEBUG[ebird_authorisation_get] TRY[%i][FAILED][%s]\n",i, url);
             out_script = NULL;
             result = NULL;
         }
@@ -345,11 +344,11 @@ ebird_access_token_get(OauthToken *request_token,
    snprintf(buf,sizeof(buf),"%s&oauth_verifier=%s",acc_url,request_token->authorisation_pin);
 
    acc_token = ebird_http_get(buf);
-   printf("\nDEBUG[ebird_access_token_get][URL][%s]\n",buf);
+//   printf("\nDEBUG[ebird_access_token_get][URL][%s]\n",buf);
 
    if (acc_token)
    {
-       printf("\nDEBUG[ebird_access_token_get][RESULT]{%s}\n",acc_token);
+//       printf("\nDEBUG[ebird_access_token_get][RESULT]{%s}\n",acc_token);
        //request_token->access_token = strdup(acc_token);
 
        res = oauth_split_url_parameters(acc_token, &access_token_prm);
@@ -390,13 +389,13 @@ ebird_direct_token_get(OauthToken *request_token)
             EBIRD_DIRECT_TOKEN_URL,
             request_token->key);
 
-   printf("\nDEBUG[ebird_direct_token_get] Step[2.1][Get Authenticity token]\n");
+//   printf("\nDEBUG[ebird_direct_token_get] Step[2.1][Get Authenticity token]\n");
    script = ebird_http_get(buf);
-   printf("get '%s'", buf);
+//   printf("get '%s'", buf);
    if (ebird_authenticity_token_get(script, request_token) < 0)
        goto error;
 
-   printf("\nDEBUG[ebird_direct_token_get] Step[2.2][Get Authorisation page]\n");
+//   printf("\nDEBUG[ebird_direct_token_get] Step[2.2][Get Authorisation page]\n");
 
    if (ebird_authorisation_url_get(request_token) < 0)
        goto error;
@@ -435,7 +434,8 @@ ebird_read_pin_from_stdin(OauthToken *request_token)
 
     char buffer[EBIRD_PIN_SIZE];
 
-    printf("Open this url in a web browser to authorize ebird on access to your account.%s\n",
+    printf("Open this url in a web browser to authorize ebird \
+            to access to your account.\n%s\n",
             request_token->authorisation_url);
 
     printf("Please paste PIN here :\n");
@@ -453,7 +453,7 @@ ebird_authorise_app(OauthToken *request_token, EbirdAccount *account)
 
     if (request_token->authorisation_pin)
     {
-        printf("You pin is [%s]\n",request_token->authorisation_pin);
+//        printf("DEBUG You pin is [%s]\n",request_token->authorisation_pin);
 
         ebird_access_token_get(request_token,
                 EBIRD_ACCESS_TOKEN_URL,
