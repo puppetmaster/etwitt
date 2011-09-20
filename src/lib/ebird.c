@@ -96,6 +96,7 @@ ebird_save_account(EbirdAccount *account)
              strlen(account->access_token_key)+1,0);
    eet_write(file,"access_token_secret",account->access_token_secret,
              strlen(account->access_token_secret)+1, 0);
+   eet_write(file,"userid",account->userid,strlen(account->userid)+1, 0);
 
    eet_close(file);
 
@@ -115,6 +116,7 @@ ebird_load_account(EbirdAccount *account)
    account->passwd = eina_stringshare_add(eet_read(file,"passwd",&size));
    account->access_token_key = eina_stringshare_add(eet_read(file,"access_token_key",&size));
    account->access_token_secret = eina_stringshare_add(eet_read(file,"access_token_secret",&size));
+   account->userid = eina_stringshare_add(eet_read(file,"userid",&size));
 
    eet_close(file);
 
@@ -353,11 +355,10 @@ ebird_access_token_get(OauthToken *request_token,
        res = oauth_split_url_parameters(acc_token, &access_token_prm);
        if (res == 4)
        {
-           printf("DEBUG ICI\n");
            account->access_token_key = strdup(&(access_token_prm[0][12]));
            account->access_token_secret = strdup(&(access_token_prm[1][19]));
-           account->username = strdup(&(access_token_prm[2][12]));
-           account->userid = strdup(&(access_token_prm[3][8]));
+           account->userid = strdup(&(access_token_prm[2][8]));
+           account->username = strdup(&(access_token_prm[3][12]));
            account->passwd = strdup("nill");
        }
        else
