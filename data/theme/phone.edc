@@ -441,6 +441,7 @@ collections {
 
    group {
       name: "elm/layout/roll";
+      min: 32 32;
       parts {
          part {
             name: "background";

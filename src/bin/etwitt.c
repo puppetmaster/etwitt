@@ -10,7 +10,7 @@ typedef struct _Twitt Twitt;
 typedef struct _Account Account;
 typedef struct _Interface Etwitt_Iface;
 typedef struct _ConfigIface Etwitt_Config_Iface;
-#define THEME_FILE "./data/theme/phone.edj"
+
 #define MESSAGES_LIMIT 140
 
 struct _Account
@@ -64,6 +64,21 @@ struct _ConfigIface
     Evas_Object *ph_avatar;
 };
 
+static const char *_theme_file = NULL;
+
+static const char*
+_theme_file_get(void)
+{
+    if (!_theme_file)
+    {
+        char tmp[4096];
+        snprintf(tmp, sizeof(tmp), "%s/etwitt/theme/phone.edj", elm_app_data_dir_get());
+        _theme_file = eina_stringshare_add(tmp);
+        printf("Set theme file to %s\n", _theme_file);
+    }
+
+    return _theme_file;
+}
 
 static char *
 _list_item_default_label_get(void *data, Evas_Object *obj __UNUSED__,
@@ -89,7 +104,7 @@ _list_item_default_icon_get(void *data, Evas_Object *obj, const char *part)
     if (!strcmp(part, "elm.swallow.icon"))
       {
 	 ic = elm_icon_add(obj);
-	 elm_icon_file_set(ic, THEME_FILE, twitt->icon);
+	 elm_icon_file_set(ic, _theme_file_get(), twitt->icon);
 	 evas_object_size_hint_min_set(ic, 32, 32);
 	 evas_object_show(ic);
       }
@@ -221,8 +236,10 @@ etwitt_win_add(Etwitt_Iface *interface)
    evas_object_smart_callback_add(interface->win,"delete,request",_win_del,interface);
 
    interface->layout = elm_layout_add(interface->win);
-   elm_layout_file_set(interface->layout,THEME_FILE,"elm/layout/roll");
+   elm_layout_file_set(interface->layout, _theme_file_get(),"elm/layout/roll");
    elm_win_resize_object_add (interface->win,interface->layout);
+   evas_object_size_hint_align_set(interface->layout, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   evas_object_size_hint_weight_set(interface->layout, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
    evas_object_show(interface->layout);
 
    elm_object_theme_set(interface->win, interface->theme);
@@ -480,7 +497,11 @@ elm_main(int argc, char **argv)
 
    OauthToken request_token;
 
-   elm_init(argc, argv);
+   /* tell elm about our app so it can figure out where to get files */
+   printf(" %s %s\n", PACKAGE_BIN_DIR, PACKAGE_DATA_DIR);
+   elm_app_compile_bin_dir_set(PACKAGE_BIN_DIR);
+   elm_app_compile_data_dir_set(PACKAGE_DATA_DIR);
+   elm_app_info_set(elm_main, "etwitt", "images/logo.png");
 
    memset(&request_token, 0, sizeof(OauthToken));
 
@@ -502,8 +523,8 @@ elm_main(int argc, char **argv)
    }
 
    iface->theme = elm_theme_new();
-   elm_theme_extension_add(iface->theme, THEME_FILE);
-   elm_theme_overlay_add(iface->theme, THEME_FILE);
+   elm_theme_extension_add(iface->theme, _theme_file_get());
+   elm_theme_overlay_add(iface->theme, _theme_file_get());
 
    // Main window creation
    etwitt_win_add(iface);
@@ -512,14 +533,12 @@ elm_main(int argc, char **argv)
    etwitt_main_toolbar_add(iface);
 
    etwitt_roll_add(iface);
-
+   
    etwitt_twitt_bar_add(iface);
 
    // Configuration
    etwitt_config_iface_add(iface);
 
-
-   elm_win_alpha_set(iface->win, 1);
    evas_object_resize(iface->win,460,540);
    evas_object_show(iface->win);
 

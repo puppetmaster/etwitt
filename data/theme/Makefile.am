@@ -1,19 +1,27 @@
-AUTOMAKE_OPTIONS     = 1.4 foreign
 MAINTAINERCLEANFILES = Makefile.in
 
-EDJE_FLAGS = -v \
--id $(top_srcdir)/data/images
+EDJE_FLAGS = \
+	-id $(top_srcdir)/data/images
 
-filesdir = @datadir_edj@
-files_DATA = phone.edj
+phonedir = $(pkgdatadir)/theme
 
-EXTRA_DIST = phone.edc
+phone_DATA = phone.edj
 
-phone.edj:  phone.edc
-	$(EDJE_CC) $(EDJE_FLAGS) $< $@
+
+EDC = \
+phone.edc
+
+IMGS = \
+../images/*.png
+
+EXTRA_DIST = \
+	$(EDC) \
+	$(IMGS)
+
+phone.edj: Makefile $(EXTRA_DIST)
+	$(AM_V_GEN)$(EDJE_CC) $(EDJE_FLAGS) \
+	$(top_srcdir)/data/theme/phone.edc \
+	$(top_builddir)/data/theme/phone.edj
 
 clean-local:
-	 rm -rf phone.edj *~
-
-uninstall:
-	 rm -rf $(DESTDIR)@datadir_edj@/phone.edj
+	rm -f *.edj
