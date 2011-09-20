@@ -498,14 +498,20 @@ ebird_home_timeline_get(OauthToken *request, EbirdAccount *acc)
 }
 
 char *
-ebird_user_show(EbirdAccount *account)
+ebird_user_show(EbirdAccount *acc)
 {
     char buf[EBIRD_URL_MAX];
     char *infos;
-    char *url = strdup(EBIRD_USER_SHOW_URL);
+    char *url;
 
-    snprintf(buf,sizeof(buf),"%s?screen_name=%s&userid=%s",url,account->username,account->userid);
+    url = strdup(EBIRD_USER_SHOW_URL); 
+
+    snprintf(buf,sizeof(buf),"%s&screen_name=%s&userid=%s",
+             url,
+             acc->username,
+             acc->userid);
 
     infos = ebird_http_get(buf);
+    free(url);
     return infos;
 }

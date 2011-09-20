@@ -102,4 +102,4 @@ Eina_Bool ebird_authorise_app(OauthToken *request_token, EbirdAccount *account);
 
 char *ebird_home_timeline_get(OauthToken *request, EbirdAccount *acc);
 
-char *ebird_user_show(EbirdAccount *account);
+char *ebird_user_show(EbirdAccount *acc);
