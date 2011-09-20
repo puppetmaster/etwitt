@@ -1,5 +1,7 @@
 #include <ebird.h>
 
+#define TAG_STATUS "status"
+
 static Eina_Bool
 _user_xml_cb(void *data, Eina_Simple_XML_Type type, const char *content, unsigned offset, unsigned length)
 {
@@ -28,9 +30,17 @@ _timeline_xml_attribute_cb(void *data, const char *key, const char *value)
 static Eina_Bool
 _timeline_xml_cb(void *data, Eina_Simple_XML_Type type, const char *content, unsigned offset, unsigned length)
 {
+   const char *tag;
+
+
    if (type == EINA_SIMPLE_XML_OPEN)
    {
-      eina_simple_xml_attributes_parse(content,strlen(content)+1,_timeline_xml_attribute_cb,NULL);
+      if (!strncmp(TAG_STATUS, content, strlen(TAG_STATUS))) 
+      {
+          tag = eina_simple_xml_tag_attributes_find(content,strlen(content)+1);
+          printf("{TAG}{%s}\n",tag);
+          eina_simple_xml_attributes_parse(tag, strlen(tag)+1, _timeline_xml_attribute_cb, NULL);
+      }
    }
    else if (type == EINA_SIMPLE_XML_DATA)
    {
