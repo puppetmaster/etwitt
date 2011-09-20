@@ -6,7 +6,7 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
     OauthToken request_token;
     EbirdAccount account;
     char *timeline;
-
+    char *userinfo;
 
     memset(&request_token, 0, sizeof(OauthToken));
     memset(&account, 0, sizeof(EbirdAccount));
@@ -52,8 +52,10 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
         if (account.access_token_key)
         {
             printf("Account exists !\n");
+            userinfo = ebird_user_show(&account);
             timeline = ebird_home_timeline_get(&request_token, &account);
             printf("%s\n",timeline);
+            printf("%s\n",userinfo);
 
         }
         else

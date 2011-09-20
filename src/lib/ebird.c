@@ -496,3 +496,16 @@ ebird_home_timeline_get(OauthToken *request, EbirdAccount *acc)
 
     return timeline;
 }
+
+char *
+ebird_user_show(EbirdAccount *account)
+{
+    char buf[EBIRD_URL_MAX];
+    char *infos;
+    char *url = strdup(EBIRD_USER_SHOW_URL);
+
+    snprintf(buf,sizeof(buf),"%s?screen_name=%s&userid=%s",url,account->username,account->userid);
+
+    infos = ebird_http_get(buf);
+    return infos;
+}

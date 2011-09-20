@@ -21,6 +21,7 @@
 #define EBIRD_STATUS_URL "http://api.twitter.com/statuses/update.xml"
 #define EBIRD_PUBLIC_TIMELINE_URL "http://twitter.com/statuses/public_timeline.xml"
 #define EBIRD_HOME_TIMELINE_URL "http://api.twitter.com/1/statuses/home_timeline.xml"
+#define EBIRD_USER_SHOW_URL "https://api.twitter.com/1/users/show.xml"
 
 #define EBIRD_REQUEST_TOKEN_URL "https://api.twitter.com/oauth/request_token"
 #define EBIRD_DIRECT_TOKEN_URL "https://api.twitter.com/oauth/authorize"
@@ -101,3 +102,4 @@ Eina_Bool ebird_authorise_app(OauthToken *request_token, EbirdAccount *account);
 
 char *ebird_home_timeline_get(OauthToken *request, EbirdAccount *acc);
 
+char *ebird_user_show(EbirdAccount *account);
