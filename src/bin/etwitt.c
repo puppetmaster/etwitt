@@ -85,11 +85,11 @@ _list_item_default_label_get(void *data, Evas_Object *obj __UNUSED__,
                              const char *part)
 {
     Twitt *twitt = data;
-    if (!strcmp(part, "elm.text"))
+    if (!strcmp(part, "elm.text") && twitt->message)
       return strdup(twitt->message);
-    else if (!strcmp(part, "elm.date"))
+    else if (!strcmp(part, "elm.date") && twitt->date)
       return strdup(twitt->date);
-    else if (!strcmp(part, "elm.name"))
+    else if (!strcmp(part, "elm.name") && twitt->name)
       return strdup(twitt->name);
     else
       return NULL;
