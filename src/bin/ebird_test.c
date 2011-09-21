@@ -15,6 +15,8 @@ struct _ebird_status
   const char *favorited;
   const char *retweet_count;
   const char *retweeted;
+  Eina_Bool st_status;
+  Eina_Bool st_user;
   EbirdAccount *user; 
 
 };
@@ -65,28 +67,36 @@ static Eina_Bool
 _timeline_xml_cb(void *data, Eina_Simple_XML_Type type, const char *content, unsigned offset, unsigned length)
 {
     const char *tag;
-    Eina_Bool status;
-    Eina_Bool user;
+    EbirdStatus *status = data;
 
     if (type == EINA_SIMPLE_XML_OPEN)
     {
         if (!strncmp(TAG_STATUS, content, strlen(TAG_STATUS))) 
-           status = EINA_TRUE;
+        {
+           status->st_status = EINA_TRUE;
+        }
 
         if (!strncmp(TAG_USER, content,strlen(TAG_USER)))
         {
-           user = EINA_TRUE;
-           tag = eina_simple_xml_tag_attributes_find(content,strlen(content)+1);
-           eina_simple_xml_attributes_parse(tag,strlen(tag)+1,_timeline_xml_attribute_cb,NULL);
+           status->st_user = EINA_TRUE;
         }
 
     }
+
     else if (type == EINA_SIMPLE_XML_DATA)
     {
-       if (status)
+       if (status->st_status)
        {
-          printf("%s\n",content);
-          status = EINA_FALSE;
+           tag = eina_simple_xml_tag_attributes_find(content,length);
+           printf("TAG[[[%s]]]\n",tag);
+           eina_simple_xml_attributes_parse(tag, length - (tag - content),_timeline_xml_attribute_cb,status);
+           status->st_status = EINA_FALSE;
+       }
+       if (status->st_user)
+       {
+           tag = eina_simple_xml_tag_attributes_find(content,length);
+           eina_simple_xml_attributes_parse(tag, length - (tag - content),_timeline_xml_attribute_cb,status);
+           status->st_user = EINA_FALSE;
        }
     }
 //    printf("\n");
@@ -104,7 +114,24 @@ ebird_user_xml_parse(char *xml)
 static void
 ebird_home_timeline_xml_parse(char *xml)
 {
-    eina_simple_xml_parse(xml,strlen(xml)+1,EINA_TRUE,_timeline_xml_cb,NULL);
+    /*
+    EbirdStatus *status;
+
+    status = calloc(1,sizeof(EbirdStatus));
+
+    eina_simple_xml_parse(xml,strlen(xml)+1,EINA_TRUE,_timeline_xml_cb,status);
+    */
+
+    Eina_Simple_XML_Node_Root *root;
+    char *out;
+
+    root = eina_simple_xml_node_load(xml,strlen(xml)+1,EINA_TRUE);
+    out = eina_simple_xml_node_dump(&root->base, " ");
+    puts(out);
+    printf("[NAME][%s]\n",&root->name);
+    free(out);
+    eina_simple_xml_node_root_free(root);
+
 }
 
 int main(int argc __UNUSED__, char **argv __UNUSED__)
