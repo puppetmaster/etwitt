@@ -126,8 +126,10 @@ ebird_home_timeline_xml_parse(char *xml)
     char *out;
 
     root = eina_simple_xml_node_load(xml,strlen(xml)+1,EINA_TRUE);
-    out = eina_simple_xml_node_dump(&root->base, " ");
-    puts(out);
+    //out = eina_simple_xml_node_dump(&root->base, " ");
+    //puts(out);
+    printf("Children   [%i]\n",eina_inlist_count(root->children));
+    printf("Attributes [%i]\n",eina_inlist_count(root->attributes));
     printf("[NAME][%s]\n",&root->name);
     free(out);
     eina_simple_xml_node_root_free(root);
