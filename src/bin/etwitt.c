@@ -1,10 +1,18 @@
-#include <Elementary.h>
-#include <ebird.h>
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
+
 #include <time.h>
 
-#ifndef __UNUSED__
-#define __UNUSED__ __attribute__((unused))
-#endif
+#include <oauth.h>
+
+#include <Eina.h>
+#include <Evas.h>
+#include <Ecore_File.h>
+#include <Edje.h>
+#include <Elementary.h>
+
+#include <ebird.h>
 
 typedef struct _Twitt Twitt;
 typedef struct _Account Account;
@@ -533,7 +541,7 @@ elm_main(int argc, char **argv)
    etwitt_main_toolbar_add(iface);
 
    etwitt_roll_add(iface);
-   
+
    etwitt_twitt_bar_add(iface);
 
    // Configuration

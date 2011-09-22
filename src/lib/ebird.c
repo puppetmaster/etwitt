@@ -1,37 +1,57 @@
-#include <ebird.h>
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+
+#include <oauth.h>
+
+#include <Eina.h>
+#include <Eet.h>
+#include <Ecore.h>
+#include <Ecore_Con.h>
+
+#include "ebird.h"
 
 Eina_Bool
 ebird_init()
 {
-    /* Eina INIT */
-    eina_init();
-
-    /* Ecore INIT */
-    ecore_init();
-    ecore_con_init();
-    ecore_con_url_init();
-    ecore_file_init();
-
-    /* Eet INIT */
-    eet_init();
+    if (!eina_init())
+        return EINA_FALSE;
+    if (!ecore_init())
+      goto shutdown_eina;
+    if (!ecore_con_init())
+      goto shutdown_ecore;
+    if (!ecore_con_url_init())
+      goto shutdown_ecore_con;
+    if (!eet_init())
+      goto shutdown_ecore_con_url;
 
     return EINA_TRUE;
 
+ shutdown_ecore_con_url:
+    ecore_con_url_shutdown();
+ shutdown_ecore_con:
+    ecore_con_shutdown();
+ shutdown_ecore:
+    ecore_shutdown();
+ shutdown_eina:
+    eina_shutdown();
+
+    return EINA_FALSE;
 }
 
-Eina_Bool
+void
 ebird_shutdown()
 {
-    /* ECORE SHUTDOWN */
+    eet_shutdown();
     ecore_con_url_shutdown();
     ecore_con_shutdown();
     ecore_shutdown();
-
-    /* EINA SHUTDOWN */
     eina_shutdown();
-
-    /* EET SHUTDOWN */
-    eet_shutdown();
 }
 
 
@@ -52,8 +72,8 @@ _url_complete_cb(void *data, int type, void *event_info)
     return EINA_TRUE;
 }
 
-char 
-*ebird_http_get(char *url)
+char *
+ebird_http_get(char *url)
 {
     Ecore_Con_Url *ec_url;
     Eina_Strbuf *data;
@@ -283,7 +303,7 @@ Connection:keep-alive\\r\\n\
 Host:api.twitter.com\\r\\n\
 User-Agent:Mozilla/5.0 (X11; Linux x86_64; rv:6.0.2) Gecko/20100101 Firefox/6.0.2\\r\\n";
 
-    snprintf(header, sizeof(header),"%sRefer:%s\r\n",static_header,request_token->authorisation_url);    
+    snprintf(header, sizeof(header),"%sRefer:%s\r\n",static_header,request_token->authorisation_url);
     snprintf(url, sizeof(url),
              "%s&session%5Busername_or_email%%5D=%s&session%%5Bpassword%%5D=%s",
              request_token->authorisation_url,
@@ -413,7 +433,7 @@ ebird_auto_authorise_app(OauthToken *request_token, EbirdAccount *account)
 {
     if (ebird_authorisation_pin_get(request_token,
                                     account->username,
-                                    account->passwd) < 0) 
+                                    account->passwd) < 0)
     {
         return EINA_FALSE;
     }
@@ -428,7 +448,7 @@ ebird_auto_authorise_app(OauthToken *request_token, EbirdAccount *account)
     return EINA_TRUE;
 }
 
-Eina_Bool 
+Eina_Bool
 ebird_read_pin_from_stdin(OauthToken *request_token)
 {
 
@@ -483,10 +503,10 @@ ebird_home_timeline_get(OauthToken *request, EbirdAccount *acc)
     char *timeline;
     char *timeline_url;
 
-    timeline_url =  oauth_sign_url2(EBIRD_HOME_TIMELINE_URL, 
-                                NULL, 
+    timeline_url =  oauth_sign_url2(EBIRD_HOME_TIMELINE_URL,
+                                NULL,
                                 OA_HMAC,
-                                NULL, 
+                                NULL,
                                 request->consumer_key,
                                 request->consumer_secret,
                                 acc->access_token_key,
@@ -504,7 +524,7 @@ ebird_user_show(EbirdAccount *acc)
     char *infos;
     char *url;
 
-    url = strdup(EBIRD_USER_SHOW_URL); 
+    url = strdup(EBIRD_USER_SHOW_URL);
 
     snprintf(buf,sizeof(buf),"%s&screen_name=%s&userid=%s",
              url,

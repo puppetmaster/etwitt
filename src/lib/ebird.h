@@ -1,17 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <oauth.h>
-#include <sys/types.h>
-#include <Eina.h>
-#include <Ecore.h>
-#include <Ecore_Con.h>
-#include <Ecore_File.h>
-#include <Eet.h>
-
-#ifndef __UNUSED__
-#define __UNUSED__ __attribute__((unused))
-#endif
+#ifndef EBIRD_H_
+#define EBIRD_H_
 
 #define EBIRD_URL_MAX 1024
 #define EBIRD_PIN_SIZE 12
@@ -64,7 +52,7 @@ struct _ebird_account
 
 Eina_Bool ebird_init();
 
-Eina_Bool ebird_shutdown();
+void ebird_shutdown();
 
 static Eina_Bool _url_data_cb(void *data, int type, void *event_info);
 
@@ -103,3 +91,5 @@ Eina_Bool ebird_authorise_app(OauthToken *request_token, EbirdAccount *account);
 char *ebird_home_timeline_get(OauthToken *request, EbirdAccount *acc);
 
 char *ebird_user_show(EbirdAccount *acc);
+
+#endif

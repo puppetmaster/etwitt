@@ -1,3 +1,14 @@
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
+
+#include <stdlib.h>
+
+#include <oauth.h>
+
+#include <Eina.h>
+#include <Ecore_File.h>
+
 #include <ebird.h>
 
 #define TAG_STATUS "status>"
@@ -17,7 +28,7 @@ struct _ebird_status
   const char *retweeted;
   Eina_Bool st_status;
   Eina_Bool st_user;
-  EbirdAccount *user; 
+  EbirdAccount *user;
 
 };
 
@@ -71,7 +82,7 @@ _timeline_xml_cb(void *data, Eina_Simple_XML_Type type, const char *content, uns
 
     if (type == EINA_SIMPLE_XML_OPEN)
     {
-        if (!strncmp(TAG_STATUS, content, strlen(TAG_STATUS))) 
+        if (!strncmp(TAG_STATUS, content, strlen(TAG_STATUS)))
         {
            status->st_status = EINA_TRUE;
         }
@@ -144,10 +155,17 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
     char *timeline;
     char *userinfo;
 
+    if (!ebird_init())
+        return -1;
+
+    if (!ecore_file_init())
+    {
+        ebird_shutdown();
+        return -1;
+    }
+
     memset(&request_token, 0, sizeof(OauthToken));
     memset(&account, 0, sizeof(EbirdAccount));
-
-    ebird_init();
 
     ebird_load_id(&request_token);
 
@@ -192,7 +210,7 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
             printf("%s\n",timeline);
 
         }
-        
+
 
         ebird_shutdown();
 
@@ -203,6 +221,8 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
         printf("\nDEBUG : END\n");
 
         ebird_shutdown();
-        return 1;
+        return -1;
     }
+
+    return 0;
 }

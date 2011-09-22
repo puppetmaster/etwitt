@@ -19,7 +19,7 @@ EXTRA_DIST = \
 	$(IMGS)
 
 phone.edj: Makefile $(EXTRA_DIST)
-	$(AM_V_GEN)$(EDJE_CC) $(EDJE_FLAGS) \
+	$(AM_V_GEN)@edje_cc@ $(EDJE_FLAGS) \
 	$(top_srcdir)/data/theme/phone.edc \
 	$(top_builddir)/data/theme/phone.edj
 

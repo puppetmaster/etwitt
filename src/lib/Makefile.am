@@ -1,37 +1,4 @@
 MAINTAINERCLEANFILES = Makefile.in
-INCLUDES = -I. \
-	   -I$(top_srcdir) \
-	   -I$(includedir)
-
-
-lib_LTLIBRARIES = libebird.la
-
-
-libebird_SOURCES = \
-	ebird.h \
-	ebird.c
-libebird_CPPFLAGS =          \
-	@OAUTH_CFLAGS@     \
-	@EINA_CFLAGS@ \
-	@ECORE_CON_CFLAGS@ \
-	@ECORE_FILE_CFLAGS@ \
-	@OPENSSL_CFLAGS@ \
-	@EET_CFLAGS@
-libebird_LDADD =           \
-	@OAUTH_LIBS@     \
-	@EINA_LIBS@ \
-	@ECORE_CON_LIBS@ \
-	@ECORE_FILE_LIBS@  \
-	@OPENSSL_LIBS@ \
-	@EET_LIBS@
-
-clean-local:
-	rm -rf *~
-
-
-
-
-MAINTAINERCLEANFILES = Makefile.in
 
 AM_CPPFLAGS = \
 -I. \
@@ -40,31 +7,16 @@ AM_CPPFLAGS = \
 -DPACKAGE_BIN_DIR=\"$(bindir)\" \
 -DPACKAGE_LIB_DIR=\"$(libdir)\" \
 -DPACKAGE_DATA_DIR=\"$(datadir)/$(PACKAGE)\" \
-@OAUTH_CFLAGS@     \
-@EINA_CFLAGS@ \
-@ECORE_CON_CFLAGS@ \
-@ECORE_FILE_CFLAGS@ \
-@OPENSSL_CFLAGS@ \
-@EET_CFLAGS@
+@EBIRD_CFLAGS@
+
+lib_LTLIBRARIES = libebird.la
 
 includes_HEADERS = ebird.h
 includesdir = $(includedir)/ebird-@VMAJ@
 
-lib_LTLIBRARIES = libebird.la
-
-base_sources = \
-ebird.c
-
-libebird_la_SOURCES = $(base_sources)
-
-libebird_la_LIBADD =\
-@OAUTH_LIBS@     \
-@EINA_LIBS@ \
-@ECORE_CON_LIBS@ \
-@ECORE_FILE_LIBS@  \
-@OPENSSL_LIBS@ \
-@EET_LIBS@
-
+libebird_la_SOURCES = ebird.c
+libebird_la_LIBADD = @EBIRD_LIBS@
+libebird_la_LDFLAGS = -no-undefined -version-info @version_info@
 
 clean-local:
-	@rm -rf *.gcno
+	rm -rf *~
