@@ -123,25 +123,104 @@ ebird_user_xml_parse(char *xml)
 }
 
 static void
+ebird_load_user(Eina_Simple_XML_Node_Tag *tag)
+{
+    Eina_Simple_XML_Node *node;
+    Eina_Simple_XML_Node_Tag *child;
+    
+    EINA_INLIST_FOREACH(tag->children,node)
+    {
+        if (node->type == EINA_SIMPLE_XML_NODE_TAG)
+        {
+            child =  (Eina_Simple_XML_Node_Tag*)node;
+            printf("\t\t\t%s\n",child->name);
+        }
+        else if(node->type == EINA_SIMPLE_XML_NODE_DATA)
+        {
+            Eina_Simple_XML_Node_Data *data = (Eina_Simple_XML_Node_Data *)node;
+            printf("\t\t\t\t[%s]\n",data->data);
+        }
+    }
+    
+}
+
+static void
+ebird_load_timeline(Eina_Simple_XML_Node_Root *root,EbirdStatus *status)
+{
+    Eina_Simple_XML_Node *node;
+    Eina_Simple_XML_Node_Tag *tag;
+    Eina_Simple_XML_Attribute *attr;
+    Eina_Simple_XML_Node_Data *data;
+    
+    EINA_INLIST_FOREACH(root->children,node)
+    {
+        if (node->type == EINA_SIMPLE_XML_NODE_TAG)
+        {
+            tag = (Eina_Simple_XML_Node_Tag*)node;
+
+            if (!strcmp(tag->name, "user"))
+            {
+                status->st_user = EINA_TRUE;
+                status->st_status = EINA_FALSE;
+            }
+            else if (!strcmp(tag->name,"status"))
+            {
+                status->st_status = EINA_TRUE;
+                status->st_user = EINA_FALSE;
+            }
+
+            if (status->st_status)
+            {
+                printf("\t%s\n",tag->name);
+            }
+            else if (status->st_user)
+            {
+                printf("\t\t%s\n",tag->name);
+            }
+
+            ebird_load_timeline(tag,status);
+
+        }
+        else if (node->type == EINA_SIMPLE_XML_NODE_DATA)
+        {
+            Eina_Simple_XML_Node_Data *data = (Eina_Simple_XML_Node_Data *)node;
+
+            if (status->st_status)
+            {
+                printf("\t\t[%s]\n",data->data);
+            }
+            else if (status->st_user)
+            {
+                printf("\t\t\t[%s]\n",data->data);
+            }
+
+        }
+        else
+            printf("\t%i\n",node->type);
+    }
+
+}
+
+static void
 ebird_home_timeline_xml_parse(char *xml)
 {
-    /*
     EbirdStatus *status;
-
-    status = calloc(1,sizeof(EbirdStatus));
-
-    eina_simple_xml_parse(xml,strlen(xml)+1,EINA_TRUE,_timeline_xml_cb,status);
-    */
-
     Eina_Simple_XML_Node_Root *root;
     char *out;
 
+    status = calloc(1,sizeof(EbirdStatus));
+
+    //eina_simple_xml_parse(xml,strlen(xml)+1,EINA_TRUE,_timeline_xml_cb,status);
+
+
     root = eina_simple_xml_node_load(xml,strlen(xml)+1,EINA_TRUE);
-    //out = eina_simple_xml_node_dump(&root->base, " ");
-    //puts(out);
+    ebird_load_timeline(root,status);
+    
     printf("Children   [%i]\n",eina_inlist_count(root->children));
     printf("Attributes [%i]\n",eina_inlist_count(root->attributes));
     printf("[NAME][%s]\n",&root->name);
+    out = eina_simple_xml_node_dump(&root->base, " ");
+//    puts(out);
     free(out);
     eina_simple_xml_node_root_free(root);
 

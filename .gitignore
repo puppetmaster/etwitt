@@ -51,5 +51,5 @@ mkid*
 /data/theme/Makefile.in
 /src/lib/.libs/
 /src/lib/libebird.la
-
+*~
 
