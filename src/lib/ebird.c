@@ -496,12 +496,50 @@ ebird_authorise_app(OauthToken *request_token, EbirdAccount *account)
     }
 }
 
+EbirdAccount *
+ebird_load_user(Eina_Simple_XML_Node_Root *root,EbirdAccount *acc)
+{
+
+    Eina_Simple_XML_Node *node;
+    Eina_Simple_XML_Node_Tag *tag;
+    Eina_Simple_XML_Node_Tag *parent; 
+    Eina_Simple_XML_Node_Data *data;
+    EbirdAccount *account;
+
+    if (acc)
+        account = acc;
+    else
+        account = calloc(1,sizeof(EbirdAccount));
+
+    EINA_INLIST_FOREACH(root->children,node)
+    {
+        tag = (Eina_Simple_XML_Node_Tag*)node;
+        parent = tag->base.parent;
+
+        if (node->type == EINA_SIMPLE_XML_NODE_TAG)
+        {
+            printf("[USER-TAG][%s]\n");
+            ebird_load_user(tag,account);
+        }
+        if (node->type == EINA_SIMPLE_XML_NODE_DATA)
+        {
+            Eina_Simple_XML_Node_Data *data = (Eina_Simple_XML_Node_Data *)node;
+
+            printf("[USER-DATA][%s]\n",data->data);
+        }
+    }
+
+
+}
+
+
 Eina_List *
 ebird_load_timeline(Eina_Simple_XML_Node_Root *root, Eina_List *list)
 {
     Eina_Simple_XML_Node *node;
     Eina_Simple_XML_Node_Tag *tag;
     Eina_Simple_XML_Node_Tag *parent; 
+    Eina_Simple_XML_Node_Tag *ancestor; 
     Eina_Simple_XML_Node_Data *data;
     EbirdStatus *status;
 
@@ -512,12 +550,22 @@ ebird_load_timeline(Eina_Simple_XML_Node_Root *root, Eina_List *list)
     {
         tag = (Eina_Simple_XML_Node_Tag*)node;
         parent = tag->base.parent;
+        ancestor = parent->base.parent;
+
+        if (ancestor)
+        {
+            puts("DEBUG ICI");
+            printf("%s\n",ancestor->name);
+        }
+        else
+            ancestor = tag;
         
         if (node->type == EINA_SIMPLE_XML_NODE_TAG)
         {
             if (!strcmp(tag->name,"status") && !strcmp(parent->name,"statuses"))
             {
                 status = calloc(1,sizeof(EbirdStatus));
+                status->user = NULL;
                 list = eina_list_append(list,status);
             }
 
@@ -530,6 +578,37 @@ ebird_load_timeline(Eina_Simple_XML_Node_Root *root, Eina_List *list)
             if (!strcmp(tag->name,"retweeted") && !strcmp(parent->name,"status"))
                 status->retweeted = NULL;
 
+            if (!strcmp(tag->name,"user")  && !strcmp(parent->name,"status"))
+            {
+                /*
+    char *username;
+    char *passwd;
+    char *userid;
+    char *access_token_key;
+    char *access_token_secret;
+    char *avatar;
+    char *realname;
+  <user>
+    <id>372786855</id>
+    <name>ebird</name>
+    <screen_name>EflBird</screen_name>
+    <profile_image_url>http://a3.twimg.com/sticky/default_profile_images/default_profile_0_normal.png</profile_image_url>
+  </user>
+  */
+  				puts("CALLOC USER");
+                status->user = calloc(1,sizeof(EbirdAccount));
+            }
+
+            printf("DEBUG LA [%s]\n",ancestor->name);
+            if (!strcmp(tag->name,"screen_name") && 
+                !strcmp(parent->name,"user") && 
+                !strcmp(ancestor->name,"statuses"))
+            {
+                puts("USER NAME\n");
+                status->user->username = NULL;
+            }
+
+            printf("DEBUG ITERATION\n");
             list = ebird_load_timeline(tag,list);
         }
         if (node->type == EINA_SIMPLE_XML_NODE_DATA)
@@ -544,6 +623,11 @@ ebird_load_timeline(Eina_Simple_XML_Node_Root *root, Eina_List *list)
                 status->text = eina_stringshare_add(data->data);
             else if (!status->retweeted)
                 status->retweeted = eina_stringshare_add(data->data);
+            else if (status->user)
+            {
+                if (!status->user->realname)
+                    status->user->username = eina_stringshare_add(data->data);
+            }
         }
     }
     return list;
