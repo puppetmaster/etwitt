@@ -18,9 +18,12 @@
 #define EBIRD_USER_SCREEN_NAME "xxxxxxx"
 #define EBIRD_USER_PASSWD "xxxxxxxx"    //<< percent encode: char "+" => %2B
 
+#define TAG_STATUS "status>"
+#define TAG_USER "user>"
 
 typedef struct _oauth_token OauthToken;
 typedef struct _ebird_account EbirdAccount;
+typedef struct _ebird_status EbirdStatus;
 
 struct _oauth_token
 {
@@ -47,6 +50,19 @@ struct _ebird_account
     char *access_token_secret;
     char *avatar;
     char *realname;
+};
+
+struct _ebird_status
+{
+  const char *created_at;
+  const char *id;
+  const char *text;
+  const char *truncated;
+  const char *favorited;
+  const char *retweet_count;
+  const char *retweeted;
+  EbirdAccount *user;
+
 };
 
 
@@ -88,7 +104,9 @@ Eina_Bool ebird_auto_authorise_app(OauthToken *request_token, EbirdAccount *acco
 
 Eina_Bool ebird_authorise_app(OauthToken *request_token, EbirdAccount *account);
 
-char *ebird_home_timeline_get(OauthToken *request, EbirdAccount *acc);
+Eina_List *ebird_home_timeline_get(OauthToken *request, EbirdAccount *acc);
+
+char *ebird_home_timeline_xml_get(OauthToken *request, EbirdAccount *acc);
 
 char *ebird_user_show(EbirdAccount *acc);
 

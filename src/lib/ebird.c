@@ -496,8 +496,86 @@ ebird_authorise_app(OauthToken *request_token, EbirdAccount *account)
     }
 }
 
-char *
+Eina_List *
+ebird_load_timeline(Eina_Simple_XML_Node_Root *root, Eina_List *list)
+{
+    Eina_Simple_XML_Node *node;
+    Eina_Simple_XML_Node_Tag *tag;
+    Eina_Simple_XML_Node_Tag *parent; 
+    Eina_Simple_XML_Node_Data *data;
+    EbirdStatus *status;
+
+    if (list)
+        status = (EbirdStatus*)(eina_list_last(list)->data);
+
+    EINA_INLIST_FOREACH(root->children,node)
+    {
+        tag = (Eina_Simple_XML_Node_Tag*)node;
+        parent = tag->base.parent;
+        
+        if (node->type == EINA_SIMPLE_XML_NODE_TAG)
+        {
+            if (!strcmp(tag->name,"status") && !strcmp(parent->name,"statuses"))
+            {
+                status = calloc(1,sizeof(EbirdStatus));
+                list = eina_list_append(list,status);
+            }
+
+            if (!strcmp(tag->name,"created_at") && !strcmp(parent->name,"status"))
+                status->created_at = NULL;
+            if (!strcmp(tag->name,"id") && !strcmp(parent->name,"status"))
+                status->id = NULL;
+            if (!strcmp(tag->name,"text") && !strcmp(parent->name,"status"))
+                status->text = NULL;
+            if (!strcmp(tag->name,"retweeted") && !strcmp(parent->name,"status"))
+                status->retweeted = NULL;
+
+            list = ebird_load_timeline(tag,list);
+        }
+        if (node->type == EINA_SIMPLE_XML_NODE_DATA)
+        {
+            Eina_Simple_XML_Node_Data *data = (Eina_Simple_XML_Node_Data *)node;
+
+            if (!status->created_at)
+                status->created_at = eina_stringshare_add(data->data);
+            else if (!status->id)
+                status->id = eina_stringshare_add(data->data);
+            else if (!status->text)
+                status->text = eina_stringshare_add(data->data);
+            else if (!status->retweeted)
+                status->retweeted = eina_stringshare_add(data->data);
+        }
+    }
+    return list;
+}
+
+Eina_List *
 ebird_home_timeline_get(OauthToken *request, EbirdAccount *acc)
+{
+
+    char *xml;
+    char *timeline_url;
+    Eina_List *timeline = NULL;
+    Eina_Simple_XML_Node_Root *root;
+
+    timeline_url =  oauth_sign_url2(EBIRD_HOME_TIMELINE_URL,
+                                NULL,
+                                OA_HMAC,
+                                NULL,
+                                request->consumer_key,
+                                request->consumer_secret,
+                                acc->access_token_key,
+                                acc->access_token_secret);
+
+    xml = ebird_http_get(timeline_url);
+    root = eina_simple_xml_node_load(xml,strlen(xml)+1,EINA_TRUE);
+    timeline = ebird_load_timeline(root, timeline);
+    eina_simple_xml_node_root_free(root);
+    return timeline;
+}
+
+char *
+ebird_home_timeline_xml_get(OauthToken *request, EbirdAccount *acc)
 {
 
     char *timeline;
@@ -513,7 +591,7 @@ ebird_home_timeline_get(OauthToken *request, EbirdAccount *acc)
                                 acc->access_token_secret);
 
     timeline = ebird_http_get(timeline_url);
-
+            
     return timeline;
 }
 
