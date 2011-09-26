@@ -60,9 +60,8 @@ struct _ebird_status
   const char *truncated;
   const char *favorited;
   const char *retweet_count;
-  const char *retweeted;
+  Eina_Bool retweeted;
   EbirdAccount *user;
-
 };
 
 

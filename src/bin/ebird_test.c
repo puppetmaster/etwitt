@@ -64,7 +64,7 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
 
             EINA_LIST_FOREACH(timeline,l,st)
             {
-                printf("TWITT :[%s][%s][%s]\n",st->user->realname, st->created_at,st->text);
+                printf("TWITT :[%s][%s][%s]\n",st->user->username, st->created_at,st->text);
             }
             
             eina_list_free(timeline);
@@ -87,8 +87,6 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
     else
     {
         printf("Error on request token get\n");
-        printf("\nDEBUG : END\n");
-
         ebird_shutdown();
         return -1;
     }
