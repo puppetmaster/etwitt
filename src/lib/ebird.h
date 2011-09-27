@@ -24,6 +24,18 @@
 typedef struct _oauth_token OauthToken;
 typedef struct _ebird_account EbirdAccount;
 typedef struct _ebird_status EbirdStatus;
+typedef enum   _state State;
+
+enum _state
+{
+    CREATEDAT,
+    TEXT,
+    ID,
+    RETWEETED,
+    USER,
+    SCREEN_NAME,
+    NONE
+};
 
 struct _oauth_token
 {

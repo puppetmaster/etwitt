@@ -500,30 +500,20 @@ ebird_authorise_app(OauthToken *request_token, EbirdAccount *account)
  * TRY NEW WAY TO USE eina_simple_xml 
  */
 
-typedef enum _State
-{
-    CREATED_AT,
-    TEXT,
-    ID,
-    RETWEETED,
-    USER,
-    SCREEN_NAME
-} State;
-
 
 static Eina_Bool
 _parse_timeline(void *data, Eina_Simple_XML_Type type, const char *content, unsigned offset, unsigned length)
 {
     static EbirdStatus *cur = NULL;
     static State s;
-    Eina_List *timeline = data;
+//    Eina_List *timeline = data;
 
     if (type == EINA_SIMPLE_XML_OPEN && !strncmp("status",content,length))
         cur = calloc(1,sizeof(EbirdStatus));
     else if (cur && type == EINA_SIMPLE_XML_OPEN) 
     {
         if (!strncmp("created_at", content, length))
-            s = CREATED_AT;
+            s = CREATEDAT;
         else if (!strncmp("text",content,length))
             s = TEXT;
         else if (!strncmp("id",content,length))
@@ -534,13 +524,16 @@ _parse_timeline(void *data, Eina_Simple_XML_Type type, const char *content, unsi
             s = USER;
         else if (!strncmp("screen_name",content,length))
             s = SCREEN_NAME;
+        else
+            s = NONE;
     }
     else if (cur && type == EINA_SIMPLE_XML_DATA)
     {
         char *ptr = strndup(content,length);
-        switch(s)
-        {
-            case CREATED_AT:
+        //printf("DEBUG =====> %s [%d]\n",ptr,s);
+        //printf("DEBUG ~~~~~> %s [%d]\n",ptr,CREATEDAT);
+        switch(s) {
+            case CREATEDAT:
                 cur->created_at = ptr;
                 break;
             case TEXT:
@@ -552,13 +545,13 @@ _parse_timeline(void *data, Eina_Simple_XML_Type type, const char *content, unsi
             case RETWEETED:
                 cur->retweeted = ptr;
                 break;
-
         }
     }
     else if (cur && type == EINA_SIMPLE_XML_CLOSE && !strncmp("status",content,length))
     {
-        printf("DEBUG APPEND\n");
-        timeline = eina_list_append(timeline,cur);
+        //printf("DEBUG APPEND\n");
+        //printf("DEBUG [%s]\n",cur->created_at);
+        data = eina_list_append(data,cur);
         cur = NULL;
     }
     return EINA_TRUE;
