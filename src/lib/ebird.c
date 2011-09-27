@@ -496,17 +496,13 @@ ebird_authorise_app(OauthToken *request_token, EbirdAccount *account)
     }
 }
 
-/* 
- * TRY NEW WAY TO USE eina_simple_xml 
- */
-
-
 static Eina_Bool
-_parse_timeline(void *data, Eina_Simple_XML_Type type, const char *content, unsigned offset, unsigned length)
+_parse_timeline(void *_data, Eina_Simple_XML_Type type, const char *content, unsigned offset, unsigned length)
 {
     static EbirdStatus *cur = NULL;
     static State s;
-//    Eina_List *timeline = data;
+    void **data = (void **)_data;
+  //  Eina_List *timeline = (Eina_List *)data;
 
     if (type == EINA_SIMPLE_XML_OPEN && !strncmp("status",content,length))
         cur = calloc(1,sizeof(EbirdStatus));
@@ -532,7 +528,8 @@ _parse_timeline(void *data, Eina_Simple_XML_Type type, const char *content, unsi
         char *ptr = strndup(content,length);
         //printf("DEBUG =====> %s [%d]\n",ptr,s);
         //printf("DEBUG ~~~~~> %s [%d]\n",ptr,CREATEDAT);
-        switch(s) {
+        switch(s) 
+        {
             case CREATEDAT:
                 cur->created_at = ptr;
                 break;
@@ -551,11 +548,11 @@ _parse_timeline(void *data, Eina_Simple_XML_Type type, const char *content, unsi
     {
         //printf("DEBUG APPEND\n");
         //printf("DEBUG [%s]\n",cur->created_at);
-        data = eina_list_append(data,cur);
+//        data = eina_list_append(data,cur);
+        *data = eina_list_append(*data,cur);
         cur = NULL;
     }
     return EINA_TRUE;
-
 }
 
 /* END OF TRY  */
@@ -658,8 +655,8 @@ ebird_home_timeline_get(OauthToken *request, EbirdAccount *acc)
                                 acc->access_token_secret);
 
     xml = ebird_http_get(timeline_url);
-    //printf("DEBUG\n\n\n%s\n\n\n",xml);
-    eina_simple_xml_parse(xml,strlen(xml),EINA_TRUE,_parse_timeline,timeline);
+//    printf("DEBUG\n\n\n%s\n\n\n",xml);
+    eina_simple_xml_parse(xml,strlen(xml),EINA_TRUE,_parse_timeline, &timeline);
 //    root = eina_simple_xml_node_load(xml,strlen(xml)+1,EINA_TRUE);
 //    timeline = ebird_load_timeline(root, timeline);
 //    eina_simple_xml_node_root_free(root);

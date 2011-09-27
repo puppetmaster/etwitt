@@ -64,7 +64,8 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
 
             EINA_LIST_FOREACH(timeline,l,st)
             {
-                printf("TWITT :[%s][%s][%s]\n",st->user->username, st->created_at,st->text);
+                printf("TWITT :[%s][%s]\n",st->created_at,st->text);
+                //printf("TWITT :[%s][%s][%s]\n",st->user->username, st->created_at,st->text);
             }
             
             eina_list_free(timeline);
