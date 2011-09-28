@@ -25,6 +25,7 @@ typedef struct _oauth_token OauthToken;
 typedef struct _ebird_account EbirdAccount;
 typedef struct _ebird_status EbirdStatus;
 typedef enum   _state State;
+typedef enum   _user_state UserState;
 
 enum _state
 {
@@ -33,8 +34,13 @@ enum _state
     ID,
     RETWEETED,
     USER,
-    SCREEN_NAME,
     NONE
+};
+
+enum _user_state
+{
+    SCREEN_NAME,
+    USER_NONE
 };
 
 struct _oauth_token
@@ -74,6 +80,7 @@ struct _ebird_status
   const char *retweet_count;
   Eina_Bool retweeted;
   EbirdAccount *user;
+  EbirdStatus *retweeted_status;
 };
 
 
