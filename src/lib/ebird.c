@@ -502,6 +502,7 @@ _parse_timeline(void *_data, Eina_Simple_XML_Type type, const char *content, uns
     static EbirdStatus *cur = NULL;
     static State s;
     static UserState us;
+    
     void **data = (void **)_data;
   //  Eina_List *timeline = (Eina_List *)data;
   //
@@ -511,7 +512,7 @@ _parse_timeline(void *_data, Eina_Simple_XML_Type type, const char *content, uns
     else if (cur && type == EINA_SIMPLE_XML_OPEN) 
     {
         us = USER_NONE;
-        if (!strncmp("retweeted_status",content,length))
+        if (!strncmp("retweeted_status",content,length) && ! cur->retweeted )
             s = RETWEETED;
         else if (!strncmp("created_at", content, length) && ! cur->retweeted)
             s = CREATEDAT;
@@ -537,14 +538,15 @@ _parse_timeline(void *_data, Eina_Simple_XML_Type type, const char *content, uns
     else if (cur && type == EINA_SIMPLE_XML_DATA)
     {
         char *ptr = strndup(content,length);
-        printf("DEBUG =====> %s [%d]\n",ptr,s);
-        //printf("DEBUG ~~~~~> %s [%d]\n",ptr,CREATEDAT);
+//        printf("DEBUG =====> %s [%d]\n",ptr,s);
+//        printf("DEBUG ~~~~~> %s [%d]\n",ptr,CREATEDAT);
         switch(s) 
         {
             case CREATEDAT:
                 cur->created_at = ptr;
                 break;
             case TEXT:
+//                printf("===> [DEBUG][%s]\n",ptr);
                 cur->text = ptr;
                 break;
             case ID:
@@ -557,7 +559,7 @@ _parse_timeline(void *_data, Eina_Simple_XML_Type type, const char *content, uns
         switch(us)
         {
             case SCREEN_NAME:
-                printf("DEBUG ICI [%d][%s]\n",us,ptr);
+//                printf("DEBUG ICI [%d][%s]\n",us,ptr);
                 cur->user->username = ptr;
                 break;
             case USER_NONE:
@@ -567,11 +569,17 @@ _parse_timeline(void *_data, Eina_Simple_XML_Type type, const char *content, uns
     }
     else if (cur && type == EINA_SIMPLE_XML_CLOSE && !strncmp("status",content,length))
     {
-        //printf("DEBUG APPEND\n");
-        //printf("DEBUG [%s]\n",cur->created_at);
+//        printf("DEBUG APPEND\n");
+//        printf("DEBUG [%s]\n",cur->created_at);
 //        data = eina_list_append(data,cur);
         *data = eina_list_append(*data,cur);
         cur = NULL;
+    }
+    else if (cur && type == EINA_SIMPLE_XML_CLOSE && !strncmp("retweeted_status",content,length))
+    {
+//        printf("CLOSE\n");
+        if (cur->retweeted)
+            cur->retweeted = EINA_FALSE;
     }
     return EINA_TRUE;
 }
