@@ -496,6 +496,7 @@ ebird_authorise_app(OauthToken *request_token, EbirdAccount *account)
     }
 }
 
+
 static Eina_Bool
 _parse_timeline(void *_data, Eina_Simple_XML_Type type, const char *content, unsigned offset, unsigned length)
 {
@@ -509,72 +510,42 @@ _parse_timeline(void *_data, Eina_Simple_XML_Type type, const char *content, uns
   //  Eina_List *timeline = (Eina_List *)data;
   //
     
-    puts("01");
     if (type == EINA_SIMPLE_XML_OPEN && !strncmp("status",content,length))
+    {
         cur = calloc(1,sizeof(EbirdStatus));
+        cur->user = calloc(1,sizeof(EbirdAccount));
+        //cur->retweeted = EINA_FALSE;
+    }
     else if (cur && type == EINA_SIMPLE_XML_OPEN) 
     {
-        if ( ! cur->retweeted)
+        us = USER_NONE;
+        if (!strncmp("retweeted_status",content,16))
         {
-            us = USER_NONE;
-            if (!strncmp("retweeted_status",content,length))// && ! cur->retweeted )
-            {
-                cur->retweeted = EINA_TRUE;
-                cur->retweeted_status = calloc(1,sizeof(EbirdStatus));
-                s = RETWEETED;
-            }
-            else if (!strncmp("created_at", content, length))// && ! cur->retweeted)
-                s = CREATEDAT;
-            else if (!strncmp("text",content,length))// && ! cur->retweeted) 
-                s = TEXT;
-            else if (!strncmp("id",content,length))// && ! cur->retweeted)
-                s = ID;
-            else if (!strncmp("retweeted",content,length))
-                s = RETWEETED;
-            else if (!strncmp("user",content,length))// && ! cur->retweeted)
-            {
-                s = USER;
-                cur->user = calloc(1,sizeof(EbirdAccount));
-            }
-            else if (!strncmp("screen_name",content,length))// && ! cur->retweeted)
-            {
-                s = USER;
-                us = SCREEN_NAME;
-            }
-            else
-                s = NONE;
+            s = RETWEETED;
+ //           printf("[-=O=-]RETWEETED[-=O=-]\n");
+            cur->retweeted_status = calloc(1,sizeof(EbirdStatus));
+            cur->retweeted_status->user = calloc(1,sizeof(EbirdAccount));
+            cur->retweeted = EINA_TRUE;
+        }
+        else if (!strncmp("created_at", content, 10))
+            s = CREATEDAT;
+        else if (!strncmp("text",content,4))
+            s = TEXT;
+        else if (!strncmp("id",content,2))
+            s = ID;
+        else if (!strncmp("user",content,4))
+            s = USER;
+        else if (!strncmp("screen_name",content, 11))
+        {
+            us = SCREEN_NAME;
+            s = USER;
         }
         else
-        {
-            if (!strncmp("created_at", content, length))// && ! cur->retweeted)
-                rt_s = CREATEDAT;
-            else if (!strncmp("text",content,length))// && ! cur->retweeted) 
-                rt_s = TEXT;
-            else if (!strncmp("id",content,length))// && ! cur->retweeted)
-                rt_s = ID;
-            else if (!strncmp("retweeted",content,length))
-                rt_s = RETWEETED;
-            else if (!strncmp("user",content,length))// && ! cur->retweeted)
-            {
-                rt_s = USER;
-                cur->retweeted_status->user = calloc(1,sizeof(EbirdAccount));
-            }
-            else if (!strncmp("screen_name",content,length))// && ! cur->retweeted)
-            {
-                rt_s = USER;
-                rt_us = SCREEN_NAME;
-            }
-            else
-                rt_s = NONE;
-
-            printf("HoHo\n");
-        }
+            s = NONE;
     }
     else if (cur && type == EINA_SIMPLE_XML_DATA)
     {
         char *ptr = strndup(content,length);
-//        printf("DEBUG =====> %s [%d]\n",ptr,s);
-//        printf("DEBUG ~~~~~> %s [%d]\n",ptr,CREATEDAT);
         if ( ! cur->retweeted)
         {
             switch(s) 
@@ -589,13 +560,11 @@ _parse_timeline(void *_data, Eina_Simple_XML_Type type, const char *content, uns
                 case ID:
                     cur->id = ptr;
                     break;
-                case RETWEETED:
-                    cur->retweeted = EINA_TRUE;
             }
             switch(us)
             {
                 case SCREEN_NAME:
-                    //                printf("DEBUG ICI [%d][%s]\n",us,ptr);
+                    //printf("DEBUG ICI [%d][%s]\n",us,ptr);
                     cur->user->username = ptr;
                     break;
                 case USER_NONE:
@@ -604,13 +573,13 @@ _parse_timeline(void *_data, Eina_Simple_XML_Type type, const char *content, uns
         }
         else
         {
-            switch(rt_s) 
+            switch(s) 
             {
                 case CREATEDAT:
                     cur->retweeted_status->created_at = ptr;
                     break;
                 case TEXT:
-                    //                printf("===> [DEBUG][%s]\n",ptr);
+                    //printf("===> [DEBUG][%s]\n",ptr);
                     cur->retweeted_status->text = ptr;
                     break;
                 case ID:
@@ -621,10 +590,10 @@ _parse_timeline(void *_data, Eina_Simple_XML_Type type, const char *content, uns
             }
 
 
-            switch(rt_us)
+            switch(us)
             {
                 case SCREEN_NAME:
-                    //                printf("DEBUG ICI [%d][%s]\n",us,ptr);
+//                    printf("DEBUG ICI [%d][%s]\n",us,ptr);
                     cur->retweeted_status->user->username = ptr;
                     break;
                 case USER_NONE:
@@ -638,10 +607,12 @@ _parse_timeline(void *_data, Eina_Simple_XML_Type type, const char *content, uns
 //        printf("DEBUG APPEND\n");
 //        printf("DEBUG [%s]\n",cur->created_at);
 //        data = eina_list_append(data,cur);
+        if (!strncmp("RT ",cur->text,3))
+            cur->retweeted = EINA_TRUE;
         *data = eina_list_append(*data,cur);
         cur = NULL;
     }
-    else if (cur && type == EINA_SIMPLE_XML_CLOSE && !strncmp("retweeted_status",content,length))
+    else if (cur && type == EINA_SIMPLE_XML_CLOSE && !strncmp("retweeted_status",content,16))
     {
 //        printf("CLOSE\n");
         if (cur->retweeted)
@@ -729,6 +700,30 @@ ebird_load_timeline(Eina_Simple_XML_Node_Root *root, Eina_List *list)
         }
     }
     return list;
+}
+
+void
+ebird_timeline_free(Eina_List *timeline)
+{
+    EbirdStatus *st;
+    Eina_List *l;
+
+    EINA_LIST_FOREACH(timeline,l,st)
+    {
+        if (st->retweeted)
+        {
+            free(st->retweeted_status->user);
+            free(st->retweeted_status);
+            free(st->user);
+            free(st);
+        }
+        else
+        {
+            free(st->user);
+            free(st);
+        }
+    }
+    eina_list_free(timeline);
 }
 
 Eina_List *

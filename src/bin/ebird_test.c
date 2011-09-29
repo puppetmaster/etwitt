@@ -58,17 +58,23 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
         if (account.access_token_key)
         {
 
-            printf("Account exists !\n");
+            //printf("Account exists !\n");
             userinfo = ebird_user_show(&account);
             timeline = ebird_home_timeline_get(&request_token, &account);
 
+            puts("HOME TIME LINE");
             EINA_LIST_FOREACH(timeline,l,st)
             {
                 //printf("TWITT :[%s][%s]\n",st->created_at,st->text);
-                printf("TWITT :[%s][%s][%s]\n",st->user->username, st->created_at,st->text);
+                if (st->retweeted)
+                    printf("[RT by %s][TW by%s]\n\t%s\n",st->user->username,st->retweeted_status->user->username, st->retweeted_status->created_at,st->retweeted_status->text);
+                else
+                    printf("[TW by %s][%s]\n\t%s\n",st->user->username, st->created_at,st->text);
+
             }
             
-            eina_list_free(timeline);
+            //eina_list_free(timeline);
+            ebird_timeline_free(timeline);
 
         }
         else
