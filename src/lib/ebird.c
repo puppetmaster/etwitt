@@ -500,70 +500,136 @@ static Eina_Bool
 _parse_timeline(void *_data, Eina_Simple_XML_Type type, const char *content, unsigned offset, unsigned length)
 {
     static EbirdStatus *cur = NULL;
-    static State s;
-    static UserState us;
+    static State s = NONE;
+    static State rt_s = NONE;
+    static UserState us = USER_NONE;
+    static UserState rt_us = USER_NONE;
     
     void **data = (void **)_data;
   //  Eina_List *timeline = (Eina_List *)data;
   //
-
+    
+    puts("01");
     if (type == EINA_SIMPLE_XML_OPEN && !strncmp("status",content,length))
         cur = calloc(1,sizeof(EbirdStatus));
     else if (cur && type == EINA_SIMPLE_XML_OPEN) 
     {
-        us = USER_NONE;
-        if (!strncmp("retweeted_status",content,length) && ! cur->retweeted )
-            s = RETWEETED;
-        else if (!strncmp("created_at", content, length) && ! cur->retweeted)
-            s = CREATEDAT;
-        else if (!strncmp("text",content,length) && ! cur->retweeted) 
-            s = TEXT;
-        else if (!strncmp("id",content,length) && ! cur->retweeted)
-            s = ID;
-        else if (!strncmp("retweeted",content,length))
-            s = RETWEETED;
-        else if (!strncmp("user",content,length) && ! cur->retweeted)
+        if ( ! cur->retweeted)
         {
-            s = USER;
-            cur->user = calloc(1,sizeof(EbirdAccount));
-        }
-        else if (!strncmp("screen_name",content,length) && ! cur->retweeted)
-        {
-            s = USER;
-            us = SCREEN_NAME;
+            us = USER_NONE;
+            if (!strncmp("retweeted_status",content,length))// && ! cur->retweeted )
+            {
+                cur->retweeted = EINA_TRUE;
+                cur->retweeted_status = calloc(1,sizeof(EbirdStatus));
+                s = RETWEETED;
+            }
+            else if (!strncmp("created_at", content, length))// && ! cur->retweeted)
+                s = CREATEDAT;
+            else if (!strncmp("text",content,length))// && ! cur->retweeted) 
+                s = TEXT;
+            else if (!strncmp("id",content,length))// && ! cur->retweeted)
+                s = ID;
+            else if (!strncmp("retweeted",content,length))
+                s = RETWEETED;
+            else if (!strncmp("user",content,length))// && ! cur->retweeted)
+            {
+                s = USER;
+                cur->user = calloc(1,sizeof(EbirdAccount));
+            }
+            else if (!strncmp("screen_name",content,length))// && ! cur->retweeted)
+            {
+                s = USER;
+                us = SCREEN_NAME;
+            }
+            else
+                s = NONE;
         }
         else
-            s = NONE;
+        {
+            if (!strncmp("created_at", content, length))// && ! cur->retweeted)
+                rt_s = CREATEDAT;
+            else if (!strncmp("text",content,length))// && ! cur->retweeted) 
+                rt_s = TEXT;
+            else if (!strncmp("id",content,length))// && ! cur->retweeted)
+                rt_s = ID;
+            else if (!strncmp("retweeted",content,length))
+                rt_s = RETWEETED;
+            else if (!strncmp("user",content,length))// && ! cur->retweeted)
+            {
+                rt_s = USER;
+                cur->retweeted_status->user = calloc(1,sizeof(EbirdAccount));
+            }
+            else if (!strncmp("screen_name",content,length))// && ! cur->retweeted)
+            {
+                rt_s = USER;
+                rt_us = SCREEN_NAME;
+            }
+            else
+                rt_s = NONE;
+
+            printf("HoHo\n");
+        }
     }
     else if (cur && type == EINA_SIMPLE_XML_DATA)
     {
         char *ptr = strndup(content,length);
 //        printf("DEBUG =====> %s [%d]\n",ptr,s);
 //        printf("DEBUG ~~~~~> %s [%d]\n",ptr,CREATEDAT);
-        switch(s) 
+        if ( ! cur->retweeted)
         {
-            case CREATEDAT:
-                cur->created_at = ptr;
-                break;
-            case TEXT:
-//                printf("===> [DEBUG][%s]\n",ptr);
-                cur->text = ptr;
-                break;
-            case ID:
-                cur->id = ptr;
-                break;
-            case RETWEETED:
-                cur->retweeted = EINA_TRUE;
-    }
+            switch(s) 
+            {
+                case CREATEDAT:
+                    cur->created_at = ptr;
+                    break;
+                case TEXT:
+                    //                printf("===> [DEBUG][%s]\n",ptr);
+                    cur->text = ptr;
+                    break;
+                case ID:
+                    cur->id = ptr;
+                    break;
+                case RETWEETED:
+                    cur->retweeted = EINA_TRUE;
+            }
+            switch(us)
+            {
+                case SCREEN_NAME:
+                    //                printf("DEBUG ICI [%d][%s]\n",us,ptr);
+                    cur->user->username = ptr;
+                    break;
+                case USER_NONE:
+                    break;
+            }
+        }
+        else
+        {
+            switch(rt_s) 
+            {
+                case CREATEDAT:
+                    cur->retweeted_status->created_at = ptr;
+                    break;
+                case TEXT:
+                    //                printf("===> [DEBUG][%s]\n",ptr);
+                    cur->retweeted_status->text = ptr;
+                    break;
+                case ID:
+                    cur->retweeted_status->id = ptr;
+                    break;
+                case RETWEETED:
+                    cur->retweeted_status->retweeted = EINA_TRUE;
+            }
 
-        switch(us)
-        {
-            case SCREEN_NAME:
-//                printf("DEBUG ICI [%d][%s]\n",us,ptr);
-                cur->user->username = ptr;
-                break;
-            case USER_NONE:
-                break;
+
+            switch(rt_us)
+            {
+                case SCREEN_NAME:
+                    //                printf("DEBUG ICI [%d][%s]\n",us,ptr);
+                    cur->retweeted_status->user->username = ptr;
+                    break;
+                case USER_NONE:
+                    break;
+            }
         }
 
     }
