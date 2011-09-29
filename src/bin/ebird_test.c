@@ -78,21 +78,21 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
 
             //printf("Account exists !\n");
             userinfo = ebird_user_show(&account);
-            timeline     = ebird_home_timeline_get(&request_token, &account);
-            pubtimeline  = ebird_public_timeline_get(&request_token, &account);
-            usertimeline = ebird_user_timeline_get(&request_token, &account);
-            usermentions = ebird_user_mentions_get(&request_token, &account);
 
             puts("HOME TIMELINE\n");
+            timeline     = ebird_home_timeline_get(&request_token, &account);
             show_timeline(timeline);
 
             puts("\nPUBLIC TIMELINE\n");
+            pubtimeline  = ebird_public_timeline_get(&request_token, &account);
             show_timeline(pubtimeline);
 
             puts("\nUSER TIMELINE\n");
+            usertimeline = ebird_user_timeline_get(&request_token, &account);
             show_timeline(usertimeline);
 
             puts("\nUSER MENTIONS\n");
+            usermentions = ebird_user_mentions_get(&request_token, &account);
             show_timeline(usermentions);
             
             //eina_list_free(timeline);
