@@ -101,6 +101,7 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
             //eina_list_free(timeline);
             ebird_timeline_free(timeline);
             ebird_timeline_free(pubtimeline);
+            ebird_timeline_free(usertimeline);
 
 
         }
