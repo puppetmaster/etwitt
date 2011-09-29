@@ -646,7 +646,7 @@ ebird_timeline_free(Eina_List *timeline)
 }
 
 Eina_List *
-ebird_home_timeline_get(OauthToken *request, EbirdAccount *acc)
+ebird_timeline_get(const char *url, OauthToken *request, EbirdAccount *acc)
 {
 
     char *xml;
@@ -654,7 +654,7 @@ ebird_home_timeline_get(OauthToken *request, EbirdAccount *acc)
     Eina_List *timeline = NULL;
     Eina_Simple_XML_Node_Root *root;
 
-    timeline_url =  oauth_sign_url2(EBIRD_HOME_TIMELINE_URL,
+    timeline_url =  oauth_sign_url2(url,
                                 NULL,
                                 OA_HMAC,
                                 NULL,
@@ -664,13 +664,39 @@ ebird_home_timeline_get(OauthToken *request, EbirdAccount *acc)
                                 acc->access_token_secret);
 
     xml = ebird_http_get(timeline_url);
-//    printf("DEBUG\n\n\n%s\n\n\n",xml);
     eina_simple_xml_parse(xml,strlen(xml),EINA_TRUE,_parse_timeline, &timeline);
-//    root = eina_simple_xml_node_load(xml,strlen(xml)+1,EINA_TRUE);
-//    timeline = ebird_load_timeline(root, timeline);
-//    eina_simple_xml_node_root_free(root);
     return timeline;
 }
+
+Eina_List *
+ebird_home_timeline_get(OauthToken *request, EbirdAccount *acc)
+{
+
+    Eina_List *timeline;
+
+    timeline = ebird_timeline_get(EBIRD_HOME_TIMELINE_URL,request,acc);
+    return timeline; 
+}
+
+Eina_List *
+ebird_public_timeline_get(OauthToken *request, EbirdAccount *acc)
+{
+
+    Eina_List *timeline;
+
+    timeline = ebird_timeline_get(EBIRD_PUBLIC_TIMELINE_URL,request,acc);
+    return timeline; 
+}
+
+Eina_List *
+ebird_user_timeline_get(OauthToken *request, EbirdAccount *acc)
+{
+    Eina_List *timeline;
+    
+    timeline = ebird_timeline_get(EBIRD_USER_TIMELINE_URL, request, acc);
+    return timeline;
+}
+
 
 char *
 ebird_home_timeline_xml_get(OauthToken *request, EbirdAccount *acc)

@@ -19,6 +19,8 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
     EbirdAccount account;
     EbirdStatus *st;
     Eina_List *timeline;
+    Eina_List *pubtimeline;
+    Eina_List *usertimeline;
     Eina_List *l;
 
     if (!ebird_init())
@@ -61,8 +63,10 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
             //printf("Account exists !\n");
             userinfo = ebird_user_show(&account);
             timeline = ebird_home_timeline_get(&request_token, &account);
+            pubtimeline = ebird_public_timeline_get(&request_token, &account);
+            usertimeline = ebird_user_timeline_get(&request_token, &account);
 
-            puts("HOME TIME LINE");
+            puts("HOME TIMELINE\n");
             EINA_LIST_FOREACH(timeline,l,st)
             {
                 //printf("TWITT :[%s][%s]\n",st->created_at,st->text);
@@ -72,9 +76,32 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
                     printf("[TW by %s][%s]\n\t%s\n",st->user->username, st->created_at,st->text);
 
             }
+
+            puts("\nPUBLIC TIMELINE\n");
+            EINA_LIST_FOREACH(pubtimeline,l,st)
+            {
+                //printf("TWITT :[%s][%s]\n",st->created_at,st->text);
+                if (st->retweeted)
+                    printf("[RT by %s][TW by %s][%s]\n\t%s\n",st->user->username,st->retweeted_status->user->username, st->retweeted_status->created_at,st->retweeted_status->text);
+                else
+                    printf("[TW by %s][%s]\n\t%s\n",st->user->username, st->created_at,st->text);
+
+            }
+
+            puts("\nUSER TIMELINE\n");
+            EINA_LIST_FOREACH(usertimeline,l,st)
+            {
+                //printf("TWITT :[%s][%s]\n",st->created_at,st->text);
+                if (st->retweeted)
+                    printf("[RT by %s][TW by %s][%s]\n\t%s\n",st->user->username,st->retweeted_status->user->username, st->retweeted_status->created_at,st->retweeted_status->text);
+                else
+                    printf("[TW by %s][%s]\n\t%s\n",st->user->username, st->created_at,st->text);
+            }
             
             //eina_list_free(timeline);
             ebird_timeline_free(timeline);
+            ebird_timeline_free(pubtimeline);
+
 
         }
         else
