@@ -67,7 +67,7 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
             {
                 //printf("TWITT :[%s][%s]\n",st->created_at,st->text);
                 if (st->retweeted)
-                    printf("[RT by %s][TW by%s]\n\t%s\n",st->user->username,st->retweeted_status->user->username, st->retweeted_status->created_at,st->retweeted_status->text);
+                    printf("[RT by %s][TW by%s][%s]\n\t%s\n",st->user->username,st->retweeted_status->user->username, st->retweeted_status->created_at,st->retweeted_status->text);
                 else
                     printf("[TW by %s][%s]\n\t%s\n",st->user->username, st->created_at,st->text);
 
