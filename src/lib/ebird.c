@@ -16,6 +16,27 @@
 
 #include "ebird.h"
 
+static char *
+ebird_oauth_sign_url(char *url, 
+                     char *consumer_key, 
+                     char *consumer_secret,
+                     char *token_key,
+                     char *token_secret)
+{
+    char *out_url;
+
+    out_url =  oauth_sign_url2(url,
+                           NULL,
+                           OA_HMAC,
+                           NULL,
+                           consumer_key,
+                           consumer_secret,
+                           token_key,
+                           token_secret);
+
+    return out_url;
+}
+
 Eina_Bool
 ebird_init()
 {
@@ -191,9 +212,9 @@ ebird_request_token_get(OauthToken *request)
     int res;
     int error_code;
 
-    request->url = oauth_sign_url2(EBIRD_REQUEST_TOKEN_URL, NULL, OA_HMAC,
-                                   NULL, request->consumer_key,
-                                   request->consumer_secret, NULL, NULL);
+    request->url = ebird_oauth_sign_url(EBIRD_REQUEST_TOKEN_URL,
+                                        request->consumer_key,
+                                        request->consumer_secret, NULL, NULL);
     request->token = ebird_http_get(request->url);
 //    printf("DEBUG request token: '%s'\n", request->token);
     if (request->token)
@@ -355,11 +376,9 @@ ebird_access_token_get(OauthToken *request_token,
 
    access_token_prm = (char**) malloc(5*sizeof(char*));
 
-   acc_url = oauth_sign_url2(url, NULL, OA_HMAC, NULL,
-                             con_key,
-                             con_secret,
-                             request_token->key,
-                             request_token->secret);
+   acc_url = ebird_oauth_sign_url(url,con_key,con_secret,
+                                  request_token->key,
+                                  request_token->secret);
 
    snprintf(buf,sizeof(buf),"%s&oauth_verifier=%s",acc_url,request_token->authorisation_pin);
 
@@ -654,16 +673,14 @@ ebird_timeline_get(const char *url, OauthToken *request, EbirdAccount *acc)
     Eina_List *timeline = NULL;
     Eina_Simple_XML_Node_Root *root;
 
-    timeline_url =  oauth_sign_url2(url,
-                                NULL,
-                                OA_HMAC,
-                                NULL,
+    timeline_url =  ebird_oauth_sign_url(url,
                                 request->consumer_key,
                                 request->consumer_secret,
                                 acc->access_token_key,
                                 acc->access_token_secret);
 
     xml = ebird_http_get(timeline_url);
+    printf("\n\n%s\n\n",xml);
     eina_simple_xml_parse(xml,strlen(xml),EINA_TRUE,_parse_timeline, &timeline);
     return timeline;
 }
@@ -711,21 +728,18 @@ char *
 ebird_home_timeline_xml_get(OauthToken *request, EbirdAccount *acc)
 {
 
-    char *timeline;
+    char *xml_timeline;
     char *timeline_url;
 
-    timeline_url =  oauth_sign_url2(EBIRD_HOME_TIMELINE_URL,
-                                NULL,
-                                OA_HMAC,
-                                NULL,
-                                request->consumer_key,
-                                request->consumer_secret,
-                                acc->access_token_key,
-                                acc->access_token_secret);
+    timeline_url =  ebird_oauth_sign_url(EBIRD_HOME_TIMELINE_URL,
+                                        request->consumer_key,
+                                        request->consumer_secret,
+                                        acc->access_token_key,
+                                        acc->access_token_secret);
 
-    timeline = ebird_http_get(timeline_url);
+    xml_timeline = ebird_http_get(timeline_url);
             
-    return timeline;
+    return xml_timeline;
 }
 
 char *
@@ -746,3 +760,5 @@ ebird_user_show(EbirdAccount *acc)
     free(url);
     return infos;
 }
+
+

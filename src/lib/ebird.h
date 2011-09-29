@@ -5,6 +5,7 @@
 #define EBIRD_PIN_SIZE 12
 #define EBIRD_ID_FILE "./id.eet"
 #define EBIRD_ACCOUNT_FILE "./ebird_user.eet"
+#define EBIRD_STATUS_MAX 140
 
 #define EBIRD_STATUS_URL "http://api.twitter.com/statuses/update.xml"
 #define EBIRD_PUBLIC_TIMELINE_URL "http://twitter.com/statuses/public_timeline.xml"
