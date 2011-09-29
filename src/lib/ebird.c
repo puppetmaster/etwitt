@@ -697,6 +697,15 @@ ebird_user_timeline_get(OauthToken *request, EbirdAccount *acc)
     return timeline;
 }
 
+Eina_List *
+ebird_user_mentions_get(OauthToken *request, EbirdAccount *acc)
+{
+    Eina_List *mentions;
+    
+    mentions = ebird_timeline_get(EBIRD_USER_MENTIONS_URL,request,acc);
+    return mentions;
+}
+
 
 char *
 ebird_home_timeline_xml_get(OauthToken *request, EbirdAccount *acc)

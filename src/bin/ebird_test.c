@@ -11,17 +11,33 @@
 
 #include <ebird.h>
 
+static void
+show_timeline(Eina_List *timeline)
+{
+    Eina_List *l;
+    EbirdStatus *st;
+
+    EINA_LIST_FOREACH(timeline,l,st)
+    {
+        //printf("TWITT :[%s][%s]\n",st->created_at,st->text);
+        if (st->retweeted)
+            printf("[RT by %s][TW by%s][%s]\n\t%s\n",st->user->username,st->retweeted_status->user->username, st->retweeted_status->created_at,st->retweeted_status->text);
+        else
+            printf("[TW by %s][%s]\n\t%s\n",st->user->username, st->created_at,st->text);
+
+    }
+}
+
 
 int main(int argc __UNUSED__, char **argv __UNUSED__)
 {
     char *userinfo;
     OauthToken request_token;
     EbirdAccount account;
-    EbirdStatus *st;
     Eina_List *timeline;
     Eina_List *pubtimeline;
     Eina_List *usertimeline;
-    Eina_List *l;
+    Eina_List *usermentions;
 
     if (!ebird_init())
         return -1;
@@ -62,47 +78,28 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
 
             //printf("Account exists !\n");
             userinfo = ebird_user_show(&account);
-            timeline = ebird_home_timeline_get(&request_token, &account);
-            pubtimeline = ebird_public_timeline_get(&request_token, &account);
+            timeline     = ebird_home_timeline_get(&request_token, &account);
+            pubtimeline  = ebird_public_timeline_get(&request_token, &account);
             usertimeline = ebird_user_timeline_get(&request_token, &account);
+            usermentions = ebird_user_mentions_get(&request_token, &account);
 
             puts("HOME TIMELINE\n");
-            EINA_LIST_FOREACH(timeline,l,st)
-            {
-                //printf("TWITT :[%s][%s]\n",st->created_at,st->text);
-                if (st->retweeted)
-                    printf("[RT by %s][TW by%s][%s]\n\t%s\n",st->user->username,st->retweeted_status->user->username, st->retweeted_status->created_at,st->retweeted_status->text);
-                else
-                    printf("[TW by %s][%s]\n\t%s\n",st->user->username, st->created_at,st->text);
-
-            }
+            show_timeline(timeline);
 
             puts("\nPUBLIC TIMELINE\n");
-            EINA_LIST_FOREACH(pubtimeline,l,st)
-            {
-                //printf("TWITT :[%s][%s]\n",st->created_at,st->text);
-                if (st->retweeted)
-                    printf("[RT by %s][TW by %s][%s]\n\t%s\n",st->user->username,st->retweeted_status->user->username, st->retweeted_status->created_at,st->retweeted_status->text);
-                else
-                    printf("[TW by %s][%s]\n\t%s\n",st->user->username, st->created_at,st->text);
-
-            }
+            show_timeline(pubtimeline);
 
             puts("\nUSER TIMELINE\n");
-            EINA_LIST_FOREACH(usertimeline,l,st)
-            {
-                //printf("TWITT :[%s][%s]\n",st->created_at,st->text);
-                if (st->retweeted)
-                    printf("[RT by %s][TW by %s][%s]\n\t%s\n",st->user->username,st->retweeted_status->user->username, st->retweeted_status->created_at,st->retweeted_status->text);
-                else
-                    printf("[TW by %s][%s]\n\t%s\n",st->user->username, st->created_at,st->text);
-            }
+            show_timeline(usertimeline);
+
+            puts("\nUSER MENTIONS\n");
+            show_timeline(usermentions);
             
             //eina_list_free(timeline);
             ebird_timeline_free(timeline);
             ebird_timeline_free(pubtimeline);
             ebird_timeline_free(usertimeline);
-
+            ebird_timeline_free(usermentions);
 
         }
         else

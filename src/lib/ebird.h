@@ -10,6 +10,7 @@
 #define EBIRD_PUBLIC_TIMELINE_URL "http://twitter.com/statuses/public_timeline.xml"
 #define EBIRD_HOME_TIMELINE_URL "http://api.twitter.com/1/statuses/home_timeline.xml"
 #define EBIRD_USER_TIMELINE_URL "http://api.twitter.com/1/statuses/user_timeline.xml"
+#define EBIRD_USER_MENTIONS_URL "http://api.twitter.com/1/statuses/mentions.xml"
 #define EBIRD_USER_SHOW_URL "https://api.twitter.com/1/users/show.xml"
 
 #define EBIRD_REQUEST_TOKEN_URL "https://api.twitter.com/oauth/request_token"
@@ -128,6 +129,8 @@ Eina_List *ebird_timeline_get(const char *url,OauthToken *request, EbirdAccount 
 Eina_List *ebird_home_timeline_get(OauthToken *request, EbirdAccount *acc);
 
 Eina_List *ebird_user_timeline_get(OauthToken *request, EbirdAccount *acc);
+
+Eina_List *ebird_user_mentions_get(OauthToken *request, EbirdAccount *acc);
 
 Eina_List *ebird_public_timeline_get(OauthToken *request, EbirdAccount *acc);
 
