@@ -82,24 +82,27 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
             puts("HOME TIMELINE\n");
             timeline     = ebird_home_timeline_get(&request_token, &account);
             show_timeline(timeline);
-
+            ebird_timeline_free(timeline);
+            /*
             puts("\nPUBLIC TIMELINE\n");
             pubtimeline  = ebird_public_timeline_get(&request_token, &account);
             show_timeline(pubtimeline);
+            ebird_timeline_free(pubtimeline);
 
             puts("\nUSER TIMELINE\n");
             usertimeline = ebird_user_timeline_get(&request_token, &account);
             show_timeline(usertimeline);
+            ebird_timeline_free(usertimeline);
 
             puts("\nUSER MENTIONS\n");
             usermentions = ebird_user_mentions_get(&request_token, &account);
             show_timeline(usermentions);
-            
-            //eina_list_free(timeline);
-            ebird_timeline_free(timeline);
-            ebird_timeline_free(pubtimeline);
-            ebird_timeline_free(usertimeline);
             ebird_timeline_free(usermentions);
+            */
+            if (ebird_update_status("Twitted-with-Ebird",&request_token, &account))
+                printf("Twitt OK\n");
+            else
+                printf("Twitt KO\n");
 
         }
         else

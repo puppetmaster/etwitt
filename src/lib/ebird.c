@@ -16,26 +16,6 @@
 
 #include "ebird.h"
 
-static char *
-ebird_oauth_sign_url(char *url, 
-                     char *consumer_key, 
-                     char *consumer_secret,
-                     char *token_key,
-                     char *token_secret)
-{
-    char *out_url;
-
-    out_url =  oauth_sign_url2(url,
-                           NULL,
-                           OA_HMAC,
-                           NULL,
-                           consumer_key,
-                           consumer_secret,
-                           token_key,
-                           token_secret);
-
-    return out_url;
-}
 
 Eina_Bool
 ebird_init()
@@ -75,6 +55,28 @@ ebird_shutdown()
     eina_shutdown();
 }
 
+static char *
+ebird_oauth_sign_url(char *url, 
+                     char *consumer_key, 
+                     char *consumer_secret,
+                     char *token_key,
+                     char *token_secret,
+                     char *http_method)
+{
+    char *out_url;
+
+    out_url =  oauth_sign_url2(url,
+                           NULL,
+                           OA_HMAC,
+                           http_method,
+                           consumer_key,
+                           consumer_secret,
+                           token_key,
+                           token_secret);
+
+    return out_url;
+}
+
 
 static Eina_Bool
 _url_data_cb(void *data, int type, void *event_info)
@@ -100,7 +102,7 @@ ebird_http_get(char *url)
     Eina_Strbuf *data;
     char *ret;
 
-
+    printf("DEBUG[%s]\n",url);
 
     ec_url = ecore_con_url_new(url);
     data = eina_strbuf_new();
@@ -112,6 +114,47 @@ ebird_http_get(char *url)
 
     ecore_main_loop_begin();
 
+
+    ecore_con_url_free(ec_url);
+
+    ret = strdup(eina_strbuf_string_get(data));
+
+    return ret;
+}
+
+char *
+ebird_http_post(char *url)
+{
+    Ecore_Con_Url *ec_url;
+    Eina_Strbuf *data;
+    int i;
+    char *ret;
+    char *key;
+    char *value;
+    char **params = NULL;
+
+    oauth_split_url_parameters(url,&params);
+
+    ec_url = ecore_con_url_new(params[0]);
+
+    data = eina_strbuf_new();
+
+    ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,_url_data_cb,data);
+    ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE,_url_complete_cb,NULL);
+
+    ecore_con_url_additional_header_add(ec_url,"User-Agent","Ebird");
+
+    for (i=1; i<=sizeof(params); i++)
+    {
+        key = strtok(params[i],"=");
+        value = strtok('\0', "=");
+        printf("DEBUG[%i][%s][%s]\n",i,key,value);
+        ecore_con_url_additional_header_add(ec_url,key,value);
+    }
+
+    ecore_con_url_post(ec_url,NULL,0,NULL);
+
+    ecore_main_loop_begin();
 
     ecore_con_url_free(ec_url);
 
@@ -214,7 +257,7 @@ ebird_request_token_get(OauthToken *request)
 
     request->url = ebird_oauth_sign_url(EBIRD_REQUEST_TOKEN_URL,
                                         request->consumer_key,
-                                        request->consumer_secret, NULL, NULL);
+                                        request->consumer_secret, NULL, NULL, NULL);
     request->token = ebird_http_get(request->url);
 //    printf("DEBUG request token: '%s'\n", request->token);
     if (request->token)
@@ -378,7 +421,7 @@ ebird_access_token_get(OauthToken *request_token,
 
    acc_url = ebird_oauth_sign_url(url,con_key,con_secret,
                                   request_token->key,
-                                  request_token->secret);
+                                  request_token->secret,NULL);
 
    snprintf(buf,sizeof(buf),"%s&oauth_verifier=%s",acc_url,request_token->authorisation_pin);
 
@@ -677,10 +720,10 @@ ebird_timeline_get(const char *url, OauthToken *request, EbirdAccount *acc)
                                 request->consumer_key,
                                 request->consumer_secret,
                                 acc->access_token_key,
-                                acc->access_token_secret);
+                                acc->access_token_secret,NULL);
 
     xml = ebird_http_get(timeline_url);
-    printf("\n\n%s\n\n",xml);
+//    printf("\n\n%s\n\n",xml);
     eina_simple_xml_parse(xml,strlen(xml),EINA_TRUE,_parse_timeline, &timeline);
     return timeline;
 }
@@ -735,10 +778,10 @@ ebird_home_timeline_xml_get(OauthToken *request, EbirdAccount *acc)
                                         request->consumer_key,
                                         request->consumer_secret,
                                         acc->access_token_key,
-                                        acc->access_token_secret);
+                                        acc->access_token_secret,NULL);
 
     xml_timeline = ebird_http_get(timeline_url);
-            
+//FIXME FREE timeline_url;        
     return xml_timeline;
 }
 
@@ -761,4 +804,24 @@ ebird_user_show(EbirdAccount *acc)
     return infos;
 }
 
+Eina_Bool
+ebird_update_status(char *message,OauthToken *request,EbirdAccount *acc)
+{
+    char *url;
+    char *ret;
+    char up_url[EBIRD_URL_MAX];
 
+    url = ebird_oauth_sign_url(EBIRD_STATUS_URL,
+                               request->consumer_key,
+                               request->consumer_secret,
+                               acc->access_token_key,
+                               acc->access_token_secret,"POST");
+
+    snprintf(up_url,sizeof(up_url),"%s&status=%s&include_entities=true",url,message);
+    printf("DEBUG %s\n",up_url);
+
+    ret = ebird_http_post(up_url);
+    printf("\n%s\n\n\n",ret);
+    return EINA_TRUE;
+
+}

@@ -7,11 +7,11 @@
 #define EBIRD_ACCOUNT_FILE "./ebird_user.eet"
 #define EBIRD_STATUS_MAX 140
 
-#define EBIRD_STATUS_URL "http://api.twitter.com/statuses/update.xml"
-#define EBIRD_PUBLIC_TIMELINE_URL "http://twitter.com/statuses/public_timeline.xml"
-#define EBIRD_HOME_TIMELINE_URL "http://api.twitter.com/1/statuses/home_timeline.xml"
-#define EBIRD_USER_TIMELINE_URL "http://api.twitter.com/1/statuses/user_timeline.xml"
-#define EBIRD_USER_MENTIONS_URL "http://api.twitter.com/1/statuses/mentions.xml"
+#define EBIRD_STATUS_URL "https://api.twitter.com/1/statuses/update.xml"
+#define EBIRD_PUBLIC_TIMELINE_URL "https://twitter.com/statuses/public_timeline.xml"
+#define EBIRD_HOME_TIMELINE_URL "https://api.twitter.com/1/statuses/home_timeline.xml"
+#define EBIRD_USER_TIMELINE_URL "https://api.twitter.com/1/statuses/user_timeline.xml"
+#define EBIRD_USER_MENTIONS_URL "https://api.twitter.com/1/statuses/mentions.xml"
 #define EBIRD_USER_SHOW_URL "https://api.twitter.com/1/users/show.xml"
 
 #define EBIRD_REQUEST_TOKEN_URL "https://api.twitter.com/oauth/request_token"
@@ -140,5 +140,7 @@ void ebird_timeline_free(Eina_List *timeline);
 char *ebird_home_timeline_xml_get(OauthToken *request, EbirdAccount *acc);
 
 char *ebird_user_show(EbirdAccount *acc);
+
+Eina_Bool ebird_update_status(char *message, OauthToken *request, EbirdAccount *acc);
 
 #endif
