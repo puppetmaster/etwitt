@@ -152,7 +152,8 @@ ebird_http_post(char *url)
 
     ec_url = ecore_con_url_new(params[0]);
     ecore_con_url_verbose_set(ec_url,EINA_TRUE);
-    ecore_con_url_cookies_init(ec_url);
+    //ecore_con_url_cookies_init(ec_url);
+    //ecore_con_url_cookies_file_add(ec_url, EBIRD_COOKIE_FILE);
 
     data = eina_strbuf_new();
 

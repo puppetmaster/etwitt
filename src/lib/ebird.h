@@ -6,6 +6,7 @@
 #define EBIRD_ID_FILE "./id.eet"
 #define EBIRD_ACCOUNT_FILE "./ebird_user.eet"
 #define EBIRD_STATUS_MAX 140
+#define EBIRD_COOKIE_FILE "./.ebird-cookies"
 
 #define EBIRD_STATUS_URL "https://api.twitter.com/1/statuses/update.xml"
 #define EBIRD_PUBLIC_TIMELINE_URL "https://twitter.com/statuses/public_timeline.xml"
