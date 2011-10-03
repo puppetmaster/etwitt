@@ -32,6 +32,7 @@ show_timeline(Eina_List *timeline)
 int main(int argc __UNUSED__, char **argv __UNUSED__)
 {
     char *userinfo;
+    char *credentials;
     OauthToken request_token;
     EbirdAccount account;
     Eina_List *timeline;
@@ -79,10 +80,17 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
             //printf("Account exists !\n");
             userinfo = ebird_user_show(&account);
 
-            puts("HOME TIMELINE\n");
+            printf("User Credentials\n");
+            printf("================\n");
+            credentials = ebird_verify_credentials(&request_token, &account);
+            printf("%s\n",credentials);
+
+            puts("HOME TIMELINE");
+            puts("=============");
             timeline     = ebird_home_timeline_get(&request_token, &account);
             show_timeline(timeline);
             ebird_timeline_free(timeline);
+
             /*
             puts("\nPUBLIC TIMELINE\n");
             pubtimeline  = ebird_public_timeline_get(&request_token, &account);
@@ -99,10 +107,12 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
             show_timeline(usermentions);
             ebird_timeline_free(usermentions);
             */
+
             if (ebird_update_status("Twitted-with-Ebird",&request_token, &account))
                 printf("Twitt OK\n");
             else
                 printf("Twitt KO\n");
+
 
         }
         else
