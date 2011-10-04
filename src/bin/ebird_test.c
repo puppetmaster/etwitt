@@ -108,7 +108,7 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
             ebird_timeline_free(usermentions);
             */
 
-            if (ebird_update_status("Twitted-with-Ebird",&request_token, &account))
+            if (ebird_update_status("JeSuisUnTest",&request_token, &account))
                 printf("Twitt OK\n");
             else
                 printf("Twitt KO\n");

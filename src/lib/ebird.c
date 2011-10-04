@@ -131,6 +131,7 @@ ebird_http_post(char *url)
     char *key;
     char *value;
     char nwurl[EBIRD_URL_MAX];
+    char post_data[EBIRD_URL_MAX];
     char auth[EBIRD_URL_MAX];
     char **sp_url = NULL;
     char **params = NULL;
@@ -138,19 +139,9 @@ ebird_http_post(char *url)
     sp_url = eina_str_split(url,"?",3);
     params = eina_str_split(sp_url[1],"&",9);
 
-    /*
-    printf("%s\n",url);
-    printf("DEBUG [0][%s]\n",params[0]);
-    printf("DEBUG [1][%s]\n",params[1]);
-    printf("DEBUG [2][%s]\n",params[2]);
-    printf("DEBUG [3][%s]\n",params[3]);
-    printf("DEBUG [4][%s]\n",params[4]);
-    printf("DEBUG [5][%s]\n",params[5]);
-    printf("DEBUG [6][%s]\n",params[6]);
-    printf("DEBUG [7][%s]\n",params[7]);
-    */
 
-    ec_url = ecore_con_url_new(params[0]);
+    //ec_url = ecore_con_url_new(url);
+    ec_url = ecore_con_url_new(sp_url[0]);
     ecore_con_url_verbose_set(ec_url,EINA_TRUE);
     //ecore_con_url_cookies_init(ec_url);
     //ecore_con_url_cookies_file_add(ec_url, EBIRD_COOKIE_FILE);
@@ -162,8 +153,6 @@ ebird_http_post(char *url)
 
     ecore_con_url_additional_header_add(ec_url,"User-Agent","Ebird 0.0.1");
     ecore_con_url_additional_header_add(ec_url,"Accept","*/*");
-    ecore_con_url_additional_header_add(ec_url,"Content-Type","application/x-www-form-urlencoded");
-//    ecore_con_url_additional_header_add(ec_url,"Content-Length","22");
 
     snprintf(auth,sizeof(auth),"OAuth ");
     for (i=0; i<=sizeof(params); i++)
@@ -183,17 +172,16 @@ ebird_http_post(char *url)
         if (!strcmp("status",key))
         {
             snprintf(nwurl,sizeof(nwurl),"%s?%s=%s",sp_url[0],key,value);
-            ecore_con_url_url_set(ec_url,nwurl);
+            snprintf(post_data,sizeof(post_data),"%s=%s",key,value);
+            //ecore_con_url_url_set(ec_url,nwurl);
         }
     }
-
-    printf("DEBUG [[%s]]\n",auth);
 
     ecore_con_url_additional_header_add(ec_url,"Authorization",auth);
     ecore_con_url_additional_header_add(ec_url,"Connection","close");
     ecore_con_url_additional_header_add(ec_url,"Host","api.twitter.com");
 
-    ecore_con_url_post(ec_url,NULL,0,NULL);
+    ecore_con_url_post(ec_url,post_data,strlen(post_data),"application/x-www-form-urlencoded");
 
     ecore_main_loop_begin();
 
@@ -874,7 +862,7 @@ ebird_update_status(char *message,OauthToken *request,EbirdAccount *acc)
                                acc->access_token_secret,"POST");
 
     snprintf(up_url,sizeof(up_url),"%s&status=%s&include_entities=true",url,message);
-
+//    printf("DEBUG\n[>%s<]\n",up_url);
     ret = ebird_http_post(up_url);
     printf("\n%s\n\n\n",ret);
     return EINA_TRUE;
