@@ -138,6 +138,15 @@ ebird_http_post(char *url)
     char **params = NULL;
 
     sp_url = eina_str_split(url,"?",3);
+
+    /* 
+     * TEST WITH oauth 
+    ret = oauth_http_post(sp_url[0],sp_url[1]);
+
+    return ret;
+
+    */
+
     params = eina_str_split(sp_url[1],"&",9);
 
 
