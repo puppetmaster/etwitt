@@ -74,6 +74,8 @@ ebird_oauth_sign_url(char *url,
                            token_key,
                            token_secret);
 
+    printf("[DEBUG][SIGNED-URL]\n[%s]\n",out_url);
+
     return out_url;
 }
 
@@ -130,7 +132,6 @@ ebird_http_post(char *url)
     char *ret;
     char *key;
     char *value;
-    char nwurl[EBIRD_URL_MAX];
     char post_data[EBIRD_URL_MAX];
     char auth[EBIRD_URL_MAX];
     char **sp_url = NULL;
@@ -170,11 +171,7 @@ ebird_http_post(char *url)
             strcat(auth,"\"");
         }
         if (!strcmp("status",key))
-        {
-            snprintf(nwurl,sizeof(nwurl),"%s?%s=%s",sp_url[0],key,value);
             snprintf(post_data,sizeof(post_data),"%s=%s",key,value);
-            //ecore_con_url_url_set(ec_url,nwurl);
-        }
     }
 
     ecore_con_url_additional_header_add(ec_url,"Authorization",auth);
