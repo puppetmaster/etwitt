@@ -208,6 +208,7 @@ ebird_save_account(EbirdAccount *account)
    eet_write(file,"access_token_secret",account->access_token_secret,
              strlen(account->access_token_secret)+1, 0);
    eet_write(file,"userid",account->userid,strlen(account->userid)+1, 0);
+   eet_write(file,"avatar",account->avatar,strlen(account->avatar)+1, 0);
 
    eet_close(file);
 
@@ -586,6 +587,53 @@ ebird_authorise_app(OauthToken *request_token, EbirdAccount *account)
     }
 }
 
+/* TO BE FIXED 
+static Eina_Bool
+_parse_user(void *data,Eina_Simple_XML_Type type, const char *content,unsigned offset, unsigned length)
+{
+    static EbirdAccount *cur = NULL;
+    static UserState s = USER_NONE;
+
+    void **data = (void **)_data;
+
+    if (type == EINA_SIMPLE_XML_OPEN && !strncmp("user",content,4))
+    {
+        if (!strncmp("screen_name", content, 11))
+            s = SCREEN_NAME;
+        else if (!strncmp("id",content,2))
+            s = ID;
+        else if (!strncmp("profile_image_url_https",content, 23))
+            s = AVATAR;
+    }
+    else if (cur && type == EINA_SIMPLE_XML_DATA)
+    {
+        char *ptr = strndup(content,length);
+        switch(s) 
+        {
+            case SCREEN_NAME:
+                cur->username = ptr;
+                break;
+            case AVATAR:
+                //                printf("===> [DEBUG][%s]\n",ptr);
+                cur->avatar = ptr;
+                break;
+            case ID:
+                cur->id = ptr;
+                break;
+        }
+
+    }
+    else if (cur && type == EINA_SIMPLE_XML_CLOSE && !strncmp("user",content,4))
+    {
+//        printf("CLOSE\n");
+        if (cur->retweeted)
+            cur->retweeted = EINA_FALSE;
+        *data = cur;
+    }
+    return EINA_TRUE;
+
+}
+*/
 
 static Eina_Bool
 _parse_timeline(void *_data, Eina_Simple_XML_Type type, const char *content, unsigned offset, unsigned length)
