@@ -45,6 +45,8 @@ enum _state
 enum _user_state
 {
     SCREEN_NAME,
+    ID,
+    AVATAR,
     USER_NONE
 };
 
