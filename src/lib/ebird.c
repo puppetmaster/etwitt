@@ -138,23 +138,11 @@ ebird_http_post(char *url)
     char **params = NULL;
 
     sp_url = eina_str_split(url,"?",3);
-
-    /* 
-     * TEST WITH oauth 
-    ret = oauth_http_post(sp_url[0],sp_url[1]);
-
-    return ret;
-
-    */
-
     params = eina_str_split(sp_url[1],"&",9);
 
 
-    //ec_url = ecore_con_url_new(url);
     ec_url = ecore_con_url_new(sp_url[0]);
     ecore_con_url_verbose_set(ec_url,EINA_TRUE);
-    //ecore_con_url_cookies_init(ec_url);
-    //ecore_con_url_cookies_file_add(ec_url, EBIRD_COOKIE_FILE);
 
     data = eina_strbuf_new();
 
@@ -163,43 +151,6 @@ ebird_http_post(char *url)
 
     ecore_con_url_additional_header_add(ec_url,"User-Agent","Ebird 0.0.1");
     ecore_con_url_additional_header_add(ec_url,"Accept","*/*");
-
-
-/*
- *  "POST /1/statuses/update.xml HTTP/1.1\r\n
- *  Accept: *\*\r\n
- *  User-Agent: OAuth gem v0.4.5\r\n
- *  Content-Length: 8\r\n
- *  Content-Type: application/x-www-form-urlencoded\r\n
- *  Authorization: OAuth oauth_consumer_key=\"ZdSqAD5mkZZtmrtq2e2Mw\", 
- *                       oauth_nonce=\"6g7ReOXApM7LHQJ9QfwyaXKXySAglQcuyQl75qNY\", 
- *                       oauth_signature=\"80%2FP5RrMReS77Qla%2BJlgk3EkiRA%3D\", 
- *                       oauth_signature_method=\"HMAC-SHA1\", 
- *                       oauth_timestamp=\"1317802636\", 
- *                       oauth_token=\"372786855-Wb9bAfYC18cCKf0E3wL1zN1R10CRIJK4W80suEbZ\", 
- *                       oauth_version=\"1.0\"\r\n
- *  Connection: close\r\n
- *  Host: api.twitter.com\r\n
- *  \r\n"
- *
- * DEBUG[0][oauth_consumer_key]
- * DEBUG[1][oauth_nonce]
- * DEBUG[2][oauth_signature_method]
- * DEBUG[3][oauth_timestamp]
- * DEBUG[4][oauth_token]
- * DEBUG[5][oauth_version]
- * DEBUG[6][oauth_signature]
- *
-
-    snprintf(post_data,sizeof(post_data),"%s",params[7]);
-    snprintf(auth,sizeof(auth),"OAuth %s, %s, %s, %s, %s, %s, %s", params[0],
-                                                                   params[1],
-                                                                   params[6],
-                                                                   params[2],
-                                                                   params[3],
-                                                                   params[4],
-                                                                   params[5]);
- */
 
     snprintf(auth,sizeof(auth),"OAuth ");
     for (i=0; i<=sizeof(params); i++)
