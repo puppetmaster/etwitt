@@ -78,7 +78,13 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
         {
 
             //printf("Account exists !\n");
-            userinfo = ebird_user_show(&account);
+            ebird_user_sync(&account);
+
+            printf("%s\n",account.username);
+            printf("%s\n",account.userid);
+            printf("%s\n",account.avatar);
+            
+            /*
 
             printf("User Credentials\n");
             printf("================\n");
@@ -91,7 +97,6 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
             show_timeline(timeline);
             ebird_timeline_free(timeline);
 
-            /*
             puts("\nPUBLIC TIMELINE\n");
             pubtimeline  = ebird_public_timeline_get(&request_token, &account);
             show_timeline(pubtimeline);
@@ -106,12 +111,13 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
             usermentions = ebird_user_mentions_get(&request_token, &account);
             show_timeline(usermentions);
             ebird_timeline_free(usermentions);
-            */
 
             if (ebird_update_status("JeSuisUnTest",&request_token, &account))
                 printf("Twitt OK\n");
             else
                 printf("Twitt KO\n");
+
+            */
 
 
         }

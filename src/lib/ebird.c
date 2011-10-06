@@ -56,12 +56,12 @@ ebird_shutdown()
 }
 
 static char *
-ebird_oauth_sign_url(char *url, 
-                     char *consumer_key, 
-                     char *consumer_secret,
-                     char *token_key,
-                     char *token_secret,
-                     char *http_method)
+ebird_oauth_sign_url(const char *url, 
+                     const char *consumer_key, 
+                     const char *consumer_secret,
+                     const char *token_key,
+                     const char *token_secret,
+                     const char *http_method)
 {
     char *out_url;
 
@@ -587,21 +587,20 @@ ebird_authorise_app(OauthToken *request_token, EbirdAccount *account)
     }
 }
 
-/* TO BE FIXED 
 static Eina_Bool
 _parse_user(void *data,Eina_Simple_XML_Type type, const char *content,unsigned offset, unsigned length)
 {
     static EbirdAccount *cur = NULL;
     static UserState s = USER_NONE;
 
-    void **data = (void **)_data;
+    data = (EbirdAccount *)data;
 
     if (type == EINA_SIMPLE_XML_OPEN && !strncmp("user",content,4))
     {
         if (!strncmp("screen_name", content, 11))
             s = SCREEN_NAME;
         else if (!strncmp("id",content,2))
-            s = ID;
+            s = USER_ID;
         else if (!strncmp("profile_image_url_https",content, 23))
             s = AVATAR;
     }
@@ -611,14 +610,15 @@ _parse_user(void *data,Eina_Simple_XML_Type type, const char *content,unsigned o
         switch(s) 
         {
             case SCREEN_NAME:
-                cur->username = ptr;
+                if ( ! cur->username)
+                    cur->username = ptr;
                 break;
             case AVATAR:
-                //                printf("===> [DEBUG][%s]\n",ptr);
+                printf("===> [DEBUG][%s]\n",ptr);
                 cur->avatar = ptr;
                 break;
-            case ID:
-                cur->id = ptr;
+            case USER_ID:
+                cur->userid = ptr;
                 break;
         }
 
@@ -626,14 +626,12 @@ _parse_user(void *data,Eina_Simple_XML_Type type, const char *content,unsigned o
     else if (cur && type == EINA_SIMPLE_XML_CLOSE && !strncmp("user",content,4))
     {
 //        printf("CLOSE\n");
-        if (cur->retweeted)
-            cur->retweeted = EINA_FALSE;
-        *data = cur;
+        data = cur;
     }
     return EINA_TRUE;
 
 }
-*/
+
 
 static Eina_Bool
 _parse_timeline(void *_data, Eina_Simple_XML_Type type, const char *content, unsigned offset, unsigned length)
@@ -861,8 +859,8 @@ ebird_home_timeline_xml_get(OauthToken *request, EbirdAccount *acc)
     return xml_timeline;
 }
 
-char *
-ebird_user_show(EbirdAccount *acc)
+Eina_Bool
+ebird_user_sync(EbirdAccount *user)
 {
     char buf[EBIRD_URL_MAX];
     char *infos;
@@ -872,12 +870,57 @@ ebird_user_show(EbirdAccount *acc)
 
     snprintf(buf,sizeof(buf),"%s&screen_name=%s&userid=%s",
              url,
-             acc->username,
-             acc->userid);
+             user->username,
+             user->userid);
 
     infos = ebird_http_get(buf);
+    printf("DEBUG [%s]\n[%s]\n",buf,infos);
+    eina_simple_xml_parse(infos,strlen(infos),EINA_TRUE,_parse_user, &user);
     free(url);
-    return infos;
+    return EINA_TRUE;
+}
+
+EbirdAccount *
+ebird_user_get(char *username)
+{
+    char buf[EBIRD_URL_MAX];
+    char *infos;
+    char *url;
+
+    EbirdAccount *user;
+
+    url = strdup(EBIRD_USER_SHOW_URL);
+
+    snprintf(buf,sizeof(buf),"%s&screen_name=%s",
+             url,
+             user->username);
+
+    infos = ebird_http_get(buf);
+    eina_simple_xml_parse(infos,strlen(infos),EINA_TRUE,_parse_user, &user);
+    free(url);
+    return user;
+}
+
+Eina_Bool
+ebird_user_show(EbirdAccount *acc)
+{
+    if (acc)
+    {
+        if (acc->username)
+            printf("USERNAME : [%s]\n",acc->username);
+        if (acc->userid)
+            printf("USERID : [%s]\n",acc->userid);
+        if (acc->avatar)
+            printf("AVATAR : [%s]\n",acc->avatar);
+    }
+    else
+    {
+        printf("Nothing to show for this user\n");
+        return EINA_FALSE;
+    }
+
+    return EINA_TRUE; 
+
 }
 
 char *

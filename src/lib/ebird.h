@@ -13,7 +13,7 @@
 #define EBIRD_HOME_TIMELINE_URL "https://api.twitter.com/1/statuses/home_timeline.xml"
 #define EBIRD_USER_TIMELINE_URL "https://api.twitter.com/1/statuses/user_timeline.xml"
 #define EBIRD_USER_MENTIONS_URL "https://api.twitter.com/1/statuses/mentions.xml"
-#define EBIRD_USER_SHOW_URL "https://api.twitter.com/1/users/show.xml"
+#define EBIRD_USER_SHOW_URL "http://api.twitter.com/1/users/show.xml"
 #define EBIRD_ACCOUNT_CREDENTIALS_URL "https://api.twitter.com/1/account/verify_credentials.xml"
 
 #define EBIRD_REQUEST_TOKEN_URL "https://api.twitter.com/oauth/request_token"
@@ -45,7 +45,7 @@ enum _state
 enum _user_state
 {
     SCREEN_NAME,
-    ID,
+    USER_ID,
     AVATAR,
     USER_NONE
 };
@@ -145,7 +145,9 @@ void ebird_timeline_free(Eina_List *timeline);
 
 char *ebird_home_timeline_xml_get(OauthToken *request, EbirdAccount *acc);
 
-char *ebird_user_show(EbirdAccount *acc);
+Eina_Bool ebird_user_sync(EbirdAccount *user);
+
+EbirdAccount *ebird_user_get(char *username);
 
 char *ebird_verify_credentials(OauthToken *request, EbirdAccount *acc);
 
