@@ -50,6 +50,17 @@ enum _user_state
     USER_NONE
 };
 
+// Move API to async test
+struct _ebird_obj
+{
+    OauthToken *token;
+    EbirdAccount *account;
+
+    void (*verify_credentials)(struct _ebird_obj);
+    void *credentials_data;
+};
+// End
+
 struct _oauth_token
 {
     char *consumer_key;

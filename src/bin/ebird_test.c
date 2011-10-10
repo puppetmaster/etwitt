@@ -28,6 +28,13 @@ show_timeline(Eina_List *timeline)
     }
 }
 
+static void
+_show_credentials(void *data)
+{
+    char *xml = (char*)data;
+
+    printf("%s\n",xml);
+}
 
 int main(int argc __UNUSED__, char **argv __UNUSED__)
 {
@@ -78,7 +85,7 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
         {
 
             //printf("Account exists !\n");
-            /*
+            /* 
             ebird_user_sync(&account);
 
             printf("%s\n",account.username);
@@ -86,19 +93,20 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
             printf("%s\n",account.avatar);
             
             */
-
             printf("User Credentials\n");
             printf("================\n");
-            credentials = ebird_verify_credentials(&request_token, &account);
+            ebird_verify_credentials(&request_token, &account,_show_credentials);
+            //credentials = ebird_verify_credentials(&request_token, &account);
             printf("%s\n",credentials);
 
+            /*
             puts("HOME TIMELINE");
             puts("=============");
             timeline     = ebird_home_timeline_get(&request_token, &account);
             show_timeline(timeline);
             ebird_timeline_free(timeline);
 
-            /*
+            
             puts("\nPUBLIC TIMELINE\n");
             pubtimeline  = ebird_public_timeline_get(&request_token, &account);
             show_timeline(pubtimeline);
@@ -113,12 +121,13 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
             usermentions = ebird_user_mentions_get(&request_token, &account);
             show_timeline(usermentions);
             ebird_timeline_free(usermentions);
-            */
 
             if (ebird_update_status("JeSuisUnTest",&request_token, &account))
                 printf("Twitt OK\n");
             else
                 printf("Twitt KO\n");
+
+            */
 
         }
         else
@@ -131,6 +140,9 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
 
         }
 
+        ecore_main_loop_begin();
+
+        ecore_main_loop_quit();
 
         ebird_shutdown();
 
