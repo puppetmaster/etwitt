@@ -17,12 +17,17 @@
 #include "Ebird.h"
 #include "ebird_private.h"
 
+static int _ebird_main_count = 0;
+
 static Eina_Bool _url_data_cb(void *data, int type, void *event_info);
 static Eina_Bool _url_complete_cb(void *data, int type, void *event_info);
 
-Eina_Bool
-ebird_init()
+int
+ebird_init(void)
 {
+    if (EINA_LIKELY(_ebird_main_count > 0))
+        return ++_ebird_main_count;
+
     if (!eina_init())
         return EINA_FALSE;
     if (!ecore_init())
@@ -34,7 +39,8 @@ ebird_init()
     if (!eet_init())
       goto shutdown_ecore_con_url;
 
-    return EINA_TRUE;
+    _ebird_main_count = 1;
+    return 1;
 
  shutdown_ecore_con_url:
     ecore_con_url_shutdown();
@@ -45,22 +51,27 @@ ebird_init()
  shutdown_eina:
     eina_shutdown();
 
-    return EINA_FALSE;
+    return 0;
 }
 
-void
-ebird_shutdown()
+int
+ebird_shutdown(void)
 {
-    eet_shutdown();
-    ecore_con_url_shutdown();
-    ecore_con_shutdown();
-    ecore_shutdown();
-    eina_shutdown();
+    _ebird_main_count--;
+    if (EINA_UNLIKELY(_ebird_main_count == 0))
+    {
+        eet_shutdown();
+        ecore_con_url_shutdown();
+        ecore_con_shutdown();
+        ecore_shutdown();
+        eina_shutdown();
+    }
+    return _ebird_main_count;
 }
 
 static char *
-ebird_oauth_sign_url(const char *url, 
-                     const char *consumer_key, 
+ebird_oauth_sign_url(const char *url,
+                     const char *consumer_key,
                      const char *consumer_secret,
                      const char *token_key,
                      const char *token_secret,

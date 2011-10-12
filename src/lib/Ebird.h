@@ -102,8 +102,8 @@ struct _ebird_status
 };
 
 
-Eina_Bool ebird_init(void);
-void ebird_shutdown(void);
+int ebird_init(void);
+int ebird_shutdown(void);
 
 Eina_Bool ebird_account_save(EbirdAccount *account);
 Eina_Bool ebird_account_load(EbirdAccount *account);
