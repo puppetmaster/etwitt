@@ -18,6 +18,8 @@
 #include "ebird_private.h"
 
 static int _ebird_main_count = 0;
+/* log domain variable */
+int _ebird_log_dom_global = -1;
 
 static Eina_Bool _url_data_cb(void *data, int type, void *event_info);
 static Eina_Bool _url_complete_cb(void *data, int type, void *event_info);
@@ -38,6 +40,15 @@ ebird_init(void)
       goto shutdown_ecore_con;
     if (!eet_init())
       goto shutdown_ecore_con_url;
+
+    _ebird_log_dom_global = eina_log_domain_register("ebird", EBIRD_DEFAULT_LOG_COLOR);
+   if (_ebird_log_dom_global < 0)
+     {
+        EINA_LOG_ERR("Ebird Can not create a general log domain.");
+        goto shutdown_ecore_con_url;
+     }
+
+   DBG("Ebird Init done");
 
     _ebird_main_count = 1;
     return 1;
@@ -88,7 +99,7 @@ ebird_oauth_sign_url(const char *url,
                            token_key,
                            token_secret);
 
-    printf("[DEBUG][SIGNED-URL]\n[%s]\n",out_url);
+    DBG("[SIGNED-URL] : [%s]",out_url);
 
     return out_url;
 }
@@ -169,7 +180,7 @@ ebird_http_post(char *url)
         value = strtok('\0', "=");
         if (!strncmp("oauth",key,5))
         {
-            printf("DEBUG[%i][%s]\n",i,key);
+            DBG("[%i][%s]",i,key);
             if (i > 0)
                 strcat(auth,", ");
             strcat(auth,key);
@@ -205,7 +216,7 @@ ebird_account_save(EbirdAccount *account)
    Eet_File *file;
    int size;
 
-//   printf("DEBUG %s\n", __FUNCTION__);
+   //DBG("DEBUG %s\n", __FUNCTION__);
 
    file = eet_open(EBIRD_ACCOUNT_FILE, EET_FILE_MODE_WRITE);
 
@@ -281,7 +292,7 @@ ebird_error_code_get(char *string)
 }
 
  /*
- * name: ebird_request_token_get
+ * name: ebird_token_request_get
  * @param : Request token variable to receive informations
  * @return : none
  * @rem : FIXME Split into 2 functions
@@ -296,13 +307,13 @@ ebird_token_request_get(OauthToken *request)
                                         request->consumer_key,
                                         request->consumer_secret, NULL, NULL, NULL);
     request->token = ebird_http_get(request->url);
-//    printf("DEBUG request token: '%s'\n", request->token);
+    DBG("request token: '%s'", request->token);
     if (request->token)
     {
         error_code = ebird_error_code_get(request->token);
         if ( error_code != 0)
         {
-            printf("Error !\n");
+            ERR("Error code : %d", error_code);
             request->token = NULL;
         }
         else
@@ -315,14 +326,14 @@ ebird_token_request_get(OauthToken *request)
                 request->key = eina_stringshare_add(&(request->token_prm[0][12]));
                 request->secret = eina_stringshare_add(&(request->token_prm[1][19]));
                 request->callback_confirmed = eina_stringshare_add(&(request->token_prm[2][25]));
-                //printf("DEBUG request->key='%s', request->secret='%s',"
+                //DBG("DEBUG request->key='%s', request->secret='%s',"
                 //       " request->callback_confirmed='%s'\n",
                 //       request->key, request->secret,
                 //       request->callback_confirmed);
             }
             else
             {
-                printf("Error on Request Token [%s]\n",
+                ERR("Error on Request Token [%s]",
                        request->token);
                 request->token = NULL;
             }
@@ -331,7 +342,7 @@ ebird_token_request_get(OauthToken *request)
     else
     {
 //        printf("\nDEBUG : [%s]\n",request->url);
-        printf("Error on Request Token [%s]\n",request->token);
+        ERR("Error on Request Token [%s]",request->token);
         request->token = NULL;
     }
 }
@@ -463,11 +474,11 @@ ebird_access_token_get(OauthToken *request_token,
    snprintf(buf,sizeof(buf),"%s&oauth_verifier=%s",acc_url,request_token->authorisation_pin);
 
    acc_token = ebird_http_get(buf);
-//   printf("\nDEBUG[ebird_access_token_get][URL][%s]\n",buf);
+   DBG("DEBUG[ebird_access_token_get][URL][%s]",buf);
 
    if (acc_token)
    {
-//       printf("\nDEBUG[ebird_access_token_get][RESULT]{%s}\n",acc_token);
+       DBG("DEBUG[ebird_access_token_get][RESULT]{%s}",acc_token);
        //request_token->access_token = strdup(acc_token);
 
        res = oauth_split_url_parameters(acc_token, &access_token_prm);
@@ -481,9 +492,9 @@ ebird_access_token_get(OauthToken *request_token,
        }
        else
        {
-           printf("Error on access_token split\n");
-           printf("%s\n",acc_token);
-           printf("[%i]\n",res);
+           ERR("Error on access_token split");
+           ERR("%s",acc_token);
+           ERR("[%i]",res);
 
            return 1;
        }
@@ -553,11 +564,11 @@ ebird_read_pin_from_stdin(OauthToken *request_token)
 
     char buffer[EBIRD_PIN_SIZE];
 
-    printf("Open this url in a web browser to authorize ebird \
-            to access to your account.\n%s\n",
+    INF("Open this url in a web browser to authorize ebird \
+            to access to your account.\n%s",
             request_token->authorisation_url);
 
-    printf("Please paste PIN here :\n");
+    INF("Please paste PIN here :");
     fgets(buffer,sizeof(buffer),stdin);
     buffer[strlen(buffer)-1] = '\0';
 
@@ -584,13 +595,13 @@ ebird_authorise_app(OauthToken *request_token, EbirdAccount *account)
             return EINA_TRUE;
         else
         {
-            printf("WARNING: Account not saved\n");
+            WRN("WARNING: Account not saved");
             return EINA_TRUE;
         }
     }
     else
     {
-        printf("Error you have to set PIN before authorising app\n");
+        ERR("Error you have to set PIN before authorising app");
         return EINA_FALSE;
     }
 }
@@ -622,7 +633,7 @@ _parse_user(void *data,Eina_Simple_XML_Type type, const char *content,unsigned o
                     cur->username = ptr;
                 break;
             case AVATAR:
-                printf("===> [DEBUG][%s]\n",ptr);
+                DBG("===> [DEBUG][%s]",ptr);
                 cur->avatar = ptr;
                 break;
             case USER_ID:
@@ -882,7 +893,7 @@ ebird_user_sync(EbirdAccount *user)
              user->userid);
 
     infos = ebird_http_get(buf);
-    printf("DEBUG [%s]\n[%s]\n",buf,infos);
+    DBG("DEBUG [%s]\n[%s]",buf,infos);
     eina_simple_xml_parse(infos,strlen(infos),EINA_TRUE,_parse_user, &user);
     free(url);
     return EINA_TRUE;
@@ -915,15 +926,15 @@ ebird_user_show(EbirdAccount *acc)
     if (acc)
     {
         if (acc->username)
-            printf("USERNAME : [%s]\n",acc->username);
+            INF("USERNAME : [%s]",acc->username);
         if (acc->userid)
-            printf("USERID : [%s]\n",acc->userid);
+            INF("USERID : [%s]",acc->userid);
         if (acc->avatar)
-            printf("AVATAR : [%s]\n",acc->avatar);
+            INF("AVATAR : [%s]",acc->avatar);
     }
     else
     {
-        printf("Nothing to show for this user\n");
+        WRN("Nothing to show for this user");
         return EINA_FALSE;
     }
 
@@ -962,7 +973,7 @@ ebird_update_status(char *message,OauthToken *request,EbirdAccount *acc)
     snprintf(up_url,sizeof(up_url),"%s&status=%s&include_entities=true",url,message);
 //    printf("DEBUG\n[>%s<]\n",up_url);
     ret = ebird_http_post(up_url);
-    printf("\n%s\n\n\n",ret);
+    DBG("\n%s\n\n",ret);
     return EINA_TRUE;
 
 }
