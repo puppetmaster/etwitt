@@ -70,7 +70,7 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
     }
 
     //printf("\nDEBUG[main] Step[1][Request Token]\n");
-    ebird_request_token_get(&request_token);
+    ebird_token_request_get(&request_token);
     if (request_token.token)
     {
 

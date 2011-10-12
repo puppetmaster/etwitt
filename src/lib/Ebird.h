@@ -112,9 +112,9 @@ int ebird_id_load(OauthToken *request_token);
 
 int ebird_error_code_get(char *string);
 
-void ebird_request_token_get(OauthToken *request);
+void ebird_token_request_get(OauthToken *request);
 
-int ebird_authenticity_token_get(char *web_script, OauthToken *request_token);
+int ebird_token_authenticity_get(char *web_script, OauthToken *request_token);
 
 int ebird_authorisation_url_get(OauthToken *request_token);
 

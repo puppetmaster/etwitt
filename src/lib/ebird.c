@@ -276,7 +276,7 @@ ebird_error_code_get(char *string)
  * @rem : FIXME Split into 2 functions
  */
 void
-ebird_request_token_get(OauthToken *request)
+ebird_token_request_get(OauthToken *request)
 {
     int res;
     int error_code;
@@ -326,7 +326,7 @@ ebird_request_token_get(OauthToken *request)
 }
 
 int
-ebird_authenticity_token_get(char *web_script, OauthToken *request_token)
+ebird_token_authenticity_get(char *web_script, OauthToken *request_token)
 {
     char *key,
          *end;
@@ -500,7 +500,7 @@ ebird_direct_token_get(OauthToken *request_token)
 //   printf("\nDEBUG[ebird_direct_token_get] Step[2.1][Get Authenticity token]\n");
    script = ebird_http_get(buf);
 //   printf("get '%s'", buf);
-   if (ebird_authenticity_token_get(script, request_token) < 0)
+   if (ebird_token_authenticity_get(script, request_token) < 0)
        goto error;
 
 //   printf("\nDEBUG[ebird_direct_token_get] Step[2.2][Get Authorisation page]\n");
