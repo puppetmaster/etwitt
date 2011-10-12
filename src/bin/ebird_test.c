@@ -9,7 +9,7 @@
 #include <Eina.h>
 #include <Ecore_File.h>
 
-#include <ebird.h>
+#include <Ebird.h>
 
 static void
 show_timeline(Eina_List *timeline)
@@ -59,10 +59,10 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
     memset(&request_token, 0, sizeof(OauthToken));
     memset(&account, 0, sizeof(EbirdAccount));
 
-    ebird_load_id(&request_token);
+    ebird_id_load(&request_token);
 
     if (ecore_file_exists(EBIRD_ACCOUNT_FILE))
-        ebird_load_account(&account);
+        ebird_account_load(&account);
     else
     {
         account.username = strdup(EBIRD_USER_SCREEN_NAME);
@@ -70,7 +70,7 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
     }
 
     //printf("\nDEBUG[main] Step[1][Request Token]\n");
-    ebird_request_token_get(&request_token);
+    ebird_token_request_get(&request_token);
     if (request_token.token)
     {
 
@@ -95,8 +95,8 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
             */
             printf("User Credentials\n");
             printf("================\n");
-            //ebird_verify_credentials(&request_token, &account,_show_credentials);
-            credentials = ebird_verify_credentials(&request_token, &account);
+            ebird_credentials_verify(&request_token, &account);
+            //credentials = ebird_verify_credentials(&request_token, &account);
             printf("%s\n",credentials);
 
             /*

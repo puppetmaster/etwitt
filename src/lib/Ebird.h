@@ -102,29 +102,19 @@ struct _ebird_status
 };
 
 
-Eina_Bool ebird_init();
+Eina_Bool ebird_init(void);
+void ebird_shutdown(void);
 
-void ebird_shutdown();
+Eina_Bool ebird_account_save(EbirdAccount *account);
+Eina_Bool ebird_account_load(EbirdAccount *account);
 
-static Eina_Bool _url_data_cb(void *data, int type, void *event_info);
-
-static Eina_Bool _url_complete_cb(void *data, int type, void *event_info);
-
-char *ebird_http_get(char *url);
-
-char *ebird_http_post(char *url);
-
-Eina_Bool ebird_save_account(EbirdAccount *account);
-
-Eina_Bool ebird_load_account(EbirdAccount *account);
-
-int ebird_load_id(OauthToken *request_token);
+int ebird_id_load(OauthToken *request_token);
 
 int ebird_error_code_get(char *string);
 
-void ebird_request_token_get(OauthToken *request);
+void ebird_token_request_get(OauthToken *request);
 
-int ebird_authenticity_token_get(char *web_script, OauthToken *request_token);
+int ebird_token_authenticity_get(char *web_script, OauthToken *request_token);
 
 int ebird_authorisation_url_get(OauthToken *request_token);
 
@@ -160,7 +150,7 @@ Eina_Bool ebird_user_sync(EbirdAccount *user);
 
 EbirdAccount *ebird_user_get(char *username);
 
-char *ebird_verify_credentials(OauthToken *request, EbirdAccount *acc);
+char *ebird_credentials_verify(OauthToken *request, EbirdAccount *acc);
 
 Eina_Bool ebird_update_status(char *message, OauthToken *request, EbirdAccount *acc);
 

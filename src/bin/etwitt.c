@@ -12,7 +12,7 @@
 #include <Edje.h>
 #include <Elementary.h>
 
-#include <ebird.h>
+#include <Ebird.h>
 
 typedef struct _Twitt Twitt;
 typedef struct _Account Account;
@@ -519,7 +519,7 @@ elm_main(int argc, char **argv)
 
    if (ecore_file_exists(EBIRD_ACCOUNT_FILE))
    {
-       ebird_load_account(iface->account);
+       ebird_account_load(iface->account);
        iface->account->avatar = eina_stringshare_add("avatar.png");
    }
    else

@@ -14,7 +14,11 @@
 #include <Ecore.h>
 #include <Ecore_Con.h>
 
-#include "ebird.h"
+#include "Ebird.h"
+#include "ebird_private.h"
+
+static Eina_Bool _url_data_cb(void *data, int type, void *event_info);
+static Eina_Bool _url_complete_cb(void *data, int type, void *event_info);
 
 Eina_Bool
 ebird_init()
@@ -185,12 +189,12 @@ ebird_http_post(char *url)
 }
 
 Eina_Bool
-ebird_save_account(EbirdAccount *account)
+ebird_account_save(EbirdAccount *account)
 {
    Eet_File *file;
    int size;
 
-//   printf("DEBUG ebird_save_account\n");
+//   printf("DEBUG %s\n", __FUNCTION__);
 
    file = eet_open(EBIRD_ACCOUNT_FILE, EET_FILE_MODE_WRITE);
 
@@ -210,7 +214,7 @@ ebird_save_account(EbirdAccount *account)
 }
 
 Eina_Bool
-ebird_load_account(EbirdAccount *account)
+ebird_account_load(EbirdAccount *account)
 {
    Eet_File *file;
    int size;
@@ -231,7 +235,7 @@ ebird_load_account(EbirdAccount *account)
 
 
 int
-ebird_load_id(OauthToken *request_token)
+ebird_id_load(OauthToken *request_token)
 {
     Eet_File *file;
     int size;
@@ -272,7 +276,7 @@ ebird_error_code_get(char *string)
  * @rem : FIXME Split into 2 functions
  */
 void
-ebird_request_token_get(OauthToken *request)
+ebird_token_request_get(OauthToken *request)
 {
     int res;
     int error_code;
@@ -322,7 +326,7 @@ ebird_request_token_get(OauthToken *request)
 }
 
 int
-ebird_authenticity_token_get(char *web_script, OauthToken *request_token)
+ebird_token_authenticity_get(char *web_script, OauthToken *request_token)
 {
     char *key,
          *end;
@@ -496,7 +500,7 @@ ebird_direct_token_get(OauthToken *request_token)
 //   printf("\nDEBUG[ebird_direct_token_get] Step[2.1][Get Authenticity token]\n");
    script = ebird_http_get(buf);
 //   printf("get '%s'", buf);
-   if (ebird_authenticity_token_get(script, request_token) < 0)
+   if (ebird_token_authenticity_get(script, request_token) < 0)
        goto error;
 
 //   printf("\nDEBUG[ebird_direct_token_get] Step[2.2][Get Authorisation page]\n");
@@ -565,7 +569,7 @@ ebird_authorise_app(OauthToken *request_token, EbirdAccount *account)
                 request_token->consumer_secret,
                 account);
 
-        if (ebird_save_account(account))
+        if (ebird_account_save(account))
             return EINA_TRUE;
         else
         {
@@ -917,7 +921,7 @@ ebird_user_show(EbirdAccount *acc)
 }
 
 char *
-ebird_verify_credentials(OauthToken *request, EbirdAccount *acc)
+ebird_credentials_verify(OauthToken *request, EbirdAccount *acc)
 {
     char *url;
     char *ret;
