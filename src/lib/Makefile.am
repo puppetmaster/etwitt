@@ -11,7 +11,7 @@ AM_CPPFLAGS = \
 
 lib_LTLIBRARIES = libebird.la
 
-includes_HEADERS = ebird.h
+includes_HEADERS = Ebird.h
 includesdir = $(includedir)/ebird-@VMAJ@
 
 libebird_la_SOURCES = ebird.c
