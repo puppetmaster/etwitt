@@ -188,12 +188,12 @@ ebird_http_post(char *url)
 }
 
 Eina_Bool
-ebird_save_account(EbirdAccount *account)
+ebird_account_save(EbirdAccount *account)
 {
    Eet_File *file;
    int size;
 
-//   printf("DEBUG ebird_save_account\n");
+//   printf("DEBUG %s\n", __FUNCTION__);
 
    file = eet_open(EBIRD_ACCOUNT_FILE, EET_FILE_MODE_WRITE);
 
@@ -213,7 +213,7 @@ ebird_save_account(EbirdAccount *account)
 }
 
 Eina_Bool
-ebird_load_account(EbirdAccount *account)
+ebird_account_load(EbirdAccount *account)
 {
    Eet_File *file;
    int size;
@@ -568,7 +568,7 @@ ebird_authorise_app(OauthToken *request_token, EbirdAccount *account)
                 request_token->consumer_secret,
                 account);
 
-        if (ebird_save_account(account))
+        if (ebird_account_save(account))
             return EINA_TRUE;
         else
         {

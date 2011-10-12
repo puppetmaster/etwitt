@@ -62,7 +62,7 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
     ebird_id_load(&request_token);
 
     if (ecore_file_exists(EBIRD_ACCOUNT_FILE))
-        ebird_load_account(&account);
+        ebird_account_load(&account);
     else
     {
         account.username = strdup(EBIRD_USER_SCREEN_NAME);

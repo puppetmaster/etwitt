@@ -110,9 +110,8 @@ char *ebird_http_get(char *url);
 
 char *ebird_http_post(char *url);
 
-Eina_Bool ebird_save_account(EbirdAccount *account);
-
-Eina_Bool ebird_load_account(EbirdAccount *account);
+Eina_Bool ebird_account_save(EbirdAccount *account);
+Eina_Bool ebird_account_load(EbirdAccount *account);
 
 int ebird_id_load(OauthToken *request_token);
 
