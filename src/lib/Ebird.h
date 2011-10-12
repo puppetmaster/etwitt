@@ -136,9 +136,9 @@ char *ebird_home_timeline_xml_get(OauthToken *request, EbirdAccount *acc);
  *
  */ 
 
-EAPI Eina_Bool ebird_init();
+EAPI int ebird_init(void);
 
-EAPI int ebird_shutdown();
+EAPI int ebird_shutdown(void);
 
 EAPI Ebird_Object *ebird_add();
 

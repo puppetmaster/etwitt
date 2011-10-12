@@ -24,7 +24,7 @@ int _ebird_log_dom_global = -1;
 static Eina_Bool _url_data_cb(void *data, int type, void *event_info);
 static Eina_Bool _url_complete_cb(void *data, int type, void *event_info);
 
-EAPI Eina_Bool
+EAPI int
 ebird_init()
 {
     if (EINA_LIKELY(_ebird_main_count > 0))
