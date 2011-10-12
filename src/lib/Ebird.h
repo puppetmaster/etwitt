@@ -142,6 +142,8 @@ EAPI int ebird_shutdown();
 
 EAPI Ebird_Object *ebird_add();
 
+EAPI void ebird_object_free(Ebird_Object *obj);
+
 EAPI Eina_Bool ebird_account_save(EbirdAccount *account);
 
 EAPI Eina_Bool ebird_account_load(EbirdAccount *account);

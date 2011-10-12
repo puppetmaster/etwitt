@@ -95,6 +95,16 @@ EAPI Ebird_Object
     return out;
 }
 
+EAPI void
+ebird_object_free(Ebird_Object *obj)
+{
+    if (obj->request_token)
+        free(obj->request_token);
+
+    if (obj->account)
+        free(obj->account);
+}
+
 static char *
 ebird_oauth_sign_url(const char *url,
                      const char *consumer_key,

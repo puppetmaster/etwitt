@@ -94,11 +94,12 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
         timeline = ebird_home_timeline_get(eobj);
         show_timeline(timeline);
         ebird_timeline_free(timeline);
-
+        /*
         puts("\nPUBLIC TIMELINE\n");
         pubtimeline  = ebird_public_timeline_get(eobj);
         show_timeline(pubtimeline);
         ebird_timeline_free(pubtimeline);
+        */
 
         puts("\nUSER TIMELINE\n");
         usertimeline = ebird_user_timeline_get(eobj);
@@ -121,5 +122,6 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
     else
         ebird_shutdown();
 
+    ebird_object_free(eobj);
     return 0;
 }
