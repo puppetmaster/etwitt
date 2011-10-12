@@ -95,7 +95,7 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
             */
             printf("User Credentials\n");
             printf("================\n");
-            ebird_verify_credentials(&request_token, &account,_show_credentials);
+            ebird_verify_credentials(&request_token, &account);
             //credentials = ebird_verify_credentials(&request_token, &account);
             printf("%s\n",credentials);
 
