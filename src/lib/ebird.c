@@ -15,6 +15,7 @@
 #include <Ecore_Con.h>
 
 #include "Ebird.h"
+#include "ebird_private.h"
 
 static Eina_Bool _url_data_cb(void *data, int type, void *event_info);
 static Eina_Bool _url_complete_cb(void *data, int type, void *event_info);

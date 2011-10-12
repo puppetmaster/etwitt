@@ -103,12 +103,7 @@ struct _ebird_status
 
 
 Eina_Bool ebird_init(void);
-
 void ebird_shutdown(void);
-
-char *ebird_http_get(char *url);
-
-char *ebird_http_post(char *url);
 
 Eina_Bool ebird_account_save(EbirdAccount *account);
 Eina_Bool ebird_account_load(EbirdAccount *account);
