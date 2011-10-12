@@ -140,7 +140,7 @@ EAPI int ebird_init(void);
 
 EAPI int ebird_shutdown(void);
 
-EAPI Ebird_Object *ebird_add();
+EAPI Ebird_Object *ebird_add(void);
 
 EAPI void ebird_del(Ebird_Object *obj);
 

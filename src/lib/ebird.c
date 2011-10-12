@@ -81,7 +81,7 @@ ebird_shutdown()
 }
 
 EAPI Ebird_Object
-*ebird_add()
+*ebird_add(void)
 {
     Ebird_Object *out;
 
