@@ -122,6 +122,6 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
     else
         ebird_shutdown();
 
-    ebird_object_free(eobj);
+    ebird_del(eobj);
     return 0;
 }

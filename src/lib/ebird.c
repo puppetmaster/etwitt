@@ -96,7 +96,7 @@ EAPI Ebird_Object
 }
 
 EAPI void
-ebird_object_free(Ebird_Object *obj)
+ebird_del(Ebird_Object *obj)
 {
     if (obj->request_token)
         free(obj->request_token);
