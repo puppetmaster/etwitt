@@ -20,7 +20,7 @@
 static Eina_Bool _url_data_cb(void *data, int type, void *event_info);
 static Eina_Bool _url_complete_cb(void *data, int type, void *event_info);
 
-Eina_Bool
+EAPI Eina_Bool
 ebird_init()
 {
     if (!eina_init())
@@ -48,7 +48,7 @@ ebird_init()
     return EINA_FALSE;
 }
 
-void
+EAPI void
 ebird_shutdown()
 {
     eet_shutdown();
@@ -188,7 +188,7 @@ ebird_http_post(char *url)
     return ret;
 }
 
-Eina_Bool
+EAPI Eina_Bool
 ebird_account_save(EbirdAccount *account)
 {
    Eet_File *file;
@@ -213,7 +213,7 @@ ebird_account_save(EbirdAccount *account)
    return EINA_TRUE;
 }
 
-Eina_Bool
+EAPI Eina_Bool
 ebird_account_load(EbirdAccount *account)
 {
    Eet_File *file;
@@ -234,7 +234,7 @@ ebird_account_load(EbirdAccount *account)
 }
 
 
-int
+EAPI int
 ebird_id_load(OauthToken *request_token)
 {
     Eet_File *file;
@@ -275,7 +275,7 @@ ebird_error_code_get(char *string)
  * @return : none
  * @rem : FIXME Split into 2 functions
  */
-void
+EAPI void
 ebird_token_request_get(OauthToken *request)
 {
     int res;
@@ -484,7 +484,7 @@ ebird_access_token_get(OauthToken *request_token,
    return 0;
 }
 
-int
+EAPI int
 ebird_direct_token_get(OauthToken *request_token)
 {
 
@@ -516,7 +516,7 @@ error:
    return -1;
 }
 
-Eina_Bool
+EAPI Eina_Bool
 ebird_auto_authorise_app(OauthToken *request_token, EbirdAccount *account)
 {
     if (ebird_authorisation_pin_get(request_token,
@@ -555,7 +555,7 @@ ebird_read_pin_from_stdin(OauthToken *request_token)
     return EINA_TRUE;
 }
 
-Eina_Bool
+EAPI Eina_Bool
 ebird_authorise_app(OauthToken *request_token, EbirdAccount *account)
 {
 
@@ -754,7 +754,7 @@ _parse_timeline(void *_data, Eina_Simple_XML_Type type, const char *content, uns
     return EINA_TRUE;
 }
 
-void
+EAPI void
 ebird_timeline_free(Eina_List *timeline)
 {
     EbirdStatus *st;
@@ -778,7 +778,7 @@ ebird_timeline_free(Eina_List *timeline)
     eina_list_free(timeline);
 }
 
-Eina_List *
+EAPI Eina_List *
 ebird_timeline_get(const char *url, OauthToken *request, EbirdAccount *acc)
 {
 
@@ -799,7 +799,7 @@ ebird_timeline_get(const char *url, OauthToken *request, EbirdAccount *acc)
     return timeline;
 }
 
-Eina_List *
+EAPI Eina_List *
 ebird_home_timeline_get(OauthToken *request, EbirdAccount *acc)
 {
 
@@ -809,7 +809,7 @@ ebird_home_timeline_get(OauthToken *request, EbirdAccount *acc)
     return timeline; 
 }
 
-Eina_List *
+EAPI Eina_List *
 ebird_public_timeline_get(OauthToken *request, EbirdAccount *acc)
 {
 
@@ -819,7 +819,7 @@ ebird_public_timeline_get(OauthToken *request, EbirdAccount *acc)
     return timeline; 
 }
 
-Eina_List *
+EAPI Eina_List *
 ebird_user_timeline_get(OauthToken *request, EbirdAccount *acc)
 {
     Eina_List *timeline;
@@ -828,7 +828,7 @@ ebird_user_timeline_get(OauthToken *request, EbirdAccount *acc)
     return timeline;
 }
 
-Eina_List *
+EAPI Eina_List *
 ebird_user_mentions_get(OauthToken *request, EbirdAccount *acc)
 {
     Eina_List *mentions;
@@ -856,7 +856,7 @@ ebird_home_timeline_xml_get(OauthToken *request, EbirdAccount *acc)
     return xml_timeline;
 }
 
-Eina_Bool
+EAPI Eina_Bool
 ebird_user_sync(EbirdAccount *user)
 {
     char buf[EBIRD_URL_MAX];
@@ -877,7 +877,7 @@ ebird_user_sync(EbirdAccount *user)
     return EINA_TRUE;
 }
 
-EbirdAccount *
+EAPI EbirdAccount *
 ebird_user_get(char *username)
 {
     char buf[EBIRD_URL_MAX];
@@ -898,7 +898,7 @@ ebird_user_get(char *username)
     return user;
 }
 
-Eina_Bool
+EAPI Eina_Bool
 ebird_user_show(EbirdAccount *acc)
 {
     if (acc)
@@ -920,7 +920,7 @@ ebird_user_show(EbirdAccount *acc)
 
 }
 
-char *
+EAPI char *
 ebird_credentials_verify(OauthToken *request, EbirdAccount *acc)
 {
     char *url;
@@ -935,7 +935,7 @@ ebird_credentials_verify(OauthToken *request, EbirdAccount *acc)
     return ret;
 }
 
-Eina_Bool
+EAPI Eina_Bool
 ebird_update_status(char *message,OauthToken *request,EbirdAccount *acc)
 {
     char *url;

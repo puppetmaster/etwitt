@@ -7,6 +7,7 @@
 #include <oauth.h>
 
 #include <Eina.h>
+#include <Ecore.h>
 #include <Ecore_File.h>
 
 #include <Ebird.h>

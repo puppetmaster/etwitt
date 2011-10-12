@@ -101,18 +101,7 @@ struct _ebird_status
   EbirdStatus *retweeted_status;
 };
 
-
-Eina_Bool ebird_init(void);
-void ebird_shutdown(void);
-
-Eina_Bool ebird_account_save(EbirdAccount *account);
-Eina_Bool ebird_account_load(EbirdAccount *account);
-
-int ebird_id_load(OauthToken *request_token);
-
 int ebird_error_code_get(char *string);
-
-void ebird_token_request_get(OauthToken *request);
 
 int ebird_token_authenticity_get(char *web_script, OauthToken *request_token);
 
@@ -126,32 +115,48 @@ Eina_Bool ebird_read_pin_from_stdin(OauthToken *request_token);
 
 int ebird_access_token_get(OauthToken *request_token, const char *url, const char *con_key, const char *con_secret, EbirdAccount *account);
 
-int ebird_direct_token_get(OauthToken *request_token);
-
-Eina_Bool ebird_auto_authorise_app(OauthToken *request_token, EbirdAccount *account);
-
-Eina_Bool ebird_authorise_app(OauthToken *request_token, EbirdAccount *account);
-
-Eina_List *ebird_timeline_get(const char *url,OauthToken *request, EbirdAccount *acc);
-
-Eina_List *ebird_home_timeline_get(OauthToken *request, EbirdAccount *acc);
-
-Eina_List *ebird_user_timeline_get(OauthToken *request, EbirdAccount *acc);
-
-Eina_List *ebird_user_mentions_get(OauthToken *request, EbirdAccount *acc);
-
-Eina_List *ebird_public_timeline_get(OauthToken *request, EbirdAccount *acc);
-
 void ebird_timeline_free(Eina_List *timeline);
 
 char *ebird_home_timeline_xml_get(OauthToken *request, EbirdAccount *acc);
 
-Eina_Bool ebird_user_sync(EbirdAccount *user);
+EAPI Eina_Bool ebird_init();
 
-EbirdAccount *ebird_user_get(char *username);
+EAPI void ebird_shutdown();
 
-char *ebird_credentials_verify(OauthToken *request, EbirdAccount *acc);
+EAPI Eina_Bool ebird_account_save(EbirdAccount *account);
 
-Eina_Bool ebird_update_status(char *message, OauthToken *request, EbirdAccount *acc);
+EAPI Eina_Bool ebird_account_load(EbirdAccount *account);
+
+EAPI int ebird_id_load(OauthToken *request_token);
+
+EAPI void ebird_token_request_get(OauthToken *request);
+
+EAPI int ebird_direct_token_get(OauthToken *request_token);
+
+EAPI Eina_Bool ebird_auto_authorise_app(OauthToken *request_token, EbirdAccount *account);
+
+EAPI Eina_Bool ebird_authorise_app(OauthToken *request_token, EbirdAccount *account);
+
+EAPI void ebird_timeline_free(Eina_List *timeline);
+
+EAPI Eina_List *ebird_timeline_get(const char *url, OauthToken *request, EbirdAccount *acc);
+
+EAPI Eina_List *ebird_home_timeline_get(OauthToken *request, EbirdAccount *acc);
+
+EAPI Eina_List *ebird_public_timeline_get(OauthToken *request, EbirdAccount *acc);
+
+EAPI Eina_List *ebird_user_timeline_get(OauthToken *request, EbirdAccount *acc);
+
+EAPI Eina_List *ebird_user_mentions_get(OauthToken *request, EbirdAccount *acc);
+
+EAPI Eina_Bool ebird_user_sync(EbirdAccount *user);
+
+EAPI EbirdAccount *ebird_user_get(char *username);
+
+EAPI Eina_Bool ebird_user_show(EbirdAccount *acc);
+
+EAPI char *ebird_credentials_verify(OauthToken *request, EbirdAccount *acc);
+
+EAPI Eina_Bool ebird_update_status(char *message,OauthToken *request,EbirdAccount *acc);
 
 #endif
