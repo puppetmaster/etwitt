@@ -31,6 +31,7 @@ typedef struct _ebird_account EbirdAccount;
 typedef struct _ebird_status EbirdStatus;
 typedef enum   _state State;
 typedef enum   _user_state UserState;
+typedef struct _ebird_obj Ebird_Object;
 
 enum _state
 {
@@ -56,7 +57,10 @@ struct _ebird_obj
     OauthToken *token;
     EbirdAccount *account;
 
-    void (*verify_credentials)(struct _ebird_obj);
+    void (*request_token_get)(Ebird_Object *obj);
+    void *request_token_data;
+
+    void (*credentials_verify)(Ebird_Object *obj);
     void *credentials_data;
 };
 // End
@@ -113,15 +117,26 @@ Eina_Bool ebird_authorisation_pin_set(OauthToken *request_token,char *pin);
 
 Eina_Bool ebird_read_pin_from_stdin(OauthToken *request_token);
 
+Eina_Bool ebird_auto_authorise_app(OauthToken *request_token, EbirdAccount *account);
+
+Eina_Bool ebird_authorise_app(OauthToken *request_token, EbirdAccount *account);
+
+int ebird_direct_token_get(OauthToken *request_token);
+
 int ebird_access_token_get(OauthToken *request_token, const char *url, const char *con_key, const char *con_secret, EbirdAccount *account);
 
 void ebird_timeline_free(Eina_List *timeline);
 
 char *ebird_home_timeline_xml_get(OauthToken *request, EbirdAccount *acc);
 
+/*
+ * API
+ *
+ */ 
+
 EAPI Eina_Bool ebird_init();
 
-EAPI void ebird_shutdown();
+EAPI int ebird_shutdown();
 
 EAPI Eina_Bool ebird_account_save(EbirdAccount *account);
 
@@ -130,12 +145,6 @@ EAPI Eina_Bool ebird_account_load(EbirdAccount *account);
 EAPI int ebird_id_load(OauthToken *request_token);
 
 EAPI void ebird_token_request_get(OauthToken *request);
-
-EAPI int ebird_direct_token_get(OauthToken *request_token);
-
-EAPI Eina_Bool ebird_auto_authorise_app(OauthToken *request_token, EbirdAccount *account);
-
-EAPI Eina_Bool ebird_authorise_app(OauthToken *request_token, EbirdAccount *account);
 
 EAPI void ebird_timeline_free(Eina_List *timeline);
 
@@ -158,5 +167,7 @@ EAPI Eina_Bool ebird_user_show(EbirdAccount *acc);
 EAPI char *ebird_credentials_verify(OauthToken *request, EbirdAccount *acc);
 
 EAPI Eina_Bool ebird_update_status(char *message,OauthToken *request,EbirdAccount *acc);
+
+EAPI Eina_Bool ebird_session_open(OauthToken *request_token, EbirdAccount *account);
 
 #endif

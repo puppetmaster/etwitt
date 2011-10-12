@@ -65,7 +65,7 @@ ebird_init()
     return 0;
 }
 
-EAPI void
+EAPI int
 ebird_shutdown()
 {
     _ebird_main_count--;
@@ -341,7 +341,6 @@ ebird_token_request_get(OauthToken *request)
     }
     else
     {
-//        printf("\nDEBUG : [%s]\n",request->url);
         ERR("Error on Request Token [%s]",request->token);
         request->token = NULL;
     }
@@ -975,5 +974,32 @@ ebird_update_status(char *message,OauthToken *request,EbirdAccount *acc)
     ret = ebird_http_post(up_url);
     DBG("\n%s\n\n",ret);
     return EINA_TRUE;
+
+}
+
+EAPI Eina_Bool
+ebird_session_open(OauthToken *request_token, EbirdAccount *account)
+{
+
+    ebird_token_request_get(request_token);
+    if (request_token->token)
+    {
+        if (account->access_token_key)
+        {
+            return EINA_TRUE;
+        }
+        else
+        {
+            ebird_direct_token_get(request_token);
+            ebird_read_pin_from_stdin(request_token);
+            ebird_authorise_app(request_token,account);
+            return EINA_TRUE;
+        }
+    }
+    else
+    {
+        ERR("Error opening session\n");
+        return EINA_FALSE;
+    }
 
 }

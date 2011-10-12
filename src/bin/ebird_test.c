@@ -71,89 +71,62 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
     }
 
     //printf("\nDEBUG[main] Step[1][Request Token]\n");
-    ebird_token_request_get(&request_token);
-    if (request_token.token)
+
+    if (ebird_session_open(&request_token,&account))
     {
 
-      //  printf("\nDEBUG[main] Step[1][URL][%s]\n", request_token.url);
-      //  printf("\nDEBUG[main] Step[1][TOKEN][%s]\n", request_token.token);
-      //  printf("\nDEBUG[main] Step[1][TOKEN KEY][%s]\n", request_token.key);
-      //  printf("\nDEBUG[main] Step[1][TOKEN SECRET][%s]\n", request_token.secret);
-      //  printf("*****************************************\n");
-      //  printf("\nDEBUG[main] Step[2][Request Direct Token]\n");
+        //printf("Account exists !\n");
+        /* 
+           ebird_user_sync(&account);
 
-        if (account.access_token_key)
-        {
+           printf("%s\n",account.username);
+           printf("%s\n",account.userid);
+           printf("%s\n",account.avatar);
 
-            //printf("Account exists !\n");
-            /* 
-            ebird_user_sync(&account);
+*/
+        printf("User Credentials\n");
+        printf("================\n");
+        ebird_credentials_verify(&request_token, &account);
+        //credentials = ebird_verify_credentials(&request_token, &account);
+        printf("%s\n",credentials);
 
-            printf("%s\n",account.username);
-            printf("%s\n",account.userid);
-            printf("%s\n",account.avatar);
-            
-            */
-            printf("User Credentials\n");
-            printf("================\n");
-            ebird_credentials_verify(&request_token, &account);
-            //credentials = ebird_verify_credentials(&request_token, &account);
-            printf("%s\n",credentials);
+        /*
+           puts("HOME TIMELINE");
+           puts("=============");
+           timeline     = ebird_home_timeline_get(&request_token, &account);
+           show_timeline(timeline);
+           ebird_timeline_free(timeline);
 
-            /*
-            puts("HOME TIMELINE");
-            puts("=============");
-            timeline     = ebird_home_timeline_get(&request_token, &account);
-            show_timeline(timeline);
-            ebird_timeline_free(timeline);
 
-            
-            puts("\nPUBLIC TIMELINE\n");
-            pubtimeline  = ebird_public_timeline_get(&request_token, &account);
-            show_timeline(pubtimeline);
-            ebird_timeline_free(pubtimeline);
+           puts("\nPUBLIC TIMELINE\n");
+           pubtimeline  = ebird_public_timeline_get(&request_token, &account);
+           show_timeline(pubtimeline);
+           ebird_timeline_free(pubtimeline);
 
-            puts("\nUSER TIMELINE\n");
-            usertimeline = ebird_user_timeline_get(&request_token, &account);
-            show_timeline(usertimeline);
-            ebird_timeline_free(usertimeline);
+           puts("\nUSER TIMELINE\n");
+           usertimeline = ebird_user_timeline_get(&request_token, &account);
+           show_timeline(usertimeline);
+           ebird_timeline_free(usertimeline);
 
-            puts("\nUSER MENTIONS\n");
-            usermentions = ebird_user_mentions_get(&request_token, &account);
-            show_timeline(usermentions);
-            ebird_timeline_free(usermentions);
+           puts("\nUSER MENTIONS\n");
+           usermentions = ebird_user_mentions_get(&request_token, &account);
+           show_timeline(usermentions);
+           ebird_timeline_free(usermentions);
 
-            if (ebird_update_status("JeSuisUnTest",&request_token, &account))
-                printf("Twitt OK\n");
-            else
-                printf("Twitt KO\n");
+           if (ebird_update_status("JeSuisUnTest",&request_token, &account))
+           printf("Twitt OK\n");
+           else
+           printf("Twitt KO\n");
 
-            */
+*/
 
-        }
-        else
-        {
-            ebird_direct_token_get(&request_token);
-            ebird_read_pin_from_stdin(&request_token);
-            ebird_authorise_app(&request_token,&account);
-            timeline = ebird_home_timeline_get(&request_token, &account);
-            printf("%s\n",timeline);
-
-        }
 
         ecore_main_loop_begin();
 
         ecore_main_loop_quit();
-
-        ebird_shutdown();
-
     }
     else
-    {
-        printf("Error on request token get\n");
         ebird_shutdown();
-        return -1;
-    }
 
     return 0;
 }
