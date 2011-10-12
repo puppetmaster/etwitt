@@ -155,7 +155,7 @@ Eina_Bool ebird_user_sync(EbirdAccount *user);
 
 EbirdAccount *ebird_user_get(char *username);
 
-char *ebird_verify_credentials(OauthToken *request, EbirdAccount *acc);
+char *ebird_credentials_verify(OauthToken *request, EbirdAccount *acc);
 
 Eina_Bool ebird_update_status(char *message, OauthToken *request, EbirdAccount *acc);
 

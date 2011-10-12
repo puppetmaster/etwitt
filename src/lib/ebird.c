@@ -920,7 +920,7 @@ ebird_user_show(EbirdAccount *acc)
 }
 
 char *
-ebird_verify_credentials(OauthToken *request, EbirdAccount *acc)
+ebird_credentials_verify(OauthToken *request, EbirdAccount *acc)
 {
     char *url;
     char *ret;
