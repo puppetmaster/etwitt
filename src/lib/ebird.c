@@ -231,7 +231,7 @@ ebird_load_account(EbirdAccount *account)
 
 
 int
-ebird_load_id(OauthToken *request_token)
+ebird_id_load(OauthToken *request_token)
 {
     Eet_File *file;
     int size;

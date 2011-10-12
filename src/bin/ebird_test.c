@@ -59,7 +59,7 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
     memset(&request_token, 0, sizeof(OauthToken));
     memset(&account, 0, sizeof(EbirdAccount));
 
-    ebird_load_id(&request_token);
+    ebird_id_load(&request_token);
 
     if (ecore_file_exists(EBIRD_ACCOUNT_FILE))
         ebird_load_account(&account);

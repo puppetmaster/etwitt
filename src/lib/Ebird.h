@@ -102,9 +102,9 @@ struct _ebird_status
 };
 
 
-Eina_Bool ebird_init();
+Eina_Bool ebird_init(void);
 
-void ebird_shutdown();
+void ebird_shutdown(void);
 
 static Eina_Bool _url_data_cb(void *data, int type, void *event_info);
 
@@ -118,7 +118,7 @@ Eina_Bool ebird_save_account(EbirdAccount *account);
 
 Eina_Bool ebird_load_account(EbirdAccount *account);
 
-int ebird_load_id(OauthToken *request_token);
+int ebird_id_load(OauthToken *request_token);
 
 int ebird_error_code_get(char *string);
 
