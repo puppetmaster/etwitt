@@ -41,6 +41,7 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
 {
     char *userinfo;
     char *credentials;
+    Ebird_Object *eobj;
     OauthToken request_token;
     EbirdAccount account;
     Eina_List *timeline;
@@ -57,13 +58,10 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
         return -1;
     }
 
-    memset(&request_token, 0, sizeof(OauthToken));
-    memset(&account, 0, sizeof(EbirdAccount));
-
-    ebird_id_load(&request_token);
+    eobj = ebird_add();
 
     if (ecore_file_exists(EBIRD_ACCOUNT_FILE))
-        ebird_account_load(&account);
+        ebird_account_load(eobj->account);
     else
     {
         account.username = strdup(EBIRD_USER_SCREEN_NAME);
@@ -72,7 +70,7 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
 
     //printf("\nDEBUG[main] Step[1][Request Token]\n");
 
-    if (ebird_session_open(&request_token,&account))
+    if (ebird_session_open(eobj->request_token,eobj->account))
     {
 
         //printf("Account exists !\n");
@@ -83,31 +81,30 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
            printf("%s\n",account.userid);
            printf("%s\n",account.avatar);
 
-*/
+        */
         printf("User Credentials\n");
         printf("================\n");
-        ebird_credentials_verify(&request_token, &account);
-        //credentials = ebird_verify_credentials(&request_token, &account);
+        //ebird_credentials_verify(eobj);
+        credentials = ebird_credentials_verify(eobj);
         printf("%s\n",credentials);
 
+        
+        puts("HOME TIMELINE");
+        puts("=============");
+        timeline = ebird_home_timeline_get(eobj);
+        show_timeline(timeline);
+        ebird_timeline_free(timeline);
+
+        puts("\nPUBLIC TIMELINE\n");
+        pubtimeline  = ebird_public_timeline_get(eobj);
+        show_timeline(pubtimeline);
+        ebird_timeline_free(pubtimeline);
+
+        puts("\nUSER TIMELINE\n");
+        usertimeline = ebird_user_timeline_get(eobj);
+        show_timeline(usertimeline);
+        ebird_timeline_free(usertimeline);
         /*
-           puts("HOME TIMELINE");
-           puts("=============");
-           timeline     = ebird_home_timeline_get(&request_token, &account);
-           show_timeline(timeline);
-           ebird_timeline_free(timeline);
-
-
-           puts("\nPUBLIC TIMELINE\n");
-           pubtimeline  = ebird_public_timeline_get(&request_token, &account);
-           show_timeline(pubtimeline);
-           ebird_timeline_free(pubtimeline);
-
-           puts("\nUSER TIMELINE\n");
-           usertimeline = ebird_user_timeline_get(&request_token, &account);
-           show_timeline(usertimeline);
-           ebird_timeline_free(usertimeline);
-
            puts("\nUSER MENTIONS\n");
            usermentions = ebird_user_mentions_get(&request_token, &account);
            show_timeline(usermentions);
@@ -120,10 +117,6 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
 
 */
 
-
-        ecore_main_loop_begin();
-
-        ecore_main_loop_quit();
     }
     else
         ebird_shutdown();

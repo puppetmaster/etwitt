@@ -80,6 +80,21 @@ ebird_shutdown()
     return _ebird_main_count;
 }
 
+EAPI Ebird_Object
+*ebird_add()
+{
+    Ebird_Object *out;
+
+    DBG("calloc of Ebird_Object :\n");
+    out = calloc(1,sizeof(Ebird_Object));
+    out->request_token = calloc(1,sizeof(OauthToken));
+    out->account = calloc(1,sizeof(EbirdAccount));
+
+    ebird_id_load(out->request_token);
+
+    return out;
+}
+
 static char *
 ebird_oauth_sign_url(const char *url,
                      const char *consumer_key,
@@ -118,6 +133,7 @@ _url_data_cb(void *data, int type, void *event_info)
 static Eina_Bool
 _url_complete_cb(void *data, int type, void *event_info)
 {
+    ecore_main_loop_quit();
     return EINA_TRUE;
 }
 
@@ -136,6 +152,8 @@ ebird_http_get(char *url)
     ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE,_url_complete_cb,NULL);
 
     ecore_con_url_get(ec_url);
+
+    ecore_main_loop_begin();
 
     ecore_con_url_free(ec_url);
 
@@ -202,6 +220,8 @@ ebird_http_post(char *url)
 
     //ecore_con_url_post(ec_url," ",1,"application/x-www-form-urlencoded; charset=utf-8");
     ecore_con_url_post(ec_url,post_data,strlen(post_data),"application/x-www-form-urlencoded; charset=utf-8");
+
+    ecore_main_loop_begin();
 
     ecore_con_url_free(ec_url);
 
@@ -821,31 +841,37 @@ ebird_timeline_get(const char *url, OauthToken *request, EbirdAccount *acc)
 }
 
 EAPI Eina_List *
-ebird_home_timeline_get(OauthToken *request, EbirdAccount *acc)
+ebird_home_timeline_get(Ebird_Object *obj)
 {
 
     Eina_List *timeline;
 
-    timeline = ebird_timeline_get(EBIRD_HOME_TIMELINE_URL,request,acc);
+    timeline = ebird_timeline_get(EBIRD_HOME_TIMELINE_URL,
+                                  obj->request_token,
+                                  obj->account);
     return timeline; 
 }
 
 EAPI Eina_List *
-ebird_public_timeline_get(OauthToken *request, EbirdAccount *acc)
+ebird_public_timeline_get(Ebird_Object *obj)
 {
 
     Eina_List *timeline;
 
-    timeline = ebird_timeline_get(EBIRD_PUBLIC_TIMELINE_URL,request,acc);
+    timeline = ebird_timeline_get(EBIRD_PUBLIC_TIMELINE_URL,
+                                  obj->request_token,
+                                  obj->account);
     return timeline; 
 }
 
 EAPI Eina_List *
-ebird_user_timeline_get(OauthToken *request, EbirdAccount *acc)
+ebird_user_timeline_get(Ebird_Object *obj)
 {
     Eina_List *timeline;
     
-    timeline = ebird_timeline_get(EBIRD_USER_TIMELINE_URL, request, acc);
+    timeline = ebird_timeline_get(EBIRD_USER_TIMELINE_URL,
+                                  obj->request_token,
+                                  obj->account);
     return timeline;
 }
 
@@ -942,16 +968,16 @@ ebird_user_show(EbirdAccount *acc)
 }
 
 EAPI char *
-ebird_credentials_verify(OauthToken *request, EbirdAccount *acc)
+ebird_credentials_verify(Ebird_Object *obj)
 {
     char *url;
     char *ret;
 
     url = ebird_oauth_sign_url(EBIRD_ACCOUNT_CREDENTIALS_URL,
-                               request->consumer_key,
-                               request->consumer_secret,
-                               acc->access_token_key,
-                               acc->access_token_secret, NULL);
+                               obj->request_token->consumer_key,
+                               obj->request_token->consumer_secret,
+                               obj->account->access_token_key,
+                               obj->account->access_token_secret, NULL);
     ret = ebird_http_get(url);
     return ret;
 }

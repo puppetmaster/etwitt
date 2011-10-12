@@ -54,14 +54,16 @@ enum _user_state
 // Move API to async test
 struct _ebird_obj
 {
-    OauthToken *token;
+    OauthToken *request_token;
     EbirdAccount *account;
 
+    /*
     void (*request_token_get)(Ebird_Object *obj);
     void *request_token_data;
 
     void (*credentials_verify)(Ebird_Object *obj);
     void *credentials_data;
+    */
 };
 // End
 
@@ -138,6 +140,8 @@ EAPI Eina_Bool ebird_init();
 
 EAPI int ebird_shutdown();
 
+EAPI Ebird_Object *ebird_add();
+
 EAPI Eina_Bool ebird_account_save(EbirdAccount *account);
 
 EAPI Eina_Bool ebird_account_load(EbirdAccount *account);
@@ -150,11 +154,11 @@ EAPI void ebird_timeline_free(Eina_List *timeline);
 
 EAPI Eina_List *ebird_timeline_get(const char *url, OauthToken *request, EbirdAccount *acc);
 
-EAPI Eina_List *ebird_home_timeline_get(OauthToken *request, EbirdAccount *acc);
+EAPI Eina_List *ebird_home_timeline_get(Ebird_Object *obj);
 
-EAPI Eina_List *ebird_public_timeline_get(OauthToken *request, EbirdAccount *acc);
+EAPI Eina_List *ebird_public_timeline_get(Ebird_Object *obj);
 
-EAPI Eina_List *ebird_user_timeline_get(OauthToken *request, EbirdAccount *acc);
+EAPI Eina_List *ebird_user_timeline_get(Ebird_Object *obj);
 
 EAPI Eina_List *ebird_user_mentions_get(OauthToken *request, EbirdAccount *acc);
 
@@ -164,7 +168,7 @@ EAPI EbirdAccount *ebird_user_get(char *username);
 
 EAPI Eina_Bool ebird_user_show(EbirdAccount *acc);
 
-EAPI char *ebird_credentials_verify(OauthToken *request, EbirdAccount *acc);
+EAPI char *ebird_credentials_verify(Ebird_Object *obj);
 
 EAPI Eina_Bool ebird_update_status(char *message,OauthToken *request,EbirdAccount *acc);
 
