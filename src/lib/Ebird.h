@@ -102,25 +102,25 @@ struct _ebird_status
 };
 
 
-int ebird_init(void);
-int ebird_shutdown(void);
+EAPI int ebird_init(void);
+EAPI int ebird_shutdown(void);
 
-Eina_Bool ebird_account_save(EbirdAccount *account);
-Eina_Bool ebird_account_load(EbirdAccount *account);
+EAPI Eina_Bool ebird_account_save(EbirdAccount *account);
+EAPI Eina_Bool ebird_account_load(EbirdAccount *account);
 
-int ebird_id_load(OauthToken *request_token);
+EAPI int ebird_id_load(OauthToken *request_token);
 
 int ebird_error_code_get(char *string);
 
-void ebird_token_request_get(OauthToken *request);
+EAPI void ebird_token_request_get(OauthToken *request);
 
-int ebird_token_authenticity_get(char *web_script, OauthToken *request_token);
+EAPI int ebird_token_authenticity_get(char *web_script, OauthToken *request_token);
 
-int ebird_authorisation_url_get(OauthToken *request_token);
+EAPI int ebird_authorisation_url_get(OauthToken *request_token);
 
-int ebird_authorisation_pin_get(OauthToken *request_token, const char *username, const char *userpassword);
+/*?*/ int ebird_authorisation_pin_get(OauthToken *request_token, const char *username, const char *userpassword);
 
-Eina_Bool ebird_authorisation_pin_set(OauthToken *request_token,char *pin);
+/*?*/EAPI Eina_Bool ebird_authorisation_pin_set(OauthToken *request_token,char *pin);
 
 Eina_Bool ebird_read_pin_from_stdin(OauthToken *request_token);
 
