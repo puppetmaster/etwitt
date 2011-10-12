@@ -14,7 +14,7 @@
 #include <Ecore.h>
 #include <Ecore_Con.h>
 
-#include "ebird.h"
+#include "Ebird.h"
 
 Eina_Bool
 ebird_init()

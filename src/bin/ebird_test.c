@@ -9,7 +9,7 @@
 #include <Eina.h>
 #include <Ecore_File.h>
 
-#include <ebird.h>
+#include <Ebird.h>
 
 static void
 show_timeline(Eina_List *timeline)

@@ -12,7 +12,7 @@
 #include <Edje.h>
 #include <Elementary.h>
 
-#include <ebird.h>
+#include <Ebird.h>
 
 typedef struct _Twitt Twitt;
 typedef struct _Account Account;
