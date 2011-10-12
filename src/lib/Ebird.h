@@ -106,10 +106,6 @@ Eina_Bool ebird_init(void);
 
 void ebird_shutdown(void);
 
-static Eina_Bool _url_data_cb(void *data, int type, void *event_info);
-
-static Eina_Bool _url_complete_cb(void *data, int type, void *event_info);
-
 char *ebird_http_get(char *url);
 
 char *ebird_http_post(char *url);

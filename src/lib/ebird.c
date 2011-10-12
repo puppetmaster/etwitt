@@ -16,6 +16,9 @@
 
 #include "Ebird.h"
 
+static Eina_Bool _url_data_cb(void *data, int type, void *event_info);
+static Eina_Bool _url_complete_cb(void *data, int type, void *event_info);
+
 Eina_Bool
 ebird_init()
 {
