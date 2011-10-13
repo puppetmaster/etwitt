@@ -93,8 +93,9 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
         ebird_account_load(eobj);
     else
     {
-        account.username = strdup(EBIRD_USER_SCREEN_NAME);
-        account.passwd   = strdup(EBIRD_USER_PASSWD);
+        printf("User account configuration file %s is missing or corrupted\n",
+            EBIRD_ACCOUNT_FILE);
+        return -1;
     }
 
     if (ebird_session_open(eobj))
@@ -126,11 +127,7 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
         show_timeline(usermentions);
         ebird_timeline_free(usermentions);
 
-        if (ebird_update_status(eobj, "Ebird Twitt Test #1"))
-            printf("Twitt OK\n");
-        else
-            printf("Twitt KO\n");
-
+        ebird_status_update(eobj, "Ebird Twitt Test #1");
 
     }
     else

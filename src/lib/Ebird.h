@@ -93,11 +93,20 @@ EAPI Ebird_Object *ebird_add(void);
 EAPI void ebird_del(Ebird_Object *obj);
 
 
+/*
+ *
+ * Account Operations
+ *
+ */ 
 EAPI Eina_Bool ebird_account_save(EbirdAccount *account);
 
 EAPI Eina_Bool ebird_account_load(Ebird_Object *obj);
 
-
+/* 
+ *
+ * TIMELINES OPERATIONS
+ *
+ */ 
 
 EAPI Eina_List *ebird_timeline_home_get(Ebird_Object *obj);
 
@@ -109,10 +118,13 @@ EAPI Eina_List *ebird_timeline_mentions_get(Ebird_Object *obj);
 
 EAPI void ebird_timeline_free(Eina_List *timeline);
 
+/*
+ *
+ * STATUS OPERATIONS
+ *
+ */ 
+
 EAPI Eina_Bool ebird_status_update(Ebird_Object *obj, char *message);
-
-EAPI void ebird_token_request_get(OauthToken *request);
-
 
 EAPI Eina_Bool ebird_user_sync(EbirdAccount *user);
 

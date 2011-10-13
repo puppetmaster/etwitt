@@ -996,7 +996,7 @@ ebird_credentials_verify(Ebird_Object *obj)
 }
 
 EAPI Eina_Bool
-ebird_update_status(Ebird_Object *obj, char *message)
+ebird_status_update(Ebird_Object *obj, char *message)
 {
     char *url;
     char *ret;
