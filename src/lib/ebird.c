@@ -240,7 +240,7 @@ ebird_http_post(char *url)
 }
 
 EAPI Eina_Bool
-ebird_account_save(EbirdAccount *account)
+ebird_account_save(Ebird_Object *obj)
 {
    Eet_File *file;
    int size;
@@ -249,14 +249,14 @@ ebird_account_save(EbirdAccount *account)
 
    file = eet_open(EBIRD_ACCOUNT_FILE, EET_FILE_MODE_WRITE);
 
-   eet_write(file,"username",account->username,strlen(account->username) + 1, 0);
-   eet_write(file,"passwd",account->passwd,strlen(account->passwd) + 1, 1);
-   eet_write(file,"access_token_key",account->access_token_key,
-             strlen(account->access_token_key)+1,0);
-   eet_write(file,"access_token_secret",account->access_token_secret,
-             strlen(account->access_token_secret)+1, 0);
-   eet_write(file,"userid",account->userid,strlen(account->userid)+1, 0);
-   eet_write(file,"avatar",account->avatar,strlen(account->avatar)+1, 0);
+   eet_write(file,"username",obj->account->username,strlen(obj->account->username) + 1, 0);
+   eet_write(file,"passwd",obj->account->passwd,strlen(obj->account->passwd) + 1, 1);
+   eet_write(file,"access_token_key",obj->account->access_token_key,
+             strlen(obj->account->access_token_key)+1,0);
+   eet_write(file,"access_token_secret",obj->account->access_token_secret,
+             strlen(obj->account->access_token_secret)+1, 0);
+   eet_write(file,"userid",obj->account->userid,strlen(obj->account->userid)+1, 0);
+   eet_write(file,"avatar",obj->account->avatar,strlen(obj->account->avatar)+1, 0);
 
    eet_close(file);
 
@@ -620,7 +620,7 @@ ebird_authorise_app(Ebird_Object *obj)
 
         ebird_access_token_get(obj);
 
-        if (ebird_account_save(obj->account))
+        if (ebird_account_save(obj))
             return EINA_TRUE;
         else
         {
@@ -1020,6 +1020,7 @@ ebird_session_open(Ebird_Object *obj, Ebird_Session_Cb cb, void *data)
     obj->session_open = cb;
     obj->session_open_data = data;
 
+//    ebird_token_request_get(obj,_token_request_get_cb,);
     ebird_token_request_get(obj);
     if (obj->request_token->token)
     {

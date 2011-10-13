@@ -97,7 +97,7 @@ EAPI void ebird_del(Ebird_Object *obj);
  * Account Operations
  *
  */ 
-EAPI Eina_Bool ebird_account_save(EbirdAccount *account);
+EAPI Eina_Bool ebird_account_save(Ebird_Object *obj);
 
 EAPI Eina_Bool ebird_account_load(Ebird_Object *obj);
 
