@@ -95,6 +95,7 @@ int ebird_access_token_get(OauthToken *request_token, const char *url, const cha
 void ebird_timeline_free(Eina_List *timeline);
 
 char *ebird_home_timeline_xml_get(OauthToken *request, EbirdAccount *acc);
+Eina_List *ebird_timeline_get(const char *url, OauthToken *request, EbirdAccount *acc);
 
 int ebird_id_load(OauthToken *request_token);
 
