@@ -80,8 +80,8 @@ ebird_shutdown()
     return _ebird_main_count;
 }
 
-EAPI Ebird_Object
-*ebird_add(void)
+EAPI Ebird_Object *
+ebird_add(void)
 {
     Ebird_Object *out;
 
@@ -811,11 +811,10 @@ EAPI void
 ebird_timeline_free(Eina_List *timeline)
 {
     EbirdStatus *st;
-    Eina_List *l;
 
-    EINA_LIST_FOREACH(timeline,l,st)
+    EINA_LIST_FREE(timeline,st)
     {
-        if (st->retweeted)
+        if (st->retweeted && st->retweeted_status)
         {
             free(st->retweeted_status->user);
             free(st->retweeted_status);
@@ -828,7 +827,7 @@ ebird_timeline_free(Eina_List *timeline)
             free(st);
         }
     }
-    eina_list_free(timeline);
+
 }
 
 EAPI Eina_List *

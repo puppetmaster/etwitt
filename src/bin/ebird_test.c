@@ -20,12 +20,42 @@ show_timeline(Eina_List *timeline)
 
     EINA_LIST_FOREACH(timeline,l,st)
     {
-        //printf("TWITT :[%s][%s]\n",st->created_at,st->text);
-        if (st->retweeted)
-            printf("[RT by %s][TW by%s][%s]\n\t%s\n",st->user->username,st->retweeted_status->user->username, st->retweeted_status->created_at,st->retweeted_status->text);
-        else
-            printf("[TW by %s][%s]\n\t%s\n",st->user->username, st->created_at,st->text);
+        const char *username = NULL;
+        const char *username_rt = NULL;
+        const char *created_at = NULL;
+        const char *text = NULL;
 
+        if (!st)
+            continue;
+
+        if (st->retweeted)
+        {
+            if (st->user)
+                username = st->user->username;
+
+            if (st->retweeted_status && st->retweeted_status->user)
+                username_rt = st->retweeted_status->user->username;
+
+            if (st->retweeted_status)
+            {
+                created_at = st->retweeted_status->created_at;
+                text = st->retweeted_status->text;
+            }
+            printf("[RT by %s][TW by%s][%s]\n\t%s\n" ,username,
+                   username_rt,
+                   created_at,
+                   text);
+        }
+        else
+        {
+            if (st->user)
+                username = st->user->username;
+
+            printf("[TW by %s][%s]\n\t%s\n",username,
+                   st->created_at,
+                   st->text);
+
+        }
     }
 }
 
