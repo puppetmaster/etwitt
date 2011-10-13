@@ -145,9 +145,8 @@ _url_complete_cb(void *data, int type, void *event_info)
 {
     Ebird_Object *obj = (Ebird_Object *)data;
 
-    obj->_session_open(obj, obj->_session_open_data); 
+    obj->session_open(obj, obj->session_open_data); 
 
-    ecore_main_loop_quit();
     return EINA_TRUE;
 }
 
@@ -166,8 +165,6 @@ ebird_http_get(char *url,Ebird_Object *obj)
     ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE,_url_complete_cb,obj);
 
     ecore_con_url_get(ec_url);
-
-    ecore_main_loop_begin();
 
     ecore_con_url_free(ec_url);
 
@@ -234,8 +231,6 @@ ebird_http_post(char *url)
 
     //ecore_con_url_post(ec_url," ",1,"application/x-www-form-urlencoded; charset=utf-8");
     ecore_con_url_post(ec_url,post_data,strlen(post_data),"application/x-www-form-urlencoded; charset=utf-8");
-
-    ecore_main_loop_begin();
 
     ecore_con_url_free(ec_url);
 
@@ -1022,8 +1017,8 @@ ebird_session_open(Ebird_Object *obj, Ebird_Session_Cb cb, void *data)
     if (!obj)
         return EINA_FALSE;
 
-    obj->_session_open = _session_open;
-    obj->_session_open_data = data;
+    obj->session_open = cb;
+    obj->session_open_data = data;
 
     ebird_token_request_get(obj);
     if (obj->request_token->token)

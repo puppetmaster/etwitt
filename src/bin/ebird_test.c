@@ -67,6 +67,11 @@ _show_credentials(void *data)
     printf("%s\n",xml);
 }
 
+void _session_opened(Ebird_Object *obj, void *data)
+{
+    printf("SESSION OPENED DEBUG MESSAGE");
+}
+
 int main(int argc __UNUSED__, char **argv __UNUSED__)
 {
     char *userinfo;
@@ -98,7 +103,7 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
         return -1;
     }
 
-    if (ebird_session_open(eobj))
+    if (ebird_session_open(eobj,_session_opened, NULL))
     {
 
         printf("User Credentials\n");
@@ -132,6 +137,10 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
     }
     else
         ebird_shutdown();
+
+    ecore_main_loop_begin();
+
+    ecore_main_loop_quit();
 
     ebird_del(eobj);
     return 0;

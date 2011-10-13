@@ -60,8 +60,8 @@ struct _Ebird_Obj
     OauthToken *request_token;
     EbirdAccount *account;
 
-    void (*_session_open)(Ebird_Object *obj,void *data);
-    void *_session_open_data;
+    void (*session_open)(Ebird_Object *obj,void *data);
+    void *session_open_data;
 
     /*
     void (*request_token_get)(Ebird_Object *obj);
