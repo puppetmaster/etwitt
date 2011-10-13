@@ -55,11 +55,13 @@ struct _oauth_token
     char *callback_confirmed;
 };
 
-// Move API to async test
-struct _ebird_obj
+struct _Ebird_Obj
 {
     OauthToken *request_token;
     EbirdAccount *account;
+
+    void (*_session_open)(Ebird_Object *obj,void *data);
+    void *_session_open_data;
 
     /*
     void (*request_token_get)(Ebird_Object *obj);
@@ -70,8 +72,11 @@ struct _ebird_obj
     */
 };
 
-char *ebird_http_get(char *url);
+
+char *ebird_http_get(char *url, Ebird_Object *obj);
+
 char *ebird_http_post(char *url);
+
 int ebird_error_code_get(char *string);
 
 int ebird_token_authenticity_get(char *web_script, OauthToken *request_token);
@@ -84,20 +89,21 @@ Eina_Bool ebird_authorisation_pin_set(OauthToken *request_token,char *pin);
 
 Eina_Bool ebird_read_pin_from_stdin(OauthToken *request_token);
 
-Eina_Bool ebird_auto_authorise_app(OauthToken *request_token, EbirdAccount *account);
+//Eina_Bool ebird_auto_authorise_app(OauthToken *request_token, EbirdAccount *account);
 
-Eina_Bool ebird_authorise_app(OauthToken *request_token, EbirdAccount *account);
+Eina_Bool ebird_authorise_app(Ebird_Object *obj);
 
-int ebird_direct_token_get(OauthToken *request_token);
+int ebird_direct_token_get(Ebird_Object *obj);
 
-int ebird_access_token_get(OauthToken *request_token, const char *url, const char *con_key, const char *con_secret, EbirdAccount *account);
+int ebird_access_token_get(Ebird_Object *obj);
 
-void ebird_token_request_get(OauthToken *request);
+void ebird_token_request_get(Ebird_Object *obj);
 
 void ebird_timeline_free(Eina_List *timeline);
 
-char *ebird_home_timeline_xml_get(OauthToken *request, EbirdAccount *acc);
-Eina_List *ebird_timeline_get(const char *url, OauthToken *request, EbirdAccount *acc);
+char *ebird_home_timeline_xml_get(Ebird_Object *obj);
+
+Eina_List *ebird_timeline_get(const char *url, Ebird_Object *obj);
 
 int ebird_id_load(OauthToken *request_token);
 

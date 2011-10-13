@@ -30,8 +30,10 @@ typedef struct _ebird_account EbirdAccount;
 typedef struct _ebird_status EbirdStatus;
 typedef enum   _state State;
 typedef enum   _user_state UserState;
-typedef struct _ebird_obj Ebird_Object;
+typedef struct _Ebird_Obj Ebird_Object;
 typedef struct _oauth_token OauthToken;
+
+typedef void (*Ebird_Session_Cb)(Ebird_Object *obj,void *data);
 
 enum _state
 {
@@ -50,9 +52,6 @@ enum _user_state
     AVATAR,
     USER_NONE
 };
-
-
-// End
 
 struct _ebird_account
 {
@@ -126,9 +125,9 @@ EAPI void ebird_timeline_free(Eina_List *timeline);
 
 EAPI Eina_Bool ebird_status_update(Ebird_Object *obj, char *message);
 
-EAPI Eina_Bool ebird_user_sync(EbirdAccount *user);
+EAPI Eina_Bool ebird_user_sync(Ebird_Object *obj);
 
-EAPI EbirdAccount *ebird_user_get(char *username);
+EAPI EbirdAccount *ebird_user_get(char *username, Ebird_Object *obj);
 
 EAPI Eina_Bool ebird_user_show(EbirdAccount *acc);
 
@@ -136,6 +135,6 @@ EAPI char *ebird_credentials_verify(Ebird_Object *obj);
 
 
 
-EAPI Eina_Bool ebird_session_open(Ebird_Object *obj);
+EAPI Eina_Bool ebird_session_open(Ebird_Object *obj,Ebird_Session_Cb cb, void *data);
 
 #endif
