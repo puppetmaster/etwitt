@@ -657,7 +657,7 @@ _parse_user(void *data,Eina_Simple_XML_Type type, const char *content,unsigned o
     else if (cur && type == EINA_SIMPLE_XML_DATA)
     {
         char *ptr = strndup(content,length);
-        switch(s) 
+        switch(s)
         {
             case SCREEN_NAME:
                 if ( ! cur->username)
@@ -691,18 +691,18 @@ _parse_timeline(void *_data, Eina_Simple_XML_Type type, const char *content, uns
     static State rt_s = NONE;
     static UserState us = USER_NONE;
     static UserState rt_us = USER_NONE;
-    
+
     void **data = (void **)_data;
   //  Eina_List *timeline = (Eina_List *)data;
   //
-    
+
     if (type == EINA_SIMPLE_XML_OPEN && !strncmp("status",content,length))
     {
         cur = calloc(1,sizeof(EbirdStatus));
         cur->user = calloc(1,sizeof(EbirdAccount));
         //cur->retweeted = EINA_FALSE;
     }
-    else if (cur && type == EINA_SIMPLE_XML_OPEN) 
+    else if (cur && type == EINA_SIMPLE_XML_OPEN)
     {
         us = USER_NONE;
         if (!strncmp("retweeted_status",content,16))
@@ -734,7 +734,7 @@ _parse_timeline(void *_data, Eina_Simple_XML_Type type, const char *content, uns
         char *ptr = strndup(content,length);
         if ( ! cur->retweeted)
         {
-            switch(s) 
+            switch(s)
             {
                 case CREATEDAT:
                     cur->created_at = ptr;
@@ -759,7 +759,7 @@ _parse_timeline(void *_data, Eina_Simple_XML_Type type, const char *content, uns
         }
         else
         {
-            switch(s) 
+            switch(s)
             {
                 case CREATEDAT:
                     cur->retweeted_status->created_at = ptr;
@@ -861,7 +861,7 @@ ebird_timeline_home_get(Ebird_Object *obj)
     timeline = ebird_timeline_get(EBIRD_HOME_TIMELINE_URL,
                                   obj->request_token,
                                   obj->account);
-    return timeline; 
+    return timeline;
 }
 
 EAPI Eina_List *
@@ -873,14 +873,14 @@ ebird_timeline_public_get(Ebird_Object *obj)
     timeline = ebird_timeline_get(EBIRD_PUBLIC_TIMELINE_URL,
                                   obj->request_token,
                                   obj->account);
-    return timeline; 
+    return timeline;
 }
 
 EAPI Eina_List *
 ebird_timeline_user_get(Ebird_Object *obj)
 {
     Eina_List *timeline;
-    
+
     timeline = ebird_timeline_get(EBIRD_USER_TIMELINE_URL,
                                   obj->request_token,
                                   obj->account);
@@ -913,7 +913,7 @@ ebird_home_timeline_xml_get(OauthToken *request, EbirdAccount *acc)
                                         acc->access_token_secret,NULL);
 
     xml_timeline = ebird_http_get(timeline_url);
-//FIXME FREE timeline_url;        
+//FIXME FREE timeline_url;
     return xml_timeline;
 }
 
@@ -977,7 +977,7 @@ ebird_user_show(EbirdAccount *acc)
         return EINA_FALSE;
     }
 
-    return EINA_TRUE; 
+    return EINA_TRUE;
 
 }
 

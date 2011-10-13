@@ -90,17 +90,17 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
         usertimeline = ebird_timeline_user_get(eobj);
         show_timeline(usertimeline);
         ebird_timeline_free(usertimeline);
-        
+
         puts("\nUSER MENTIONS\n");
         usermentions = ebird_timeline_mentions_get(eobj);
         show_timeline(usermentions);
         ebird_timeline_free(usermentions);
-        
+
         if (ebird_update_status(eobj, "Ebird Twitt Test #1"))
             printf("Twitt OK\n");
         else
             printf("Twitt KO\n");
-        
+
 
     }
     else
