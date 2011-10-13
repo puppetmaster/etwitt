@@ -997,17 +997,20 @@ ebird_credentials_verify(Ebird_Object *obj)
 }
 
 EAPI Eina_Bool
-ebird_update_status(char *message,OauthToken *request,EbirdAccount *acc)
+ebird_update_status(Ebird_Object *obj, char *message)
 {
     char *url;
     char *ret;
     char up_url[EBIRD_URL_MAX];
 
+    if (!obj)
+        return EINA_FALSE;
+
     url = ebird_oauth_sign_url(EBIRD_STATUS_URL,
-                               request->consumer_key,
-                               request->consumer_secret,
-                               acc->access_token_key,
-                               acc->access_token_secret,"POST");
+                               obj->request_token->consumer_key,
+                               obj->request_token->consumer_secret,
+                               obj->account->access_token_key,
+                               obj->account->access_token_secret,"POST");
 
     snprintf(up_url,sizeof(up_url),"%s&status=%s&include_entities=true",url,message);
 //    printf("DEBUG\n[>%s<]\n",up_url);

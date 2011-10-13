@@ -109,6 +109,8 @@ EAPI Eina_List *ebird_timeline_mentions_get(Ebird_Object *obj);
 
 EAPI void ebird_timeline_free(Eina_List *timeline);
 
+EAPI Eina_Bool ebird_status_update(Ebird_Object *obj, char *message);
+
 EAPI void ebird_token_request_get(OauthToken *request);
 
 
@@ -120,7 +122,7 @@ EAPI Eina_Bool ebird_user_show(EbirdAccount *acc);
 
 EAPI char *ebird_credentials_verify(Ebird_Object *obj);
 
-EAPI Eina_Bool ebird_update_status(char *message,OauthToken *request,EbirdAccount *acc);
+
 
 EAPI Eina_Bool ebird_session_open(Ebird_Object *obj);
 
