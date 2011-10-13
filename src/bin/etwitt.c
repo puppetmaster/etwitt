@@ -503,15 +503,11 @@ elm_main(int argc, char **argv)
 {
    Etwitt_Iface *iface;
 
-   OauthToken request_token;
-
    /* tell elm about our app so it can figure out where to get files */
    printf(" %s %s\n", PACKAGE_BIN_DIR, PACKAGE_DATA_DIR);
    elm_app_compile_bin_dir_set(PACKAGE_BIN_DIR);
    elm_app_compile_data_dir_set(PACKAGE_DATA_DIR);
    elm_app_info_set(elm_main, "etwitt", "images/logo.png");
-
-   memset(&request_token, 0, sizeof(OauthToken));
 
    iface = calloc(1,sizeof(Etwitt_Iface));
    iface->account = calloc(1,sizeof(EbirdAccount));

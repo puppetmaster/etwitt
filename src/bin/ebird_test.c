@@ -42,7 +42,6 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
     char *userinfo;
     char *credentials;
     Ebird_Object *eobj;
-    OauthToken request_token;
     EbirdAccount account;
     Eina_List *timeline;
     Eina_List *pubtimeline;
@@ -61,7 +60,7 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
     eobj = ebird_add();
 
     if (ecore_file_exists(EBIRD_ACCOUNT_FILE))
-        ebird_account_load(eobj->account);
+        ebird_account_load(eobj);
     else
     {
         account.username = strdup(EBIRD_USER_SCREEN_NAME);
@@ -70,7 +69,7 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
 
     //printf("\nDEBUG[main] Step[1][Request Token]\n");
 
-    if (ebird_session_open(eobj->request_token,eobj->account))
+    if (ebird_session_open(eobj))
     {
 
         //printf("Account exists !\n");
@@ -91,7 +90,7 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
         
         puts("HOME TIMELINE");
         puts("=============");
-        timeline = ebird_home_timeline_get(eobj);
+        timeline = ebird_timeline_home_get(eobj);
         show_timeline(timeline);
         ebird_timeline_free(timeline);
         /*
@@ -102,7 +101,7 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
         */
 
         puts("\nUSER TIMELINE\n");
-        usertimeline = ebird_user_timeline_get(eobj);
+        usertimeline = ebird_timeline_user_get(eobj);
         show_timeline(usertimeline);
         ebird_timeline_free(usertimeline);
         /*

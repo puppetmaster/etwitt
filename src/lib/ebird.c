@@ -266,18 +266,20 @@ ebird_account_save(EbirdAccount *account)
 }
 
 EAPI Eina_Bool
-ebird_account_load(EbirdAccount *account)
+ebird_account_load(Ebird_Object *obj)
 {
    Eet_File *file;
    int size;
 
+   if (!obj)
+       return EINA_FALSE;
 
    file = eet_open(EBIRD_ACCOUNT_FILE,EET_FILE_MODE_READ);
-   account->username = eina_stringshare_add(eet_read(file,"username",&size));
-   account->passwd = eina_stringshare_add(eet_read(file,"passwd",&size));
-   account->access_token_key = eina_stringshare_add(eet_read(file,"access_token_key",&size));
-   account->access_token_secret = eina_stringshare_add(eet_read(file,"access_token_secret",&size));
-   account->userid = eina_stringshare_add(eet_read(file,"userid",&size));
+   obj->account->username = eina_stringshare_add(eet_read(file,"username",&size));
+   obj->account->passwd = eina_stringshare_add(eet_read(file,"passwd",&size));
+   obj->account->access_token_key = eina_stringshare_add(eet_read(file,"access_token_key",&size));
+   obj->account->access_token_secret = eina_stringshare_add(eet_read(file,"access_token_secret",&size));
+   obj->account->userid = eina_stringshare_add(eet_read(file,"userid",&size));
 
    eet_close(file);
 
@@ -851,7 +853,7 @@ ebird_timeline_get(const char *url, OauthToken *request, EbirdAccount *acc)
 }
 
 EAPI Eina_List *
-ebird_home_timeline_get(Ebird_Object *obj)
+ebird_timeline_home_get(Ebird_Object *obj)
 {
 
     Eina_List *timeline;
@@ -863,7 +865,7 @@ ebird_home_timeline_get(Ebird_Object *obj)
 }
 
 EAPI Eina_List *
-ebird_public_timeline_get(Ebird_Object *obj)
+ebird_timeline_public_get(Ebird_Object *obj)
 {
 
     Eina_List *timeline;
@@ -875,7 +877,7 @@ ebird_public_timeline_get(Ebird_Object *obj)
 }
 
 EAPI Eina_List *
-ebird_user_timeline_get(Ebird_Object *obj)
+ebird_timeline_user_get(Ebird_Object *obj)
 {
     Eina_List *timeline;
     
@@ -1014,21 +1016,24 @@ ebird_update_status(char *message,OauthToken *request,EbirdAccount *acc)
 }
 
 EAPI Eina_Bool
-ebird_session_open(OauthToken *request_token, EbirdAccount *account)
+ebird_session_open(Ebird_Object *obj)
 {
 
-    ebird_token_request_get(request_token);
-    if (request_token->token)
+    if (!obj)
+        return EINA_FALSE;
+
+    ebird_token_request_get(obj->request_token);
+    if (obj->request_token->token)
     {
-        if (account->access_token_key)
+        if (obj->account->access_token_key)
         {
             return EINA_TRUE;
         }
         else
         {
-            ebird_direct_token_get(request_token);
-            ebird_read_pin_from_stdin(request_token);
-            ebird_authorise_app(request_token,account);
+            ebird_direct_token_get(obj->request_token);
+            ebird_read_pin_from_stdin(obj->request_token);
+            ebird_authorise_app(obj->request_token, obj->account);
             return EINA_TRUE;
         }
     }
