@@ -147,26 +147,27 @@ _url_complete_cb(void *data, int type, void *event_info)
 
     obj->session_open(obj, obj->session_open_data); 
 
+    ecore_con_url_free(obj->ec_url);
+    ecore_event_handler_del(obj->ev_hl_data);
+    ecore_event_handler_del(obj->ev_hl_complete);
+
     return EINA_TRUE;
 }
 
 char *
 ebird_http_get(char *url,Ebird_Object *obj)
 {
-    Ecore_Con_Url *ec_url;
     Eina_Strbuf *data;
     char *ret;
 
 
-    ec_url = ecore_con_url_new(url);
+    obj->ec_url = ecore_con_url_new(url);
     data = eina_strbuf_new();
 
-    ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,_url_data_cb,data);
-    ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE,_url_complete_cb,obj);
+    obj->ev_hl_data = ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,_url_data_cb,data);
+    obj->ev_hl_complete = ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE,_url_complete_cb,obj);
 
-    ecore_con_url_get(ec_url);
-
-    ecore_con_url_free(ec_url);
+    ecore_con_url_get(obj->ec_url);
 
     ret = strdup(eina_strbuf_string_get(data));
 
@@ -174,9 +175,8 @@ ebird_http_get(char *url,Ebird_Object *obj)
 }
 
 char *
-ebird_http_post(char *url)
+ebird_http_post(char *url, Ebird_Object *obj)
 {
-    Ecore_Con_Url *ec_url;
     Eina_Strbuf *data;
     int i;
     char *ret;
@@ -191,16 +191,16 @@ ebird_http_post(char *url)
     params = eina_str_split(sp_url[1],"&",9);
 
 
-    ec_url = ecore_con_url_new(sp_url[0]);
-    ecore_con_url_verbose_set(ec_url,EINA_TRUE);
+    obj->ec_url = ecore_con_url_new(sp_url[0]);
+    ecore_con_url_verbose_set(obj->ec_url,EINA_TRUE);
 
     data = eina_strbuf_new();
 
-    ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,_url_data_cb,data);
-    ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE,_url_complete_cb,NULL);
+    obj->ev_hl_data = ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,_url_data_cb,data);
+    obj->ev_hl_complete =  ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE,_url_complete_cb,NULL);
 
-    ecore_con_url_additional_header_add(ec_url,"User-Agent","Ebird 0.0.1");
-    ecore_con_url_additional_header_add(ec_url,"Accept","*/*");
+    ecore_con_url_additional_header_add(obj->ec_url,"User-Agent","Ebird 0.0.1");
+    ecore_con_url_additional_header_add(obj->ec_url,"Accept","*/*");
 
     snprintf(auth,sizeof(auth),"OAuth ");
     for (i=0; i<=sizeof(params); i++)
@@ -225,14 +225,12 @@ ebird_http_post(char *url)
 
 //    ecore_con_url_url_set(ec_url,post_data);
 
-    ecore_con_url_additional_header_add(ec_url,"Authorization",auth);
-    ecore_con_url_additional_header_add(ec_url,"Connection","close");
-    ecore_con_url_additional_header_add(ec_url,"Host","api.twitter.com");
+    ecore_con_url_additional_header_add(obj->ec_url,"Authorization",auth);
+    ecore_con_url_additional_header_add(obj->ec_url,"Connection","close");
+    ecore_con_url_additional_header_add(obj->ec_url,"Host","api.twitter.com");
 
     //ecore_con_url_post(ec_url," ",1,"application/x-www-form-urlencoded; charset=utf-8");
-    ecore_con_url_post(ec_url,post_data,strlen(post_data),"application/x-www-form-urlencoded; charset=utf-8");
-
-    ecore_con_url_free(ec_url);
+    ecore_con_url_post(obj->ec_url,post_data,strlen(post_data),"application/x-www-form-urlencoded; charset=utf-8");
 
     ret = strdup(eina_strbuf_string_get(data));
 
@@ -1004,7 +1002,7 @@ ebird_status_update(Ebird_Object *obj, char *message)
 
     snprintf(up_url,sizeof(up_url),"%s&status=%s&include_entities=true",url,message);
 //    printf("DEBUG\n[>%s<]\n",up_url);
-    ret = ebird_http_post(up_url);
+    ret = ebird_http_post(up_url,obj);
     DBG("\n%s\n\n",ret);
     return EINA_TRUE;
 

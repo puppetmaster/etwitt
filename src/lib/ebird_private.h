@@ -60,6 +60,10 @@ struct _Ebird_Obj
     OauthToken *request_token;
     EbirdAccount *account;
 
+    Ecore_Con_Url *ec_url;
+    Ecore_Event_Handler *ev_hl_data;
+    Ecore_Event_Handler *ev_hl_complete;
+
     void (*session_open)(Ebird_Object *obj,void *data);
     void *session_open_data;
 
@@ -75,7 +79,7 @@ struct _Ebird_Obj
 
 char *ebird_http_get(char *url, Ebird_Object *obj);
 
-char *ebird_http_post(char *url);
+char *ebird_http_post(char *url, Ebird_Object *obj);
 
 int ebird_error_code_get(char *string);
 
