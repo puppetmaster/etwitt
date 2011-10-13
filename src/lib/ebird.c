@@ -133,9 +133,10 @@ ebird_oauth_sign_url(const char *url,
 static Eina_Bool
 _url_data_cb(void *data, int type, void *event_info)
 {
+    Ebird_Object *obj = (Ebird_Object*)data;
     Ecore_Con_Event_Url_Data *url_data = event_info;
 
-    eina_strbuf_append_length(data, url_data->data,url_data->size);
+    eina_strbuf_append_length(obj->http_data, url_data->data,url_data->size);
 
     return EINA_TRUE;
 }
@@ -162,9 +163,9 @@ ebird_http_get(char *url,Ebird_Object *obj)
 
 
     obj->ec_url = ecore_con_url_new(url);
-    data = eina_strbuf_new();
+    obj->data = eina_strbuf_new();
 
-    obj->ev_hl_data = ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,_url_data_cb,data);
+    obj->ev_hl_data = ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,_url_data_cb,obj);
     obj->ev_hl_complete = ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE,_url_complete_cb,obj);
 
     ecore_con_url_get(obj->ec_url);
