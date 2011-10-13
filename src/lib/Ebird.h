@@ -105,12 +105,12 @@ EAPI Eina_List *ebird_timeline_public_get(Ebird_Object *obj);
 
 EAPI Eina_List *ebird_timeline_user_get(Ebird_Object *obj);
 
+EAPI Eina_List *ebird_timeline_mentions_get(Ebird_Object *obj);
+
 EAPI void ebird_timeline_free(Eina_List *timeline);
 
 EAPI void ebird_token_request_get(OauthToken *request);
 
-
-EAPI Eina_List *ebird_user_mentions_get(OauthToken *request, EbirdAccount *acc);
 
 EAPI Eina_Bool ebird_user_sync(EbirdAccount *user);
 

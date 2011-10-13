@@ -888,11 +888,13 @@ ebird_timeline_user_get(Ebird_Object *obj)
 }
 
 EAPI Eina_List *
-ebird_user_mentions_get(OauthToken *request, EbirdAccount *acc)
+ebird_timeline_mentions_get(Ebird_Object *obj)
 {
     Eina_List *mentions;
-    
-    mentions = ebird_timeline_get(EBIRD_USER_MENTIONS_URL,request,acc);
+
+    mentions = ebird_timeline_get(EBIRD_USER_MENTIONS_URL,
+                                  obj->request_token,
+                                  obj->account);
     return mentions;
 }
 

@@ -67,55 +67,40 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
         account.passwd   = strdup(EBIRD_USER_PASSWD);
     }
 
-    //printf("\nDEBUG[main] Step[1][Request Token]\n");
-
     if (ebird_session_open(eobj))
     {
 
-        //printf("Account exists !\n");
-        /* 
-           ebird_user_sync(&account);
-
-           printf("%s\n",account.username);
-           printf("%s\n",account.userid);
-           printf("%s\n",account.avatar);
-
-        */
         printf("User Credentials\n");
         printf("================\n");
-        //ebird_credentials_verify(eobj);
         credentials = ebird_credentials_verify(eobj);
         printf("%s\n",credentials);
 
-        
         puts("HOME TIMELINE");
         puts("=============");
         timeline = ebird_timeline_home_get(eobj);
         show_timeline(timeline);
         ebird_timeline_free(timeline);
-        /*
+
         puts("\nPUBLIC TIMELINE\n");
-        pubtimeline  = ebird_public_timeline_get(eobj);
+        pubtimeline  = ebird_timeline_public_get(eobj);
         show_timeline(pubtimeline);
         ebird_timeline_free(pubtimeline);
-        */
 
         puts("\nUSER TIMELINE\n");
         usertimeline = ebird_timeline_user_get(eobj);
         show_timeline(usertimeline);
         ebird_timeline_free(usertimeline);
+        
+        puts("\nUSER MENTIONS\n");
+        usermentions = ebird_timeline_mentions_get(eobj);
+        show_timeline(usermentions);
+        ebird_timeline_free(usermentions);
         /*
-           puts("\nUSER MENTIONS\n");
-           usermentions = ebird_user_mentions_get(&request_token, &account);
-           show_timeline(usermentions);
-           ebird_timeline_free(usermentions);
-
            if (ebird_update_status("JeSuisUnTest",&request_token, &account))
            printf("Twitt OK\n");
            else
            printf("Twitt KO\n");
-
-*/
+        */
 
     }
     else
