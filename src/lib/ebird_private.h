@@ -68,10 +68,9 @@ struct _Ebird_Obj
     void (*session_open)(Ebird_Object *obj,void *data);
     void *session_open_data;
 
-    /*
     void (*request_token_get)(Ebird_Object *obj);
     void *request_token_data;
-
+    /*
     void (*credentials_verify)(Ebird_Object *obj);
     void *credentials_data;
     */

@@ -34,6 +34,7 @@ typedef struct _Ebird_Obj Ebird_Object;
 typedef struct _oauth_token OauthToken;
 
 typedef void (*Ebird_Session_Cb)(Ebird_Object *obj,void *data);
+typedef void (*Ebird_Token_Request_Cb)(Ebird_Object *obj, *data);
 
 enum _state
 {

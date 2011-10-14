@@ -106,12 +106,7 @@ ebird_del(Ebird_Object *obj)
 }
 
 static char *
-ebird_oauth_sign_url(const char *url,
-                     const char *consumer_key,
-                     const char *consumer_secret,
-                     const char *token_key,
-                     const char *token_secret,
-                     const char *http_method)
+ebird_oauth_sign_url(const char *url, Ebird_Object *obj, const char *http_method)
 {
     char *out_url;
 
@@ -119,10 +114,10 @@ ebird_oauth_sign_url(const char *url,
                            NULL,
                            OA_HMAC,
                            http_method,
-                           consumer_key,
-                           consumer_secret,
-                           token_key,
-                           token_secret);
+                           obj->request_token->consumer_key,
+                           obj->request_token->consumer_secret,
+                           obj->request_token->key,
+                           obj->request_token->secret);
 
     DBG("[SIGNED-URL] : [%s]",out_url);
 
@@ -155,27 +150,26 @@ _url_complete_cb(void *data, int type, void *event_info)
     return EINA_TRUE;
 }
 
-char *
-ebird_http_get(char *url,Ebird_Object *obj)
+Eina_Bool 
+ebird_http_get(char *url,Ebird_Object *obj, Ebird_Http_Get_Cb *cb)
 {
     Eina_Strbuf *data;
     char *ret;
 
 
     obj->ec_url = ecore_con_url_new(url);
-    obj->data = eina_strbuf_new();
+    obj->http_data = eina_strbuf_new();
 
     obj->ev_hl_data = ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,_url_data_cb,obj);
     obj->ev_hl_complete = ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE,_url_complete_cb,obj);
 
     ecore_con_url_get(obj->ec_url);
+    
 
-    ret = strdup(eina_strbuf_string_get(data));
-
-    return ret;
+    return EINA_TRUE;
 }
 
-char *
+Eina_Bool 
 ebird_http_post(char *url, Ebird_Object *obj)
 {
     Eina_Strbuf *data;
@@ -197,8 +191,10 @@ ebird_http_post(char *url, Ebird_Object *obj)
 
     data = eina_strbuf_new();
 
-    obj->ev_hl_data = ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,_url_data_cb,data);
-    obj->ev_hl_complete =  ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE,_url_complete_cb,NULL);
+    obj->ev_hl_data = ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,
+                                              _url_data_cb,data);
+    obj->ev_hl_complete =  ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE,
+                                                   _url_complete_cb,NULL);
 
     ecore_con_url_additional_header_add(obj->ec_url,"User-Agent","Ebird 0.0.1");
     ecore_con_url_additional_header_add(obj->ec_url,"Accept","*/*");
@@ -231,11 +227,12 @@ ebird_http_post(char *url, Ebird_Object *obj)
     ecore_con_url_additional_header_add(obj->ec_url,"Host","api.twitter.com");
 
     //ecore_con_url_post(ec_url," ",1,"application/x-www-form-urlencoded; charset=utf-8");
-    ecore_con_url_post(obj->ec_url,post_data,strlen(post_data),"application/x-www-form-urlencoded; charset=utf-8");
+    ecore_con_url_post(obj->ec_url,post_data,strlen(post_data),
+                       "application/x-www-form-urlencoded; charset=utf-8");
 
-    ret = strdup(eina_strbuf_string_get(data));
+    //ret = strdup(eina_strbuf_string_get(data));
 
-    return ret;
+    return EINA_TRUE;
 }
 
 EAPI Eina_Bool
@@ -302,7 +299,6 @@ ebird_id_load(OauthToken *request_token)
 }
 
 
-
 /*
  * name: ebird_error_code_get
  * @param : web script retruned by ebird_http_get()
@@ -321,6 +317,49 @@ ebird_error_code_get(char *string)
         return 0;
 }
 
+Ebird_Http_Get_Cb 
+_token_request_get_cb(Ebird_Object *obj, void *data)
+{
+   obj->request_token->token = obj->http_data;
+   DBG("request cb token: '%s'", obj->request_token->token);
+   if (obj->request_token->token)
+   {
+      error_code = ebird_error_code_get(obj->request_token->token);
+      if ( error_code != 0)
+      {
+         ERR("Error code : %d", error_code);
+         obj->request_token->token = NULL;
+      }
+      else
+      {
+         res = oauth_split_url_parameters(obj->request_token->token,
+         &obj->request_token->token_prm);
+
+         if (res == 3)
+         {
+            obj->request_token->key    = eina_stringshare_add(&(obj->request_token->token_prm[0][12]));
+            obj->request_token->secret = eina_stringshare_add(&(obj->request_token->token_prm[1][19]));
+            obj->request_token->callback_confirmed = eina_stringshare_add(&(obj->request_token->token_prm[2][25]));
+            //DBG("DEBUG obj->request_token->key='%s', obj->request_token->secret='%s',"
+            //       " obj->request_token->callback_confirmed='%s'\n",
+            //       obj->request_token->key, obj->request_token->secret,
+            //       obj->request_token->callback_confirmed);
+         }
+         else
+         {
+            ERR("Error on Request Token [%s]",
+            obj->request_token->token);
+            obj->request_token->token = NULL;
+         }
+      }
+   }
+   else
+   {
+      ERR("Error on Request Token [%s]",obj->request_token->token);
+      obj->request_token->token = NULL;
+   }
+}
+
  /*
  * name: ebird_token_request_get
  * @param : Request token variable to receive informations
@@ -330,50 +369,13 @@ ebird_error_code_get(char *string)
 EAPI void
 ebird_token_request_get(Ebird_Object *obj)
 {
-    int res;
-    int error_code;
+   int res;
+   int error_code;
 
-    obj->request_token->url = ebird_oauth_sign_url(EBIRD_REQUEST_TOKEN_URL,
-                                        obj->request_token->consumer_key,
-                                        obj->request_token->consumer_secret, NULL, NULL, NULL);
-    obj->request_token->token = ebird_http_get(obj->request_token->url,obj);
-    DBG("request token: '%s'", obj->request_token->token);
-    if (obj->request_token->token)
-    {
-        error_code = ebird_error_code_get(obj->request_token->token);
-        if ( error_code != 0)
-        {
-            ERR("Error code : %d", error_code);
-            obj->request_token->token = NULL;
-        }
-        else
-        {
-            res = oauth_split_url_parameters(obj->request_token->token,
-                                             &obj->request_token->token_prm);
-
-            if (res == 3)
-            {
-                obj->request_token->key = eina_stringshare_add(&(obj->request_token->token_prm[0][12]));
-                obj->request_token->secret = eina_stringshare_add(&(obj->request_token->token_prm[1][19]));
-                obj->request_token->callback_confirmed = eina_stringshare_add(&(obj->request_token->token_prm[2][25]));
-                //DBG("DEBUG obj->request_token->key='%s', obj->request_token->secret='%s',"
-                //       " obj->request_token->callback_confirmed='%s'\n",
-                //       obj->request_token->key, obj->request_token->secret,
-                //       obj->request_token->callback_confirmed);
-            }
-            else
-            {
-                ERR("Error on Request Token [%s]",
-                       obj->request_token->token);
-                obj->request_token->token = NULL;
-            }
-        }
-    }
-    else
-    {
-        ERR("Error on Request Token [%s]",obj->request_token->token);
-        obj->request_token->token = NULL;
-    }
+   obj->request_token->url = ebird_oauth_sign_url(EBIRD_REQUEST_TOKEN_URL, obj,NULL);
+    
+   ebird_http_get(obj->request_token->url,obj,_token_request_get_cb);
+   
 }
 
 int
@@ -498,11 +500,7 @@ ebird_access_token_get(Ebird_Object *obj)
 
    access_token_prm = (char**) malloc(5*sizeof(char*));
 
-   acc_url = ebird_oauth_sign_url(EBIRD_ACCESS_TOKEN_URL,
-                                  obj->request_token->consumer_key,
-                                  obj->request_token->consumer_secret,
-                                  obj->request_token->key,
-                                  obj->request_token->secret,NULL);
+   acc_url = ebird_oauth_sign_url(EBIRD_ACCESS_TOKEN_URL, obj, NULL);
 
    snprintf(buf,sizeof(buf),"%s&oauth_verifier=%s",acc_url,obj->request_token->authorisation_pin);
 
@@ -836,11 +834,7 @@ ebird_timeline_get(const char *url, Ebird_Object *obj)
     Eina_List *timeline = NULL;
     Eina_Simple_XML_Node_Root *root;
 
-    timeline_url =  ebird_oauth_sign_url(url,
-                                obj->request_token->consumer_key,
-                                obj->request_token->consumer_secret,
-                                obj->account->access_token_key,
-                                obj->account->access_token_secret,NULL);
+    timeline_url =  ebird_oauth_sign_url(url, obj, NULL);
 
     xml = ebird_http_get(timeline_url,obj);
 //    printf("\n\n%s\n\n",xml);
@@ -895,11 +889,7 @@ ebird_home_timeline_xml_get(Ebird_Object *obj)
     char *xml_timeline;
     char *timeline_url;
 
-    timeline_url =  ebird_oauth_sign_url(EBIRD_HOME_TIMELINE_URL,
-                                        obj->request_token->consumer_key,
-                                        obj->request_token->consumer_secret,
-                                        obj->account->access_token_key,
-                                        obj->account->access_token_secret,NULL);
+    timeline_url =  ebird_oauth_sign_url(EBIRD_HOME_TIMELINE_URL,obj, NULL);
 
     xml_timeline = ebird_http_get(timeline_url,obj);
 //FIXME FREE timeline_url;
@@ -976,11 +966,7 @@ ebird_credentials_verify(Ebird_Object *obj)
     char *url;
     char *ret;
 
-    url = ebird_oauth_sign_url(EBIRD_ACCOUNT_CREDENTIALS_URL,
-                               obj->request_token->consumer_key,
-                               obj->request_token->consumer_secret,
-                               obj->account->access_token_key,
-                               obj->account->access_token_secret, NULL);
+    url = ebird_oauth_sign_url(EBIRD_ACCOUNT_CREDENTIALS_URL, obj, NULL);
     ret = ebird_http_get(url,obj);
     return ret;
 }
@@ -995,11 +981,7 @@ ebird_status_update(Ebird_Object *obj, char *message)
     if (!obj)
         return EINA_FALSE;
 
-    url = ebird_oauth_sign_url(EBIRD_STATUS_URL,
-                               obj->request_token->consumer_key,
-                               obj->request_token->consumer_secret,
-                               obj->account->access_token_key,
-                               obj->account->access_token_secret,"POST");
+    url = ebird_oauth_sign_url(EBIRD_STATUS_URL, obj,"POST");
 
     snprintf(up_url,sizeof(up_url),"%s&status=%s&include_entities=true",url,message);
 //    printf("DEBUG\n[>%s<]\n",up_url);
