@@ -367,7 +367,7 @@ _token_request_get_cb(Ebird_Object *obj, void *data)
  * @rem : FIXME Split into 2 functions
  */
 EAPI void
-ebird_token_request_get(Ebird_Object *obj)
+ (Ebird_Object *obj)
 {
    int res;
    int error_code;
