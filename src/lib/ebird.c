@@ -150,8 +150,8 @@ _url_complete_cb(void *data, int type, void *event_info)
     return EINA_TRUE;
 }
 
-Eina_Bool 
-ebird_http_get(char *url,Ebird_Object *obj, Ebird_Http_Get_Cb *cb)
+char * 
+ebird_http_get(char *url,Ebird_Object *obj)
 {
     Eina_Strbuf *data;
     char *ret;
@@ -166,10 +166,10 @@ ebird_http_get(char *url,Ebird_Object *obj, Ebird_Http_Get_Cb *cb)
     ecore_con_url_get(obj->ec_url);
     
 
-    return EINA_TRUE;
+    return "NULL";
 }
 
-Eina_Bool 
+char * 
 ebird_http_post(char *url, Ebird_Object *obj)
 {
     Eina_Strbuf *data;
@@ -232,7 +232,7 @@ ebird_http_post(char *url, Ebird_Object *obj)
 
     //ret = strdup(eina_strbuf_string_get(data));
 
-    return EINA_TRUE;
+    return "NULL";
 }
 
 EAPI Eina_Bool
@@ -317,9 +317,12 @@ ebird_error_code_get(char *string)
         return 0;
 }
 
+/*
 Ebird_Http_Get_Cb 
 _token_request_get_cb(Ebird_Object *obj, void *data)
 {
+   char **res; 
+	
    obj->request_token->token = obj->http_data;
    DBG("request cb token: '%s'", obj->request_token->token);
    if (obj->request_token->token)
@@ -360,6 +363,8 @@ _token_request_get_cb(Ebird_Object *obj, void *data)
    }
 }
 
+*/
+
  /*
  * name: ebird_token_request_get
  * @param : Request token variable to receive informations
@@ -367,14 +372,14 @@ _token_request_get_cb(Ebird_Object *obj, void *data)
  * @rem : FIXME Split into 2 functions
  */
 EAPI void
- (Ebird_Object *obj)
+ebird_token_request_get(Ebird_Object *obj)
 {
    int res;
    int error_code;
 
    obj->request_token->url = ebird_oauth_sign_url(EBIRD_REQUEST_TOKEN_URL, obj,NULL);
     
-   ebird_http_get(obj->request_token->url,obj,_token_request_get_cb);
+   ebird_http_get(obj->request_token->url,obj);
    
 }
 

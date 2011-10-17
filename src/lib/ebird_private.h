@@ -64,7 +64,6 @@ struct _Ebird_Obj
     Ecore_Event_Handler *ev_hl_data;
     Ecore_Event_Handler *ev_hl_complete;
     Eina_Strbuf *http_data;
-    
 
     void (*session_open)(Ebird_Object *obj,void *data);
     void *session_open_data;
