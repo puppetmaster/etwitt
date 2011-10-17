@@ -69,7 +69,7 @@ _show_credentials(void *data)
 
 void _session_opened(Ebird_Object *obj, void *data)
 {
-    printf("SESSION OPENED DEBUG MESSAGE");
+    puts("SESSION OPENED DEBUG MESSAGE");
 }
 
 int main(int argc __UNUSED__, char **argv __UNUSED__)
@@ -142,10 +142,10 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
 
    ebird_session_open2(eobj,_session_opened,NULL);
 
-    ecore_main_loop_begin();
+   ecore_main_loop_begin();
 
-    ecore_main_loop_quit();
+   ecore_main_loop_quit();
 
-    ebird_del(eobj);
-    return 0;
+   ebird_del(eobj);
+   return 0;
 }
