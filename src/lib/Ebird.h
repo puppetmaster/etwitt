@@ -35,6 +35,7 @@ typedef struct _oauth_token OauthToken;
 
 typedef void (*Ebird_Session_Cb)(Ebird_Object *obj,void *data);
 typedef void (*Ebird_Token_Request_Cb)(Ebird_Object *obj, void *data);
+typedef void (*Ebird_Http_Cb)(Ebird_Object *obj);
 
 enum _state
 {
@@ -137,5 +138,6 @@ EAPI char *ebird_credentials_verify(Ebird_Object *obj);
 
 
 EAPI Eina_Bool ebird_session_open(Ebird_Object *obj,Ebird_Session_Cb cb, void *data);
+EAPI Eina_Bool ebird_session_open2(Ebird_Object *obj,Ebird_Session_Cb cb, void *data);
 
 #endif

@@ -57,27 +57,31 @@ struct _oauth_token
 
 struct _Ebird_Obj
 {
-    OauthToken *request_token;
-    EbirdAccount *account;
+   OauthToken *request_token;
+   EbirdAccount *account;
+    
+   char *url;
+   Ecore_Con_Url *ec_url;
+   Ecore_Event_Handler *ev_hl_data;
+   Ecore_Event_Handler *ev_hl_complete;
+   Eina_Strbuf *http_data;
+    
+   void (*http_complete_cb)(void *data, int type, void *event_info);
 
-    Ecore_Con_Url *ec_url;
-    Ecore_Event_Handler *ev_hl_data;
-    Ecore_Event_Handler *ev_hl_complete;
-    Eina_Strbuf *http_data;
+   void (*session_open)(Ebird_Object *obj,void *data);
+   void *session_open_data;
 
-    void (*session_open)(Ebird_Object *obj,void *data);
-    void *session_open_data;
-
-    void (*request_token_get)(Ebird_Object *obj);
-    void *request_token_data;
-    /*
-    void (*credentials_verify)(Ebird_Object *obj);
-    void *credentials_data;
-    */
+   void (*request_token_get)(Ebird_Object *obj);
+   void *request_token_data;
+   /*
+   void (*credentials_verify)(Ebird_Object *obj);
+   void *credentials_data;
+   */
 };
 
 
-char *ebird_http_get(char *url, Ebird_Object *obj);
+char *ebird_http_get(Ebird_Object *obj,Ebird_Http_Cb cb);
+
 
 char *ebird_http_post(char *url, Ebird_Object *obj);
 

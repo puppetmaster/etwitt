@@ -102,7 +102,7 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
             EBIRD_ACCOUNT_FILE);
         return -1;
     }
-
+/*
     if (ebird_session_open(eobj,_session_opened, NULL))
     {
 
@@ -137,6 +137,10 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
     }
     else
         ebird_shutdown();
+
+*/
+
+   ebird_session_open2(eobj,_session_opened,NULL);
 
     ecore_main_loop_begin();
 
