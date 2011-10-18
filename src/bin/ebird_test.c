@@ -112,7 +112,6 @@ main(int    argc __UNUSED__,
      {
         printf("User account configuration file %s is missing or corrupted\n",
                EBIRD_ACCOUNT_FILE);
-        return -1;
      }
 /*
     if (ebird_session_open(eobj,_session_opened, NULL))

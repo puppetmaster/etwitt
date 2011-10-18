@@ -38,6 +38,7 @@ extern int _ebird_log_dom_global;
 #endif /* ifdef CRIT */
 #define CRIT(...) EINA_LOG_DOM_CRIT(_ebird_log_dom_global, __VA_ARGS__)
 
+typedef struct _Async_Data Async_Data;
 
 
 struct _oauth_token
@@ -64,6 +65,17 @@ struct _Ebird_Obj
 };
 
 
+struct _Async_Data
+{
+   Ebird_Object  *eobj;
+   void           (*cb)(Ebird_Object *obj,
+                        void         *data);
+   void          *data;
+   Ecore_Con_Url *url;
+   Eina_Strbuf   *http_data;
+   Eina_List     *handlers;
+};
+
 char *ebird_http_get(Ebird_Object *obj,Ebird_Http_Cb cb);
 
 
@@ -71,7 +83,7 @@ char *ebird_http_post(char *url, Ebird_Object *obj);
 
 int ebird_error_code_get(char *string);
 
-int ebird_token_authenticity_get(char *web_script, OauthToken *request_token);
+int ebird_token_authenticity_get(Async_Data *data);
 
 int ebird_authorisation_url_get(OauthToken *request_token);
 
@@ -79,13 +91,13 @@ int ebird_authorisation_pin_get(OauthToken *request_token, const char *username,
 
 Eina_Bool ebird_authorisation_pin_set(OauthToken *request_token,char *pin);
 
-Eina_Bool ebird_read_pin_from_stdin(OauthToken *request_token);
+Eina_Bool ebird_read_pin_from_stdin(Ebird_Object *obj);
 
 //Eina_Bool ebird_auto_authorise_app(OauthToken *request_token, EbirdAccount *account);
 
 Eina_Bool ebird_authorise_app(Ebird_Object *obj);
 
-int ebird_direct_token_get(Ebird_Object *obj);
+void ebird_direct_token_get(Async_Data *d);
 
 int ebird_access_token_get(Ebird_Object *obj);
 

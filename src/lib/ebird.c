@@ -17,19 +17,6 @@
 #include "Ebird.h"
 #include "ebird_private.h"
 
-typedef struct _Async_Data Async_Data;
-
-struct _Async_Data
-{
-   Ebird_Object  *eobj;
-   void           (*cb)(Ebird_Object *obj,
-                        void         *data);
-   void          *data;
-   Ecore_Con_Url *url;
-   Eina_Strbuf   *http_data;
-   Eina_List     *handlers;
-};
-
 static int _ebird_main_count = 0;
 
 /* log domain variable */
@@ -236,11 +223,11 @@ ebird_error_code_get(char *string)
 }
 
 int
-ebird_token_authenticity_get(char       *web_script,
-                             OauthToken *request_token)
+ebird_token_authenticity_get(Async_Data *data)
 {
    char *key,
    *end;
+   char *web_script = eina_strbuf_string_get(data->http_data);
 
    //printf("DEBUG webscript=%s\n", web_script);
    key = strstr(web_script, "twttr.form_authenticity_token");
@@ -256,7 +243,7 @@ ebird_token_authenticity_get(char       *web_script,
      return -1;
 
    *end = '\0';
-   request_token->authenticity_token = strdup(key);
+   data->eobj->request_token->authenticity_token = eina_stringshare_add(key);
    *end = '\'';
 
    return 0;
@@ -461,6 +448,7 @@ _ebird_timeline_get_cb(void *data,
    Async_Data *d = data;
    Ebird_Object *eobj = d->eobj;
    const char *xml = eina_strbuf_string_get(d->http_data);
+   DBG("%s\n", xml);
    Eina_List *timeline = NULL;
    eina_simple_xml_parse(xml, strlen(xml), EINA_TRUE, _parse_timeline, &timeline);
 
@@ -544,6 +532,32 @@ ebird_user_show(EbirdAccount *acc)
    return EINA_TRUE;
 }
 
+Eina_Bool
+ebird_read_pin_from_stdin(Ebird_Object *obj)
+{
+   char buffer[EBIRD_PIN_SIZE];
+   char url[EBIRD_URL_MAX];
+
+   snprintf(url, sizeof(url),
+            EBIRD_DIRECT_TOKEN_URL "?authenticity_token=%s&oauth_token=%s",
+            obj->request_token->authenticity_token,
+            obj->request_token->key);
+
+   obj->request_token->authorisation_url = eina_stringshare_add(url);
+
+   printf("Open this url in a web browser to authorize ebird \
+to access to your account.\n%s",
+          obj->request_token->authorisation_url);
+
+   puts("Please paste PIN here :");
+   fgets(buffer, sizeof(buffer), stdin);
+   buffer[strlen(buffer) - 1] = '\0';
+
+   obj->request_token->authorisation_pin = strdup(buffer);
+
+   return EINA_TRUE;
+}
+
 static Eina_Bool
 _ebird_direct_token_get_cb(void *data,
                            int   type,
@@ -552,13 +566,20 @@ _ebird_direct_token_get_cb(void *data,
    Async_Data *d = data;
    Ebird_Object *eobj = d->eobj;
 
+   if (ebird_token_authenticity_get(d) < 0)
+     goto error;
+
+   ebird_read_pin_from_stdin(eobj);
    DBG("");
    DBG("[%s]\n", eobj->request_token->token);
    DBG("[%s]\n", eobj->request_token->key);
+
+error:
+   return EINA_FALSE;
 }
 
-static void
-ebird_direct_token_get2(Async_Data *d)
+void
+ebird_direct_token_get(Async_Data *d)
 {
    Ecore_Event_Handler *h;
    Ebird_Object *eobj = d->eobj;
@@ -576,7 +597,8 @@ ebird_direct_token_get2(Async_Data *d)
 
    d->http_data = eina_strbuf_new();
    d->url = ecore_con_url_new(buf);
-   h = ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE, _ebird_direct_token_get_cb, d);
+   h = ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE,
+                               _ebird_direct_token_get_cb, d);
    d->handlers = eina_list_append(d->handlers, h);
    h = ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,
                                _url_data_cb, d);
@@ -663,7 +685,7 @@ _ebird_token_request_cb(void *data,
         EINA_LIST_FREE(d->handlers, h)
           ecore_event_handler_del(h);
         d->handlers = NULL;
-        ebird_direct_token_get2(d);
+        ebird_direct_token_get(d);
      }
 
    return EINA_TRUE;
