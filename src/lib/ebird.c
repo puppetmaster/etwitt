@@ -21,23 +21,28 @@ typedef struct _Async_Data Async_Data;
 
 struct _Async_Data
 {
-   Ebird_Object *eobj;
-   void (*cb)(Ebird_Object *obj,void *data);
-   void *data;
+   Ebird_Object  *eobj;
+   void           (*cb)(Ebird_Object *obj,
+                        void         *data);
+   void          *data;
    Ecore_Con_Url *url;
-   Eina_Strbuf *http_data;
-   Eina_List *handlers;
+   Eina_Strbuf   *http_data;
+   Eina_List     *handlers;
 };
-
 
 static int _ebird_main_count = 0;
 
 /* log domain variable */
 int _ebird_log_dom_global = -1;
 
-static Eina_Bool _url_data_cb(void *data, int type, void *event_info);
-static Eina_Bool _url_complete_cb(void *data, int type, void *event_info);
-static void ebird_timeline_get(const char *url, Async_Data *d);
+static Eina_Bool _url_data_cb(void *data,
+                              int   type,
+                              void *event_info);
+static Eina_Bool _url_complete_cb(void *data,
+                                  int   type,
+                                  void *event_info);
+static void ebird_timeline_get(const char *url,
+                               Async_Data *d);
 
 EAPI int
 ebird_init()
@@ -68,13 +73,13 @@ ebird_init()
    _ebird_main_count = 1;
    return 1;
 
- shutdown_ecore_con_url:
+shutdown_ecore_con_url:
    ecore_con_url_shutdown();
- shutdown_ecore_con:
+shutdown_ecore_con:
    ecore_con_shutdown();
- shutdown_ecore:
+shutdown_ecore:
    ecore_shutdown();
- shutdown_eina:
+shutdown_eina:
    eina_shutdown();
 
    return 0;
@@ -100,9 +105,9 @@ ebird_add(void)
 {
    Ebird_Object *eobj;
 
-   eobj = calloc(1,sizeof(Ebird_Object));
-   eobj->request_token = calloc(1,sizeof(OauthToken));
-   eobj->account = calloc(1,sizeof(EbirdAccount));
+   eobj = calloc(1, sizeof(Ebird_Object));
+   eobj->request_token = calloc(1, sizeof(OauthToken));
+   eobj->account = calloc(1, sizeof(EbirdAccount));
    ebird_id_load(eobj->request_token);
 
    return eobj;
@@ -119,27 +124,30 @@ ebird_del(Ebird_Object *eobj)
 }
 
 static char *
-ebird_oauth_sign_url(const char *url, Ebird_Object *obj, const char *http_method)
+ebird_oauth_sign_url(const char   *url,
+                     Ebird_Object *obj,
+                     const char   *http_method)
 {
    char *out_url;
 
-   out_url =  oauth_sign_url2(url,
-			      NULL,
-			      OA_HMAC,
-			      http_method,
-			      obj->request_token->consumer_key,
-			      obj->request_token->consumer_secret,
-			      obj->request_token->key,
-			      obj->request_token->secret);
+   out_url = oauth_sign_url2(url,
+                             NULL,
+                             OA_HMAC,
+                             http_method,
+                             obj->request_token->consumer_key,
+                             obj->request_token->consumer_secret,
+                             obj->request_token->key,
+                             obj->request_token->secret);
 
-   DBG("[SIGNED-URL] : [%s]",out_url);
+   DBG("[SIGNED-URL] : [%s]", out_url);
 
    return out_url;
 }
 
-
 static Eina_Bool
-_url_data_cb(void *data, int type, void *event_info)
+_url_data_cb(void *data,
+             int   type,
+             void *event_info)
 {
    Async_Data *d = data;
    Ecore_Con_Event_Url_Data *url_data = event_info;
@@ -148,9 +156,9 @@ _url_data_cb(void *data, int type, void *event_info)
      d->http_data = eina_strbuf_new();
 
    eina_strbuf_append_length(d->http_data,
-			     url_data->data,
-			     url_data->size);
-   DBG("==> [%s]",eina_strbuf_string_get(d->http_data));
+                             url_data->data,
+                             url_data->size);
+   DBG("==> [%s]", eina_strbuf_string_get(d->http_data));
    return EINA_TRUE;
 }
 
@@ -162,17 +170,16 @@ ebird_account_save(Ebird_Object *obj)
 
    file = eet_open(EBIRD_ACCOUNT_FILE, EET_FILE_MODE_WRITE);
 
-   eet_write(file,"username",obj->account->username,strlen(obj->account->username) + 1, 0);
-   eet_write(file,"passwd",obj->account->passwd,strlen(obj->account->passwd) + 1, 1);
-   eet_write(file,"access_token_key",obj->account->access_token_key,
-             strlen(obj->account->access_token_key)+1,0);
-   eet_write(file,"access_token_secret",obj->account->access_token_secret,
-             strlen(obj->account->access_token_secret)+1, 0);
-   eet_write(file,"userid",obj->account->userid,strlen(obj->account->userid)+1, 0);
-   eet_write(file,"avatar",obj->account->avatar,strlen(obj->account->avatar)+1, 0);
+   eet_write(file, "username", obj->account->username, strlen(obj->account->username) + 1, 0);
+   eet_write(file, "passwd", obj->account->passwd, strlen(obj->account->passwd) + 1, 1);
+   eet_write(file, "access_token_key", obj->account->access_token_key,
+             strlen(obj->account->access_token_key) + 1, 0);
+   eet_write(file, "access_token_secret", obj->account->access_token_secret,
+             strlen(obj->account->access_token_secret) + 1, 0);
+   eet_write(file, "userid", obj->account->userid, strlen(obj->account->userid) + 1, 0);
+   eet_write(file, "avatar", obj->account->avatar, strlen(obj->account->avatar) + 1, 0);
 
    eet_close(file);
-
 
    return EINA_TRUE;
 }
@@ -186,19 +193,17 @@ ebird_account_load(Ebird_Object *obj)
    if (!obj)
      return EINA_FALSE;
 
-   file = eet_open(EBIRD_ACCOUNT_FILE,EET_FILE_MODE_READ);
-   obj->account->username = eina_stringshare_add(eet_read(file,"username",&size));
-   obj->account->passwd = eina_stringshare_add(eet_read(file,"passwd",&size));
-   obj->account->access_token_key = eina_stringshare_add(eet_read(file,"access_token_key",&size));
-   obj->account->access_token_secret = eina_stringshare_add(eet_read(file,"access_token_secret",&size));
-   obj->account->userid = eina_stringshare_add(eet_read(file,"userid",&size));
+   file = eet_open(EBIRD_ACCOUNT_FILE, EET_FILE_MODE_READ);
+   obj->account->username = eina_stringshare_add(eet_read(file, "username", &size));
+   obj->account->passwd = eina_stringshare_add(eet_read(file, "passwd", &size));
+   obj->account->access_token_key = eina_stringshare_add(eet_read(file, "access_token_key", &size));
+   obj->account->access_token_secret = eina_stringshare_add(eet_read(file, "access_token_secret", &size));
+   obj->account->userid = eina_stringshare_add(eet_read(file, "userid", &size));
 
    eet_close(file);
 
    return EINA_TRUE;
-
 }
-
 
 EAPI int
 ebird_id_load(OauthToken *request_token)
@@ -206,15 +211,11 @@ ebird_id_load(OauthToken *request_token)
    Eet_File *file;
    int size;
 
-
-   file = eet_open(EBIRD_ID_FILE,EET_FILE_MODE_READ);
-   request_token->consumer_key = strdup(eet_read(file,"key",&size));
-   request_token->consumer_secret = strdup(eet_read(file,"secret",&size));
+   file = eet_open(EBIRD_ID_FILE, EET_FILE_MODE_READ);
+   request_token->consumer_key = strdup(eet_read(file, "key", &size));
+   request_token->consumer_secret = strdup(eet_read(file, "secret", &size));
    eet_close(file);
-
-
 }
-
 
 /*
  * name: ebird_error_code_get
@@ -227,7 +228,7 @@ ebird_error_code_get(char *string)
 {
    int compare_res;
 
-   compare_res = strcmp(string,"Failed to validate oauth signature and token");
+   compare_res = strcmp(string, "Failed to validate oauth signature and token");
    if (compare_res == 0)
      return 500;
    else
@@ -235,10 +236,11 @@ ebird_error_code_get(char *string)
 }
 
 int
-ebird_token_authenticity_get(char *web_script, OauthToken *request_token)
+ebird_token_authenticity_get(char       *web_script,
+                             OauthToken *request_token)
 {
    char *key,
-     *end;
+   *end;
 
    //printf("DEBUG webscript=%s\n", web_script);
    key = strstr(web_script, "twttr.form_authenticity_token");
@@ -261,54 +263,59 @@ ebird_token_authenticity_get(char *web_script, OauthToken *request_token)
 }
 
 static Eina_Bool
-_parse_user(void *data,Eina_Simple_XML_Type type, const char *content,
-            unsigned offset, unsigned length)
+_parse_user(void                *data,
+            Eina_Simple_XML_Type type,
+            const char          *content,
+            unsigned             offset,
+            unsigned             length)
 {
    static EbirdAccount *cur = NULL;
    static UserState s = USER_NONE;
 
    data = (EbirdAccount *)data;
 
-   if (type == EINA_SIMPLE_XML_OPEN && !strncmp("user",content,4))
+   if (type == EINA_SIMPLE_XML_OPEN && !strncmp("user", content, 4))
      {
         if (!strncmp("screen_name", content, 11))
-	  s = SCREEN_NAME;
-        else if (!strncmp("id",content,2))
-	  s = USER_ID;
-        else if (!strncmp("profile_image_url_https",content, 23))
-	  s = AVATAR;
+          s = SCREEN_NAME;
+        else if (!strncmp("id", content, 2))
+          s = USER_ID;
+        else if (!strncmp("profile_image_url_https", content, 23))
+          s = AVATAR;
      }
    else if (cur && type == EINA_SIMPLE_XML_DATA)
      {
-        char *ptr = strndup(content,length);
+        char *ptr = strndup(content, length);
         switch(s)
-	  {
-	   case SCREEN_NAME:
-	      if ( ! cur->username)
-		cur->username = ptr;
-	      break;
-	   case AVATAR:
-	      DBG("===> [DEBUG][%s]",ptr);
-	      cur->avatar = ptr;
-	      break;
-	   case USER_ID:
-	      cur->userid = ptr;
-	      break;
-	  }
+          {
+           case SCREEN_NAME:
+             if ( !cur->username)
+               cur->username = ptr;
+             break;
 
+           case AVATAR:
+             DBG("===> [DEBUG][%s]", ptr);
+             cur->avatar = ptr;
+             break;
+
+           case USER_ID:
+             cur->userid = ptr;
+             break;
+          }
      }
    else if (cur && type == EINA_SIMPLE_XML_CLOSE &&
-	    !strncmp("user",content,4))
+            !strncmp("user", content, 4))
      data = cur;
 
    return EINA_TRUE;
-
 }
 
-
 static Eina_Bool
-_parse_timeline(void *_data, Eina_Simple_XML_Type type, const char *content,
-                unsigned offset, unsigned length)
+_parse_timeline(void                *_data,
+                Eina_Simple_XML_Type type,
+                const char          *content,
+                unsigned             offset,
+                unsigned             length)
 {
    static EbirdStatus *cur = NULL;
    static State s = NONE;
@@ -318,104 +325,108 @@ _parse_timeline(void *_data, Eina_Simple_XML_Type type, const char *content,
 
    void **data = (void **)_data;
 
-
-   if (type == EINA_SIMPLE_XML_OPEN && !strncmp("status",content,length))
+   if (type == EINA_SIMPLE_XML_OPEN && !strncmp("status", content, length))
      {
-        cur = calloc(1,sizeof(EbirdStatus));
-        cur->user = calloc(1,sizeof(EbirdAccount));
+        cur = calloc(1, sizeof(EbirdStatus));
+        cur->user = calloc(1, sizeof(EbirdAccount));
      }
    else if (cur && type == EINA_SIMPLE_XML_OPEN)
      {
         us = USER_NONE;
-        if (!strncmp("retweeted_status",content,16))
-	  {
-	     s = RETWEETED;
-	     cur->retweeted_status = calloc(1,sizeof(EbirdStatus));
-	     cur->retweeted_status->user = calloc(1,sizeof(EbirdAccount));
-	     cur->retweeted = EINA_TRUE;
-	  }
+        if (!strncmp("retweeted_status", content, 16))
+          {
+             s = RETWEETED;
+             cur->retweeted_status = calloc(1, sizeof(EbirdStatus));
+             cur->retweeted_status->user = calloc(1, sizeof(EbirdAccount));
+             cur->retweeted = EINA_TRUE;
+          }
         else if (!strncmp("created_at", content, 10))
-	  s = CREATEDAT;
-        else if (!strncmp("text",content,4))
-	  s = TEXT;
-        else if (!strncmp("id",content,2))
-	  s = ID;
-        else if (!strncmp("user",content,4))
-	  s = USER;
-        else if (!strncmp("screen_name",content, 11))
-	  {
-	     us = SCREEN_NAME;
-	     s = USER;
-	  }
+          s = CREATEDAT;
+        else if (!strncmp("text", content, 4))
+          s = TEXT;
+        else if (!strncmp("id", content, 2))
+          s = ID;
+        else if (!strncmp("user", content, 4))
+          s = USER;
+        else if (!strncmp("screen_name", content, 11))
+          {
+             us = SCREEN_NAME;
+             s = USER;
+          }
         else
-	  s = NONE;
+          s = NONE;
      }
    else if (cur && type == EINA_SIMPLE_XML_DATA)
      {
-        char *ptr = strndup(content,length);
-        if ( ! cur->retweeted)
-	  {
-	     switch(s)
-	       {
+        char *ptr = strndup(content, length);
+        if ( !cur->retweeted)
+          {
+             switch(s)
+               {
                 case CREATEDAT:
-		   cur->created_at = ptr;
-		   break;
+                  cur->created_at = ptr;
+                  break;
+
                 case TEXT:
-		   cur->text = ptr;
-		   break;
+                  cur->text = ptr;
+                  break;
+
                 case ID:
-		   cur->id = ptr;
-		   break;
-	       }
-	     switch(us)
-	       {
+                  cur->id = ptr;
+                  break;
+               }
+             switch(us)
+               {
                 case SCREEN_NAME:
-		   cur->user->username = ptr;
-		   break;
+                  cur->user->username = ptr;
+                  break;
+
                 case USER_NONE:
-		   break;
-	       }
-	  }
+                  break;
+               }
+          }
         else
-	  {
-	     switch(s)
-	       {
+          {
+             switch(s)
+               {
                 case CREATEDAT:
-		   cur->retweeted_status->created_at = ptr;
-		   break;
+                  cur->retweeted_status->created_at = ptr;
+                  break;
+
                 case TEXT:
-		   cur->retweeted_status->text = ptr;
-		   break;
+                  cur->retweeted_status->text = ptr;
+                  break;
+
                 case ID:
-		   cur->retweeted_status->id = ptr;
-		   break;
+                  cur->retweeted_status->id = ptr;
+                  break;
+
                 case RETWEETED:
-		   cur->retweeted_status->retweeted = EINA_TRUE;
-	       }
+                  cur->retweeted_status->retweeted = EINA_TRUE;
+               }
 
-
-	     switch(us)
-	       {
+             switch(us)
+               {
                 case SCREEN_NAME:
-		   cur->retweeted_status->user->username = ptr;
-		   break;
-                case USER_NONE:
-		   break;
-	       }
-	  }
+                  cur->retweeted_status->user->username = ptr;
+                  break;
 
+                case USER_NONE:
+                  break;
+               }
+          }
      }
-   else if (cur && type == EINA_SIMPLE_XML_CLOSE && !strncmp("status",content,length))
+   else if (cur && type == EINA_SIMPLE_XML_CLOSE && !strncmp("status", content, length))
      {
-        if (!strncmp("RT ",cur->text,3))
-	  cur->retweeted = EINA_TRUE;
-        *data = eina_list_append(*data,cur);
+        if (!strncmp("RT ", cur->text, 3))
+          cur->retweeted = EINA_TRUE;
+        *data = eina_list_append(*data, cur);
         cur = NULL;
      }
-   else if (cur && type == EINA_SIMPLE_XML_CLOSE && !strncmp("retweeted_status",content,16))
+   else if (cur && type == EINA_SIMPLE_XML_CLOSE && !strncmp("retweeted_status", content, 16))
      {
         if (cur->retweeted)
-	  cur->retweeted = EINA_FALSE;
+          cur->retweeted = EINA_FALSE;
      }
    return EINA_TRUE;
 }
@@ -425,26 +436,27 @@ ebird_timeline_free(Eina_List *timeline)
 {
    EbirdStatus *st;
 
-   EINA_LIST_FREE(timeline,st)
+   EINA_LIST_FREE(timeline, st)
      {
         if (st->retweeted && st->retweeted_status)
-	  {
-	     free(st->retweeted_status->user);
-	     free(st->retweeted_status);
-	     free(st->user);
-	     free(st);
-	  }
+          {
+             free(st->retweeted_status->user);
+             free(st->retweeted_status);
+             free(st->user);
+             free(st);
+          }
         else
-	  {
-	     free(st->user);
-	     free(st);
-	  }
+          {
+             free(st->user);
+             free(st);
+          }
      }
-
 }
 
 static Eina_Bool
-_ebird_timeline_get_cb(void *data, int type, void *event_info)
+_ebird_timeline_get_cb(void *data,
+                       int   type,
+                       void *event_info)
 {
    Async_Data *d = data;
    Ebird_Object *eobj = d->eobj;
@@ -454,29 +466,30 @@ _ebird_timeline_get_cb(void *data, int type, void *event_info)
 
    if (d->cb)
      d->cb(eobj, d->data);
-
 }
 
 static void
-ebird_timeline_get(const char *url, Async_Data *d)
+ebird_timeline_get(const char *url,
+                   Async_Data *d)
 {
    Ecore_Event_Handler *h;
    Ebird_Object *eobj = d->eobj;
 
-
    d->url = ecore_con_url_new(ebird_oauth_sign_url(url, eobj, NULL));
    h = ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,
-			       _url_data_cb, d);
+                               _url_data_cb, d);
    d->handlers = eina_list_append(d->handlers, h);
    h = ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE,
-			       _ebird_timeline_get_cb, d);
+                               _ebird_timeline_get_cb, d);
    d->handlers = eina_list_append(d->handlers, h);
 
    ecore_con_url_get(d->url);
 }
 
 EAPI void
-ebird_timeline_home_get(Ebird_Object *eobj, Ebird_Session_Cb cb, void *data)
+ebird_timeline_home_get(Ebird_Object    *eobj,
+                        Ebird_Session_Cb cb,
+                        void            *data)
 {
    Async_Data *d;
 
@@ -516,11 +529,11 @@ ebird_user_show(EbirdAccount *acc)
    if (acc)
      {
         if (acc->username)
-	  INF("USERNAME : [%s]",acc->username);
+          INF("USERNAME : [%s]", acc->username);
         if (acc->userid)
-	  INF("USERID : [%s]",acc->userid);
+          INF("USERID : [%s]", acc->userid);
         if (acc->avatar)
-	  INF("AVATAR : [%s]",acc->avatar);
+          INF("AVATAR : [%s]", acc->avatar);
      }
    else
      {
@@ -529,24 +542,24 @@ ebird_user_show(EbirdAccount *acc)
      }
 
    return EINA_TRUE;
-
 }
 
 static Eina_Bool
-_ebird_direct_token_get_cb(void *data, int type, void *event_info)
+_ebird_direct_token_get_cb(void *data,
+                           int   type,
+                           void *event_info)
 {
    Async_Data *d = data;
    Ebird_Object *eobj = d->eobj;
 
    DBG("");
-   DBG("[%s]\n",eobj->request_token->token);
-   DBG("[%s]\n",eobj->request_token->key);
+   DBG("[%s]\n", eobj->request_token->token);
+   DBG("[%s]\n", eobj->request_token->key);
 }
 
 static void
 ebird_direct_token_get2(Async_Data *d)
 {
-
    Ecore_Event_Handler *h;
    Ebird_Object *eobj = d->eobj;
    char buf[1024];
@@ -573,9 +586,10 @@ ebird_direct_token_get2(Async_Data *d)
 }
 
 static Eina_Bool
-_ebird_token_request_cb(void *data, int type, void *event_info)
+_ebird_token_request_cb(void *data,
+                        int   type,
+                        void *event_info)
 {
-
    Async_Data *d = data;
    Ebird_Object *eobj = d->eobj;
 
@@ -589,35 +603,34 @@ _ebird_token_request_cb(void *data, int type, void *event_info)
      {
         error_code = ebird_error_code_get(eobj->request_token->token);
         if ( error_code != 0)
-	  {
-	     ERR("Error code : %d", error_code);
-	     free(eobj->request_token->token);
-	     eobj->request_token->token = NULL;
-	  }
+          {
+             ERR("Error code : %d", error_code);
+             free(eobj->request_token->token);
+             eobj->request_token->token = NULL;
+          }
         else
-	  {
-	     res = oauth_split_url_parameters(eobj->request_token->token,
-					      &eobj->request_token->token_prm);
+          {
+             res = oauth_split_url_parameters(eobj->request_token->token,
+                                              &eobj->request_token->token_prm);
 
-	     if (res == 3)
-	       {
-		  eobj->request_token->key =
-		    strdup(&(eobj->request_token->token_prm[0][12]));
+             if (res == 3)
+               {
+                  eobj->request_token->key =
+                    strdup(&(eobj->request_token->token_prm[0][12]));
 
-		  eobj->request_token->secret =
-		    strdup(&(eobj->request_token->token_prm[1][19]));
-		  eobj->request_token->callback_confirmed =
-		    strdup(&(eobj->request_token->token_prm[2][25]));
-	       }
-	     else
-	       {
-		  ERR("Error on Request Token [%s]",
-		      eobj->request_token->token);
-		  free(eobj->request_token->token);
-		  eobj->request_token->token = NULL;
-	       }
-	  }
-
+                  eobj->request_token->secret =
+                    strdup(&(eobj->request_token->token_prm[1][19]));
+                  eobj->request_token->callback_confirmed =
+                    strdup(&(eobj->request_token->token_prm[2][25]));
+               }
+             else
+               {
+                  ERR("Error on Request Token [%s]",
+                      eobj->request_token->token);
+                  free(eobj->request_token->token);
+                  eobj->request_token->token = NULL;
+               }
+          }
      }
    else
      {
@@ -646,7 +659,7 @@ _ebird_token_request_cb(void *data, int type, void *event_info)
         ecore_con_url_free(d->url);
         eina_strbuf_free(d->http_data);
         d->http_data = NULL;
-        d->url= NULL;
+        d->url = NULL;
         EINA_LIST_FREE(d->handlers, h)
           ecore_event_handler_del(h);
         d->handlers = NULL;
@@ -654,11 +667,12 @@ _ebird_token_request_cb(void *data, int type, void *event_info)
      }
 
    return EINA_TRUE;
-
 }
 
 EAPI Eina_Bool
-ebird_session_open(Ebird_Object *eobj, Ebird_Session_Cb cb, void *data)
+ebird_session_open(Ebird_Object    *eobj,
+                   Ebird_Session_Cb cb,
+                   void            *data)
 {
    Async_Data *d;
    Ecore_Event_Handler *h;
@@ -676,22 +690,22 @@ ebird_session_open(Ebird_Object *eobj, Ebird_Session_Cb cb, void *data)
    d->cb = cb;
    d->data = data;
    d->url = ecore_con_url_new
-     (ebird_oauth_sign_url
-      (EBIRD_REQUEST_TOKEN_URL,
-       eobj,
-       NULL
-       )
-      );
+       (ebird_oauth_sign_url
+         (EBIRD_REQUEST_TOKEN_URL,
+         eobj,
+         NULL
+         )
+       );
 
    h = ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,
-			       _url_data_cb, d);
+                               _url_data_cb, d);
    d->handlers = eina_list_append(d->handlers, h);
    h = ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE,
-			       _ebird_token_request_cb, d);
+                               _ebird_token_request_cb, d);
    d->handlers = eina_list_append(d->handlers, h);
 
    ecore_con_url_get(d->url);
 
-
    return EINA_TRUE;
 }
+

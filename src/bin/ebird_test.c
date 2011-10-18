@@ -15,101 +15,105 @@
 static void
 show_timeline(Eina_List *timeline)
 {
-    Eina_List *l;
-    EbirdStatus *st;
+   Eina_List *l;
+   EbirdStatus *st;
 
-    EINA_LIST_FOREACH(timeline,l,st)
-    {
+   EINA_LIST_FOREACH(timeline, l, st)
+     {
         const char *username = NULL;
         const char *username_rt = NULL;
         const char *created_at = NULL;
         const char *text = NULL;
 
         if (!st)
-            continue;
+          continue;
 
         if (st->retweeted)
-        {
-            if (st->user)
-                username = st->user->username;
+          {
+             if (st->user)
+               username = st->user->username;
 
-            if (st->retweeted_status && st->retweeted_status->user)
-                username_rt = st->retweeted_status->user->username;
+             if (st->retweeted_status && st->retweeted_status->user)
+               username_rt = st->retweeted_status->user->username;
 
-            if (st->retweeted_status)
-            {
-                created_at = st->retweeted_status->created_at;
-                text = st->retweeted_status->text;
-            }
-            printf("[RT by %s][TW by%s][%s]\n\t%s\n" ,username,
-                   username_rt,
-                   created_at,
-                   text);
-        }
+             if (st->retweeted_status)
+               {
+                  created_at = st->retweeted_status->created_at;
+                  text = st->retweeted_status->text;
+               }
+             printf("[RT by %s][TW by%s][%s]\n\t%s\n", username,
+                    username_rt,
+                    created_at,
+                    text);
+          }
         else
-        {
-            if (st->user)
-                username = st->user->username;
+          {
+             if (st->user)
+               username = st->user->username;
 
-            printf("[TW by %s][%s]\n\t%s\n",username,
-                   st->created_at,
-                   st->text);
-
-        }
-    }
+             printf("[TW by %s][%s]\n\t%s\n", username,
+                    st->created_at,
+                    st->text);
+          }
+     }
 }
 
 static void
 _show_credentials(void *data)
 {
-    char *xml = (char*)data;
+   char *xml = (char *)data;
 
-    printf("%s\n",xml);
+   printf("%s\n", xml);
 }
+
 static void
-_timeline_get_cb(Ebird_Object *obj, void *data)
+_timeline_get_cb(Ebird_Object *obj,
+                 void         *data)
 {
-    printf("Time LINE GET\n");
-
-}
-void _session_opened(Ebird_Object *obj, void *data)
-{
-    printf("SESSION OPENED DEBUG MESSAGE\n");
-
-    ebird_timeline_home_get(obj, _timeline_get_cb, obj);
-
+   printf("Time LINE GET\n");
 }
 
-int main(int argc __UNUSED__, char **argv __UNUSED__)
+void
+_session_opened(Ebird_Object *obj,
+                void         *data)
 {
-    char *userinfo;
-    char *credentials;
-    Ebird_Object *eobj;
-    EbirdAccount account;
-    Eina_List *timeline;
-    Eina_List *pubtimeline;
-    Eina_List *usertimeline;
-    Eina_List *usermentions;
+   printf("SESSION OPENED DEBUG MESSAGE\n");
 
-    if (!ebird_init())
-        return -1;
+   ebird_timeline_home_get(obj, _timeline_get_cb, obj);
+}
 
-    if (!ecore_file_init())
-    {
+int
+main(int    argc __UNUSED__,
+     char **argv __UNUSED__)
+{
+   char *userinfo;
+   char *credentials;
+   Ebird_Object *eobj;
+   EbirdAccount account;
+   Eina_List *timeline;
+   Eina_List *pubtimeline;
+   Eina_List *usertimeline;
+   Eina_List *usermentions;
+
+   if (!ebird_init())
+     return -1;
+
+   if (!ecore_file_init())
+     {
         ebird_shutdown();
         return -1;
-    }
+     }
 
-    eobj = ebird_add();
+   eobj = ebird_add();
 
-    if (ecore_file_exists(EBIRD_ACCOUNT_FILE))
-        ebird_account_load(eobj);
-    else
-    {
+   if (ecore_file_exists(EBIRD_ACCOUNT_FILE))
+     ebird_account_load(eobj);
+   else
+     {
         printf("User account configuration file %s is missing or corrupted\n",
-            EBIRD_ACCOUNT_FILE);
+               EBIRD_ACCOUNT_FILE);
         return -1;
-    }
+     }
 /*
     if (ebird_session_open(eobj,_session_opened, NULL))
     {
@@ -146,9 +150,9 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
     else
         ebird_shutdown();
 
-*/
+ */
 
-   ebird_session_open(eobj,_session_opened,NULL);
+   ebird_session_open(eobj, _session_opened, NULL);
 
    ecore_main_loop_begin();
 
@@ -157,3 +161,4 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
    ebird_del(eobj);
    return 0;
 }
+
