@@ -1177,6 +1177,9 @@ ebird_session_open2(Ebird_Object *obj, Ebird_Session_Cb cb, void *data)
    //obj->request_token->url = ebird_oauth_sign_url(EBIRD_REQUEST_TOKEN_URL, obj,NULL);
    DBG("Euuu\n");
  
+   obj->session_open = cb;
+   obj->session_open_data = data;
+
    obj->ec_url = ecore_con_url_new(ebird_oauth_sign_url(EBIRD_REQUEST_TOKEN_URL, obj,NULL));
    obj->ev_hl_data = ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,_url_data_cb,obj);
    obj->ev_hl_complete = ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE,_ebird_token_request_get,obj);
