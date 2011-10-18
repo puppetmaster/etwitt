@@ -31,6 +31,7 @@ struct _Async_Data
 
 
 static int _ebird_main_count = 0;
+
 /* log domain variable */
 int _ebird_log_dom_global = -1;
 
@@ -159,8 +160,6 @@ ebird_account_save(Ebird_Object *obj)
    Eet_File *file;
    int size;
 
-   //DBG("DEBUG %s\n", __FUNCTION__);
-
    file = eet_open(EBIRD_ACCOUNT_FILE, EET_FILE_MODE_WRITE);
 
    eet_write(file,"username",obj->account->username,strlen(obj->account->username) + 1, 0);
@@ -235,55 +234,6 @@ ebird_error_code_get(char *string)
      return 0;
 }
 
-/*
-  Ebird_Http_Get_Cb
-  _token_request_get_cb(Ebird_Object *obj, void *data)
-  {
-  char **res;
-
-  obj->request_token->token = obj->http_data;
-  DBG("request cb token: '%s'", obj->request_token->token);
-  if (obj->request_token->token)
-  {
-  error_code = ebird_error_code_get(obj->request_token->token);
-  if ( error_code != 0)
-  {
-  ERR("Error code : %d", error_code);
-  obj->request_token->token = NULL;
-  }
-  else
-  {
-  res = oauth_split_url_parameters(obj->request_token->token,
-  &obj->request_token->token_prm);
-
-  if (res == 3)
-  {
-  obj->request_token->key    = eina_stringshare_add(&(obj->request_token->token_prm[0][12]));
-  obj->request_token->secret = eina_stringshare_add(&(obj->request_token->token_prm[1][19]));
-  obj->request_token->callback_confirmed = eina_stringshare_add(&(obj->request_token->token_prm[2][25]));
-  //DBG("DEBUG obj->request_token->key='%s', obj->request_token->secret='%s',"
-  //       " obj->request_token->callback_confirmed='%s'\n",
-  //       obj->request_token->key, obj->request_token->secret,
-  //       obj->request_token->callback_confirmed);
-  }
-  else
-  {
-  ERR("Error on Request Token [%s]",
-  obj->request_token->token);
-  obj->request_token->token = NULL;
-  }
-  }
-  }
-  else
-  {
-  ERR("Error on Request Token [%s]",obj->request_token->token);
-  obj->request_token->token = NULL;
-  }
-  }
-
-*/
-
-
 int
 ebird_token_authenticity_get(char *web_script, OauthToken *request_token)
 {
@@ -347,11 +297,10 @@ _parse_user(void *data,Eina_Simple_XML_Type type, const char *content,
 	  }
 
      }
-   else if (cur && type == EINA_SIMPLE_XML_CLOSE && !strncmp("user",content,4))
-     {
-	//        printf("CLOSE\n");
-        data = cur;
-     }
+   else if (cur && type == EINA_SIMPLE_XML_CLOSE &&
+	    !strncmp("user",content,4))
+     data = cur;
+
    return EINA_TRUE;
 
 }
@@ -368,14 +317,12 @@ _parse_timeline(void *_data, Eina_Simple_XML_Type type, const char *content,
    static UserState rt_us = USER_NONE;
 
    void **data = (void **)_data;
-   //  Eina_List *timeline = (Eina_List *)data;
-   //
+
 
    if (type == EINA_SIMPLE_XML_OPEN && !strncmp("status",content,length))
      {
         cur = calloc(1,sizeof(EbirdStatus));
         cur->user = calloc(1,sizeof(EbirdAccount));
-        //cur->retweeted = EINA_FALSE;
      }
    else if (cur && type == EINA_SIMPLE_XML_OPEN)
      {
@@ -383,7 +330,6 @@ _parse_timeline(void *_data, Eina_Simple_XML_Type type, const char *content,
         if (!strncmp("retweeted_status",content,16))
 	  {
 	     s = RETWEETED;
-	     //           printf("[-=O=-]RETWEETED[-=O=-]\n");
 	     cur->retweeted_status = calloc(1,sizeof(EbirdStatus));
 	     cur->retweeted_status->user = calloc(1,sizeof(EbirdAccount));
 	     cur->retweeted = EINA_TRUE;
@@ -415,7 +361,6 @@ _parse_timeline(void *_data, Eina_Simple_XML_Type type, const char *content,
 		   cur->created_at = ptr;
 		   break;
                 case TEXT:
-		   //                printf("===> [DEBUG][%s]\n",ptr);
 		   cur->text = ptr;
 		   break;
                 case ID:
@@ -425,7 +370,6 @@ _parse_timeline(void *_data, Eina_Simple_XML_Type type, const char *content,
 	     switch(us)
 	       {
                 case SCREEN_NAME:
-		   //printf("DEBUG ICI [%d][%s]\n",us,ptr);
 		   cur->user->username = ptr;
 		   break;
                 case USER_NONE:
@@ -440,7 +384,6 @@ _parse_timeline(void *_data, Eina_Simple_XML_Type type, const char *content,
 		   cur->retweeted_status->created_at = ptr;
 		   break;
                 case TEXT:
-		   //printf("===> [DEBUG][%s]\n",ptr);
 		   cur->retweeted_status->text = ptr;
 		   break;
                 case ID:
@@ -454,7 +397,6 @@ _parse_timeline(void *_data, Eina_Simple_XML_Type type, const char *content,
 	     switch(us)
 	       {
                 case SCREEN_NAME:
-		   //                    printf("DEBUG ICI [%d][%s]\n",us,ptr);
 		   cur->retweeted_status->user->username = ptr;
 		   break;
                 case USER_NONE:
@@ -465,9 +407,6 @@ _parse_timeline(void *_data, Eina_Simple_XML_Type type, const char *content,
      }
    else if (cur && type == EINA_SIMPLE_XML_CLOSE && !strncmp("status",content,length))
      {
-	//        printf("DEBUG APPEND\n");
-	//        printf("DEBUG [%s]\n",cur->created_at);
-	//        data = eina_list_append(data,cur);
         if (!strncmp("RT ",cur->text,3))
 	  cur->retweeted = EINA_TRUE;
         *data = eina_list_append(*data,cur);
@@ -475,7 +414,6 @@ _parse_timeline(void *_data, Eina_Simple_XML_Type type, const char *content,
      }
    else if (cur && type == EINA_SIMPLE_XML_CLOSE && !strncmp("retweeted_status",content,16))
      {
-	//        printf("CLOSE\n");
         if (cur->retweeted)
 	  cur->retweeted = EINA_FALSE;
      }
@@ -670,10 +608,6 @@ _ebird_token_request_cb(void *data, int type, void *event_info)
 		    strdup(&(eobj->request_token->token_prm[1][19]));
 		  eobj->request_token->callback_confirmed =
 		    strdup(&(eobj->request_token->token_prm[2][25]));
-		  //DBG("DEBUG request->key='%s', request->secret='%s',"
-		  // " request->callback_confirmed='%s'\n",
-		  // request->key, request->secret,
-		  // request->callback_confirmed);
 	       }
 	     else
 	       {
@@ -741,13 +675,13 @@ ebird_session_open(Ebird_Object *eobj, Ebird_Session_Cb cb, void *data)
    d->eobj = eobj;
    d->cb = cb;
    d->data = data;
-   d->url = ecore_con_url_new(
-			      ebird_oauth_sign_url(
-						   EBIRD_REQUEST_TOKEN_URL,
-						   eobj,
-						   NULL
-						   )
-			      );
+   d->url = ecore_con_url_new
+     (ebird_oauth_sign_url
+      (EBIRD_REQUEST_TOKEN_URL,
+       eobj,
+       NULL
+       )
+      );
 
    h = ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,
 			       _url_data_cb, d);
