@@ -114,8 +114,6 @@ void ebird_timeline_free(Eina_List *timeline);
 
 char *ebird_home_timeline_xml_get(Ebird_Object *obj);
 
-Eina_List *ebird_timeline_get(const char *url, Ebird_Object *obj);
-
 int ebird_id_load(OauthToken *request_token);
 
 #endif /* EBIRD_PRIVATE_H_ */

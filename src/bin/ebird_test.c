@@ -148,7 +148,7 @@ int main(int argc __UNUSED__, char **argv __UNUSED__)
 
 */
 
-   ebird_session_open2(eobj,_session_opened,NULL);
+   ebird_session_open(eobj,_session_opened,NULL);
 
    ecore_main_loop_begin();
 
