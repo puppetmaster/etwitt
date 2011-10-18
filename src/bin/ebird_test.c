@@ -66,10 +66,18 @@ _show_credentials(void *data)
 
     printf("%s\n",xml);
 }
+static void
+_timeline_get_cb(Ebird_Object *obj, void *data)
+{
+    printf("Time LINE GET\n");
 
+}
 void _session_opened(Ebird_Object *obj, void *data)
 {
-    puts("SESSION OPENED DEBUG MESSAGE");
+    printf("SESSION OPENED DEBUG MESSAGE\n");
+
+    ebird_timeline_home_get(obj, _timeline_get_cb, obj);
+
 }
 
 int main(int argc __UNUSED__, char **argv __UNUSED__)

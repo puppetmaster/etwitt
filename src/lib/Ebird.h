@@ -109,7 +109,7 @@ EAPI Eina_Bool ebird_account_load(Ebird_Object *obj);
  *
  */ 
 
-EAPI Eina_List *ebird_timeline_home_get(Ebird_Object *obj);
+EAPI Eina_List *ebird_timeline_home_get(Ebird_Object *obj, Ebird_Session_Cb cb, void *data);
 
 EAPI Eina_List *ebird_timeline_public_get(Ebird_Object *obj);
 

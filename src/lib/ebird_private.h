@@ -73,6 +73,9 @@ struct _Ebird_Obj
 
    void (*request_token_get)(Ebird_Object *obj);
    void *request_token_data;
+
+   void (*timeline_cb)(Ebird_Object *obj,void *data);
+   void *timeline_data;
    /*
    void (*credentials_verify)(Ebird_Object *obj);
    void *credentials_data;

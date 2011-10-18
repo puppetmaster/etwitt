@@ -841,6 +841,19 @@ ebird_timeline_free(Eina_List *timeline)
 
 }
 
+static Eina_Bool
+_ebird_timeline_get_cb(void *data, int type, void *event_info)
+{
+    Ebird_Object *obj = data;
+    const char *xml = eina_strbuf_string_get(obj->http_data);
+    Eina_List *timeline = NULL;
+    eina_simple_xml_parse(xml, strlen(xml), EINA_TRUE, _parse_timeline, &timeline);
+    
+    if (obj->timeline_cb)
+        obj->timeline_cb(obj, obj->timeline_data);
+
+}
+
 EAPI Eina_List *
 ebird_timeline_get(const char *url, Ebird_Object *obj)
 {
@@ -850,23 +863,35 @@ ebird_timeline_get(const char *url, Ebird_Object *obj)
     Eina_List *timeline = NULL;
     Eina_Simple_XML_Node_Root *root;
 
-    timeline_url =  ebird_oauth_sign_url(url, obj, NULL);
-   obj->url = strdup(timeline_url);
-    xml = ebird_http_get(obj,NULL);
-//    printf("\n\n%s\n\n",xml);
-    eina_simple_xml_parse(xml,strlen(xml),EINA_TRUE,_parse_timeline, &timeline);
-    return timeline;
+/*     timeline_url =  ebird_oauth_sign_url(url, obj, NULL); */
+/*     obj->url = strdup(timeline_url); */
+/*     xml = ebird_http_get(obj,NULL); */
+/* //    printf("\n\n%s\n\n",xml); */
+/*     eina_simple_xml_parse(xml,strlen(xml),EINA_TRUE,_parse_timeline, &timeline); */
+
+    obj->ec_url = ecore_con_url_new(ebird_oauth_sign_url(url, obj,NULL));
+    obj->ev_hl_data = ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,_url_data_cb,obj);
+    obj->ev_hl_complete = ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE,_ebird_timeline_get_cb, obj);
+   
+    ecore_con_url_get(obj->ec_url);
+
+
+    return NULL;
 }
 
 EAPI Eina_List *
-ebird_timeline_home_get(Ebird_Object *obj)
+ebird_timeline_home_get(Ebird_Object *obj, Ebird_Session_Cb cb, void *data)
 {
 
-    Eina_List *timeline;
+    if (!obj)
+        return NULL;
 
-    timeline = ebird_timeline_get(EBIRD_HOME_TIMELINE_URL, obj);
+    obj->timeline_cb = cb;
+    obj->timeline_data = data;
 
-    return timeline;
+    ebird_timeline_get(EBIRD_HOME_TIMELINE_URL, obj);
+
+    return NULL;
 }
 
 EAPI Eina_List *
