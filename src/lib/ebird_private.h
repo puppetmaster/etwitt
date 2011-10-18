@@ -59,27 +59,8 @@ struct _Ebird_Obj
 {
    OauthToken *request_token;
    EbirdAccount *account;
-    
-   char *url;
-   Ecore_Con_Url *ec_url;
-   Ecore_Event_Handler *ev_hl_data;
-   Ecore_Event_Handler *ev_hl_complete;
-   Eina_Strbuf *http_data;
-    
+
    void (*http_complete_cb)(void *data, int type, void *event_info);
-
-   void (*session_open)(Ebird_Object *obj,void *data);
-   void *session_open_data;
-
-   void (*request_token_get)(Ebird_Object *obj);
-   void *request_token_data;
-
-   void (*timeline_cb)(Ebird_Object *obj,void *data);
-   void *timeline_data;
-   /*
-   void (*credentials_verify)(Ebird_Object *obj);
-   void *credentials_data;
-   */
 };
 
 

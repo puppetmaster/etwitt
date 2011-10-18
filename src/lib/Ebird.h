@@ -57,13 +57,13 @@ enum _user_state
 
 struct _ebird_account
 {
-    char *username;
-    char *passwd;
-    char *userid;
-    char *access_token_key;
-    char *access_token_secret;
-    char *avatar;
-    char *realname;
+    const char *username;
+    const char *passwd;
+    const char *userid;
+    const char *access_token_key;
+    const char *access_token_secret;
+    const char *avatar;
+    const char *realname;
 };
 
 struct _ebird_status
