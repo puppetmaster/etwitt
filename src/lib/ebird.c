@@ -628,29 +628,29 @@ _ebird_token_request_cb(void *data, int type, void *event_info)
 
    if (eobj->account->access_token_key)
      {
-	Ecore_Event_Handler *h;
-	DBG("Access token exist");
-	d->cb(eobj, d->data);
-	ecore_con_url_free(d->url);
-	eina_strbuf_free(d->http_data);
-	d->http_data = NULL;
-	d->url = NULL;
-	EINA_LIST_FREE(d->handlers, h)
-	  ecore_event_handler_del(h);
-	free(d);
+        Ecore_Event_Handler *h;
+        DBG("Access token exist");
+        d->cb(eobj, d->data);
+        ecore_con_url_free(d->url);
+        eina_strbuf_free(d->http_data);
+        d->http_data = NULL;
+        d->url = NULL;
+        EINA_LIST_FREE(d->handlers, h)
+          ecore_event_handler_del(h);
+        free(d);
      }
    else
      {
-	Ecore_Event_Handler *h;
-	DBG("Application Autorisation procedure start");
-	ecore_con_url_free(d->url);
-	eina_strbuf_free(d->http_data);
-	d->http_data = NULL;
-	d->url= NULL;
-	EINA_LIST_FREE(d->handlers, h)
+        Ecore_Event_Handler *h;
+        DBG("Application Autorisation procedure start");
+        ecore_con_url_free(d->url);
+        eina_strbuf_free(d->http_data);
+        d->http_data = NULL;
+        d->url= NULL;
+        EINA_LIST_FREE(d->handlers, h)
           ecore_event_handler_del(h);
-	d->handlers = NULL;
-	ebird_direct_token_get2(d);
+        d->handlers = NULL;
+        ebird_direct_token_get2(d);
      }
 
    return EINA_TRUE;
