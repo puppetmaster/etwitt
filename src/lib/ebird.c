@@ -153,74 +153,6 @@ _url_data_cb(void *data, int type, void *event_info)
     return EINA_TRUE;
 }
 
-#if 0
-char *
-ebird_http_post(char *url, Ebird_Object *obj)
-{
-    Eina_Strbuf *data;
-    int i;
-    char *ret;
-    char *key;
-    char *value;
-    char post_data[EBIRD_URL_MAX];
-    char auth[EBIRD_URL_MAX];
-    char **sp_url = NULL;
-    char **params = NULL;
-
-    sp_url = eina_str_split(url,"?",3);
-    params = eina_str_split(sp_url[1],"&",9);
-
-
-    obj->ec_url = ecore_con_url_new(sp_url[0]);
-    ecore_con_url_verbose_set(obj->ec_url,EINA_TRUE);
-
-    data = eina_strbuf_new();
-
-    obj->ev_hl_data = ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,
-                                              _url_data_cb,data);
-    obj->ev_hl_complete =  ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE,
-                                                   _url_complete_cb,NULL);
-
-    ecore_con_url_additional_header_add(obj->ec_url,"User-Agent","Ebird 0.0.1");
-    ecore_con_url_additional_header_add(obj->ec_url,"Accept","*/*");
-
-    snprintf(auth,sizeof(auth),"OAuth ");
-    for (i=0; i<=sizeof(params); i++)
-    {
-        key = strtok(params[i],"=");
-        value = strtok('\0', "=");
-        if (!strncmp("oauth",key,5))
-        {
-            DBG("[%i][%s]",i,key);
-            if (i > 0)
-                strcat(auth,", ");
-            strcat(auth,key);
-            strcat(auth,"=");
-            strcat(auth,"\"");
-            strcat(auth,value);
-            strcat(auth,"\"");
-        }
-        if (!strcmp("status",key))
-            snprintf(post_data,sizeof(post_data),"%s=%s",key,value);
-            //snprintf(post_data,sizeof(post_data),"%s?%s=%s",sp_url[0],key,value);
-    }
-
-//    ecore_con_url_url_set(ec_url,post_data);
-
-    ecore_con_url_additional_header_add(obj->ec_url,"Authorization",auth);
-    ecore_con_url_additional_header_add(obj->ec_url,"Connection","close");
-    ecore_con_url_additional_header_add(obj->ec_url,"Host","api.twitter.com");
-
-    //ecore_con_url_post(ec_url," ",1,"application/x-www-form-urlencoded; charset=utf-8");
-    ecore_con_url_post(obj->ec_url,post_data,strlen(post_data),
-                       "application/x-www-form-urlencoded; charset=utf-8");
-
-    //ret = strdup(eina_strbuf_string_get(data));
-
-    return "NULL";
-}
-#endif
-
 EAPI Eina_Bool
 ebird_account_save(Ebird_Object *obj)
 {
@@ -662,42 +594,6 @@ ebird_user_show(EbirdAccount *acc)
 
 }
 
-EAPI char *
-ebird_credentials_verify(Ebird_Object *obj)
-{
-#if 0
-    char *url;
-    char *ret;
-
-    obj->url = ebird_oauth_sign_url(EBIRD_ACCOUNT_CREDENTIALS_URL, obj, NULL);
-    ret = ebird_http_get(obj,NULL);
-    return ret;
-#endif
-    return 0;
-}
-
-EAPI Eina_Bool
-ebird_status_update(Ebird_Object *obj, char *message)
-{
-#if 0
-    char *url;
-    char *ret;
-    char up_url[EBIRD_URL_MAX];
-
-    if (!obj)
-        return EINA_FALSE;
-
-    url = ebird_oauth_sign_url(EBIRD_STATUS_URL, obj,"POST");
-
-    snprintf(up_url,sizeof(up_url),"%s&status=%s&include_entities=true",url,message);
-//    printf("DEBUG\n[>%s<]\n",up_url);
-    ret = ebird_http_post(up_url,obj);
-    DBG("\n%s\n\n",ret);
-#endif
-    return EINA_TRUE;
-
-}
-
 static Eina_Bool
 _ebird_direct_token_get_cb(void *data, int type, void *event_info)
 {
@@ -709,10 +605,7 @@ _ebird_direct_token_get_cb(void *data, int type, void *event_info)
 
     DBG("[%s]\n",eobj->request_token->token);
     DBG("[%s]\n",eobj->request_token->key);
-
 }
-
-
 
 static void
 ebird_direct_token_get2(Async_Data *d)
