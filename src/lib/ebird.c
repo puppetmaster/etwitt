@@ -154,18 +154,29 @@ ebird_account_save(Ebird_Object *obj)
 {
    Eet_File *file;
    int size;
-
+   DBG("Opening %s",EBIRD_ACCOUNT_FILE);
    file = eet_open(EBIRD_ACCOUNT_FILE, EET_FILE_MODE_WRITE);
-
-   eet_write(file, "username", obj->account->username, strlen(obj->account->username) + 1, 0);
-   eet_write(file, "passwd", obj->account->passwd, strlen(obj->account->passwd) + 1, 1);
+   DBG("Saving username");
+   eet_write(file, "username", obj->account->username, 
+             strlen(obj->account->username) + 1, 0);
+   DBG("Saving Password");
+   eet_write(file, "passwd", obj->account->passwd, 
+             strlen(obj->account->passwd) + 1, 1);
+   DBG("Saving Access Token Key");
    eet_write(file, "access_token_key", obj->account->access_token_key,
              strlen(obj->account->access_token_key) + 1, 0);
+   DBG("Saving Access Token Secret");
    eet_write(file, "access_token_secret", obj->account->access_token_secret,
              strlen(obj->account->access_token_secret) + 1, 0);
-   eet_write(file, "userid", obj->account->userid, strlen(obj->account->userid) + 1, 0);
-   eet_write(file, "avatar", obj->account->avatar, strlen(obj->account->avatar) + 1, 0);
+   DBG("Saving User ID");
+   eet_write(file, "userid", obj->account->userid, 
+             strlen(obj->account->userid) + 1, 0);
+   DBG("Saving Avatar image");
+   if (obj->account->avatar)
+      eet_write(file, "avatar", obj->account->avatar, 
+               strlen(obj->account->avatar) + 1, 0);
 
+   DBG("Closing %s",EBIRD_ACCOUNT_FILE);
    eet_close(file);
 
    return EINA_TRUE;
@@ -543,6 +554,8 @@ _ebird_access_token_get_cb(void *data,
    char **access_token_prm;
    int res;
 
+   access_token_prm = (char **)malloc(5 * sizeof(char *));
+
    acc_token = eina_strbuf_string_get(d->http_data);
    DBG("DATA : %s", acc_token);
    if (acc_token)
@@ -553,11 +566,13 @@ _ebird_access_token_get_cb(void *data,
         res = oauth_split_url_parameters(acc_token, &access_token_prm);
         if (res == 4)
           {
+             DBG("SPLIT OK");
              obj->account->access_token_key = strdup(&(access_token_prm[0][12]));
              obj->account->access_token_secret = strdup(&(access_token_prm[1][19]));
              obj->account->userid = strdup(&(access_token_prm[2][8]));
              obj->account->username = strdup(&(access_token_prm[3][12]));
              obj->account->passwd = strdup("nill");
+             DBG("SAVING CONFIGURATION");
              ebird_account_save(obj);
           }
         else
@@ -569,8 +584,11 @@ _ebird_access_token_get_cb(void *data,
              return EINA_FALSE;
           }
      }
-   d->cb(obj, d->data);
+   DBG("ICI");  
    free(access_token_prm);
+   DBG("LA");
+   d->cb(obj, d->data);
+ 
 }
 
 void
@@ -579,12 +597,13 @@ ebird_access_token_get(Async_Data *d)
    Ecore_Event_Handler *h;
    Ebird_Object *obj = d->eobj;
    char *acc_url;
-   char **access_token_prm;
    char buf[EBIRD_URL_MAX];
 
    DBG("Start of access token get");
-
-   access_token_prm = (char **)malloc(5 * sizeof(char *));
+   
+   EINA_LIST_FREE(d->handlers, h)
+          ecore_event_handler_del(h);
+   d->handlers = NULL; 
 
    acc_url = ebird_oauth_sign_url(EBIRD_ACCESS_TOKEN_URL, obj, NULL);
 
@@ -652,12 +671,12 @@ _ebird_direct_token_get_cb(void *data,
    if (ebird_token_authenticity_get(d) < 0)
      goto error;
 
-   ebird_read_pin_from_stdin(eobj);
-   ebird_access_token_get(d);
-   DBG("");
    DBG("[%s]\n", eobj->request_token->token);
    DBG("[%s]\n", eobj->request_token->key);
 
+   ebird_read_pin_from_stdin(eobj);
+   ebird_access_token_get(d);
+  
 error:
    return EINA_FALSE;
 }
