@@ -103,6 +103,14 @@ EAPI Eina_Bool ebird_account_save(Ebird_Object *obj);
 
 EAPI Eina_Bool ebird_account_load(Ebird_Object *obj);
 
+/*
+ * 
+ * Authorisation Operations
+ * 
+ */ 
+ 
+EAPI Eina_Bool ebird_authorisation_pin_set(Ebird_Object *obj,char *pin);
+
 /* 
  *
  * TIMELINES OPERATIONS

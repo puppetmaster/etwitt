@@ -532,6 +532,89 @@ ebird_user_show(EbirdAccount *acc)
    return EINA_TRUE;
 }
 
+static Eina_Bool
+_ebird_access_token_get_cb(void *data,
+                           int   type,
+                           void *event_info)
+{
+   Async_Data *d = data;
+   Ebird_Object *obj = d->eobj;
+   char *acc_token;
+   char **access_token_prm;
+   int res;
+
+   acc_token = eina_strbuf_string_get(d->http_data);
+   DBG("DATA : %s", acc_token);
+   if (acc_token)
+     {
+        DBG("DEBUG[ebird_access_token_get][RESULT]{%s}", acc_token);
+        //request_token->access_token = strdup(acc_token);
+
+        res = oauth_split_url_parameters(acc_token, &access_token_prm);
+        if (res == 4)
+          {
+             obj->account->access_token_key = strdup(&(access_token_prm[0][12]));
+             obj->account->access_token_secret = strdup(&(access_token_prm[1][19]));
+             obj->account->userid = strdup(&(access_token_prm[2][8]));
+             obj->account->username = strdup(&(access_token_prm[3][12]));
+             obj->account->passwd = strdup("nill");
+             ebird_account_save(obj);
+          }
+        else
+          {
+             ERR("Error on access_token split");
+             ERR("%s", acc_token);
+             ERR("[%i]", res);
+
+             return EINA_FALSE;
+          }
+     }
+   d->cb(obj, d->data);
+   free(access_token_prm);
+}
+
+void
+ebird_access_token_get(Async_Data *d)
+{
+   Ecore_Event_Handler *h;
+   Ebird_Object *obj = d->eobj;
+   char *acc_url;
+   char **access_token_prm;
+   char buf[EBIRD_URL_MAX];
+
+   DBG("Start of access token get");
+
+   access_token_prm = (char **)malloc(5 * sizeof(char *));
+
+   acc_url = ebird_oauth_sign_url(EBIRD_ACCESS_TOKEN_URL, obj, NULL);
+
+   snprintf(buf, sizeof(buf), "%s&oauth_verifier=%s",
+            acc_url,
+            d->eobj->request_token->authorisation_pin);
+
+   d->http_data = eina_strbuf_new();
+   d->url = ecore_con_url_new(buf);
+   h = ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE,
+                               _ebird_access_token_get_cb, d);
+   d->handlers = eina_list_append(d->handlers, h);
+   h = ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,
+                               _url_data_cb, d);
+   d->handlers = eina_list_append(d->handlers, h);
+
+   DBG("[URL][%s]", buf);
+   ecore_con_url_get(d->url);
+
+   free(acc_url);
+}
+
+EAPI Eina_Bool
+ebird_authorisation_pin_set(Ebird_Object *obj,
+                            char         *pin)
+{
+   obj->request_token->authorisation_pin = strdup(pin);
+   return EINA_TRUE;
+}
+
 Eina_Bool
 ebird_read_pin_from_stdin(Ebird_Object *obj)
 {
@@ -546,10 +629,10 @@ ebird_read_pin_from_stdin(Ebird_Object *obj)
    obj->request_token->authorisation_url = eina_stringshare_add(url);
 
    printf("Open this url in a web browser to authorize ebird \
-to access to your account.\n%s",
+to access to your account.\n%s\n",
           obj->request_token->authorisation_url);
 
-   puts("Please paste PIN here :");
+   puts("Please enter PIN here :");
    fgets(buffer, sizeof(buffer), stdin);
    buffer[strlen(buffer) - 1] = '\0';
 
@@ -570,6 +653,7 @@ _ebird_direct_token_get_cb(void *data,
      goto error;
 
    ebird_read_pin_from_stdin(eobj);
+   ebird_access_token_get(d);
    DBG("");
    DBG("[%s]\n", eobj->request_token->token);
    DBG("[%s]\n", eobj->request_token->key);
