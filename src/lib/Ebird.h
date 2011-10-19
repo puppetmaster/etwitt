@@ -119,7 +119,7 @@ EAPI Eina_Bool ebird_authorisation_pin_set(Ebird_Object *obj,char *pin);
 
 EAPI void ebird_timeline_home_get(Ebird_Object *obj, Ebird_Session_Cb cb, void *data);
 
-EAPI void ebird_timeline_public_get(Ebird_Object *obj);
+EAPI void ebird_timeline_public_get(Ebird_Object *obj, Ebird_Session_Cb cb, void *data);
 
 EAPI void ebird_timeline_user_get(Ebird_Object *obj);
 

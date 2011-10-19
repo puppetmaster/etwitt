@@ -466,6 +466,8 @@ _ebird_timeline_get_cb(void *data,
    Eina_List *timeline = NULL;
    eina_simple_xml_parse(xml, strlen(xml), EINA_TRUE, _parse_timeline, &timeline);
 
+   
+
    if (d->cb)
      d->cb(eobj, timeline);
 }
@@ -478,6 +480,12 @@ ebird_timeline_get(const char *url,
    Ebird_Object *eobj = d->eobj;
    char *full_url;
    
+   if (d->handlers)
+   {
+      EINA_LIST_FREE(d->handlers, h)
+            ecore_event_handler_del(h);
+      d->handlers = NULL; 
+   }
    full_url = ebird_oauth_sign_url(url, 
                                    eobj->request_token->consumer_key,
                                    eobj->request_token->consumer_secret,
@@ -516,9 +524,22 @@ ebird_timeline_home_get(Ebird_Object    *eobj,
 }
 
 EAPI void
-ebird_timeline_public_get(Ebird_Object *obj)
+ebird_timeline_public_get(Ebird_Object *eobj,
+                          Ebird_Session_Cb cb,
+                          void            *data)
 {
-   ebird_timeline_get(EBIRD_PUBLIC_TIMELINE_URL, NULL);
+   Async_Data *d;
+
+   if (!eobj)
+     return;
+
+   d = calloc(1, sizeof(Async_Data));
+   d->eobj = eobj;
+
+   d->cb = cb;
+   d->data = data;
+   
+   ebird_timeline_get(EBIRD_PUBLIC_TIMELINE_URL, d);
 }
 
 EAPI void
