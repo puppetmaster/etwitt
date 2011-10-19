@@ -70,13 +70,16 @@ static void
 _timeline_get_cb(Ebird_Object *obj,
                  void         *data)
 {
+   Eina_List *timeline = data;
    printf("Time LINE GET\n");
+   show_timeline(timeline);
 }
 
 void
 _session_opened(Ebird_Object *obj,
                 void         *data)
 {
+  
    printf("SESSION OPENED DEBUG MESSAGE\n");
 
    ebird_timeline_home_get(obj, _timeline_get_cb, obj);

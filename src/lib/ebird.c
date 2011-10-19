@@ -112,7 +112,10 @@ ebird_del(Ebird_Object *eobj)
 
 static char *
 ebird_oauth_sign_url(const char   *url,
-                     Ebird_Object *obj,
+                     const char *consumer_key,
+                     const char *consumer_secret,
+                     const char *token_key,
+                     const char *token_secret,
                      const char   *http_method)
 {
    char *out_url;
@@ -121,10 +124,10 @@ ebird_oauth_sign_url(const char   *url,
                              NULL,
                              OA_HMAC,
                              http_method,
-                             obj->request_token->consumer_key,
-                             obj->request_token->consumer_secret,
-                             obj->request_token->key,
-                             obj->request_token->secret);
+                             consumer_key,
+                             consumer_secret,
+                             token_key,
+                             token_secret);
 
    DBG("[SIGNED-URL] : [%s]", out_url);
 
@@ -475,7 +478,11 @@ ebird_timeline_get(const char *url,
    Ebird_Object *eobj = d->eobj;
    char *full_url;
    
-   full_url = ebird_oauth_sign_url(url, eobj, NULL);
+   full_url = ebird_oauth_sign_url(url, 
+                                   eobj->request_token->consumer_key,
+                                   eobj->request_token->consumer_secret,
+                                   eobj->account->access_token_key,
+                                   eobj->account->access_token_secret, NULL);
 
    d->url = ecore_con_url_new(full_url);
    DBG("TIMELINE_GET_URL [%s]\n",full_url);
@@ -609,7 +616,11 @@ ebird_access_token_get(Async_Data *d)
           ecore_event_handler_del(h);
    d->handlers = NULL; 
 
-   acc_url = ebird_oauth_sign_url(EBIRD_ACCESS_TOKEN_URL, obj, NULL);
+   acc_url = ebird_oauth_sign_url(EBIRD_ACCESS_TOKEN_URL, 
+                                  obj->request_token->consumer_key,
+                                  obj->request_token->consumer_secret,
+                                  obj->request_token->key,
+                                  obj->request_token->secret, NULL);
 
    snprintf(buf, sizeof(buf), "%s&oauth_verifier=%s",
             acc_url,
@@ -823,7 +834,10 @@ ebird_session_open(Ebird_Object    *eobj,
    d->url = ecore_con_url_new
        (ebird_oauth_sign_url
          (EBIRD_REQUEST_TOKEN_URL,
-         eobj,
+         eobj->request_token->consumer_key,
+         eobj->request_token->consumer_secret,
+         NULL,
+         NULL,
          NULL
          )
        );

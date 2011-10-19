@@ -10,7 +10,7 @@
 
 #define EBIRD_STATUS_URL "https://api.twitter.com/1/statuses/update.xml"
 #define EBIRD_PUBLIC_TIMELINE_URL "https://twitter.com/statuses/public_timeline.xml"
-#define EBIRD_HOME_TIMELINE_URL "https://api.twitter.com/1/statuses/home_timeline.xml"
+#define EBIRD_HOME_TIMELINE_URL "http://api.twitter.com/1/statuses/home_timeline.xml"
 #define EBIRD_USER_TIMELINE_URL "https://api.twitter.com/1/statuses/user_timeline.xml"
 #define EBIRD_USER_MENTIONS_URL "https://api.twitter.com/1/statuses/mentions.xml"
 #define EBIRD_USER_SHOW_URL "http://api.twitter.com/1/users/show.xml"
