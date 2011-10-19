@@ -160,10 +160,10 @@ ebird_account_save(Ebird_Object *obj)
    DBG("Opening %s",EBIRD_ACCOUNT_FILE);
    file = eet_open(EBIRD_ACCOUNT_FILE, EET_FILE_MODE_WRITE);
    DBG("Saving username");
-   eet_write(file, "username", obj->account->username, 
+   eet_write(file, "username", obj->account->username,
              strlen(obj->account->username) + 1, 0);
    DBG("Saving Password");
-   eet_write(file, "passwd", obj->account->passwd, 
+   eet_write(file, "passwd", obj->account->passwd,
              strlen(obj->account->passwd) + 1, 1);
    DBG("Saving Access Token Key");
    eet_write(file, "access_token_key", obj->account->access_token_key,
@@ -172,11 +172,11 @@ ebird_account_save(Ebird_Object *obj)
    eet_write(file, "access_token_secret", obj->account->access_token_secret,
              strlen(obj->account->access_token_secret) + 1, 0);
    DBG("Saving User ID");
-   eet_write(file, "userid", obj->account->userid, 
+   eet_write(file, "userid", obj->account->userid,
              strlen(obj->account->userid) + 1, 0);
    DBG("Saving Avatar image");
    if (obj->account->avatar)
-      eet_write(file, "avatar", obj->account->avatar, 
+      eet_write(file, "avatar", obj->account->avatar,
                strlen(obj->account->avatar) + 1, 0);
 
    DBG("Closing %s",EBIRD_ACCOUNT_FILE);
@@ -466,7 +466,7 @@ _ebird_timeline_get_cb(void *data,
    Eina_List *timeline = NULL;
    eina_simple_xml_parse(xml, strlen(xml), EINA_TRUE, _parse_timeline, &timeline);
 
-   
+
 
    if (d->cb)
      d->cb(eobj, timeline);
@@ -479,14 +479,14 @@ ebird_timeline_get(const char *url,
    Ecore_Event_Handler *h;
    Ebird_Object *eobj = d->eobj;
    char *full_url;
-   
+
    if (d->handlers)
    {
       EINA_LIST_FREE(d->handlers, h)
             ecore_event_handler_del(h);
-      d->handlers = NULL; 
+      d->handlers = NULL;
    }
-   full_url = ebird_oauth_sign_url(url, 
+   full_url = ebird_oauth_sign_url(url,
                                    eobj->request_token->consumer_key,
                                    eobj->request_token->consumer_secret,
                                    eobj->account->access_token_key,
@@ -538,7 +538,7 @@ ebird_timeline_public_get(Ebird_Object *eobj,
 
    d->cb = cb;
    d->data = data;
-   
+
    ebird_timeline_get(EBIRD_PUBLIC_TIMELINE_URL, d);
 }
 
@@ -620,7 +620,7 @@ _ebird_access_token_get_cb(void *data,
      }
    free(access_token_prm);
    d->cb(obj, d->data);
- 
+
 }
 
 void
@@ -632,12 +632,12 @@ ebird_access_token_get(Async_Data *d)
    char buf[EBIRD_URL_MAX];
 
    DBG("Start of access token get");
-   
+
    EINA_LIST_FREE(d->handlers, h)
           ecore_event_handler_del(h);
-   d->handlers = NULL; 
+   d->handlers = NULL;
 
-   acc_url = ebird_oauth_sign_url(EBIRD_ACCESS_TOKEN_URL, 
+   acc_url = ebird_oauth_sign_url(EBIRD_ACCESS_TOKEN_URL,
                                   obj->request_token->consumer_key,
                                   obj->request_token->consumer_secret,
                                   obj->request_token->key,
@@ -714,7 +714,7 @@ _ebird_direct_token_get_cb(void *data,
    d->url = NULL;
    ebird_read_pin_from_stdin(eobj);
    ebird_access_token_get(d);
-  
+
 error:
    return EINA_FALSE;
 }
