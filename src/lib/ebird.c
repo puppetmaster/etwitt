@@ -467,7 +467,7 @@ _ebird_timeline_get_cb(void *data,
    eina_simple_xml_parse(xml, strlen(xml), EINA_TRUE, _parse_timeline, &timeline);
 
    if (d->cb)
-     d->cb(eobj, d->data);
+     d->cb(eobj, timeline);
 }
 
 static void
