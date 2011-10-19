@@ -473,8 +473,12 @@ ebird_timeline_get(const char *url,
 {
    Ecore_Event_Handler *h;
    Ebird_Object *eobj = d->eobj;
+   char *full_url;
+   
+   full_url = ebird_oauth_sign_url(url, eobj, NULL);
 
-   d->url = ecore_con_url_new(ebird_oauth_sign_url(url, eobj, NULL));
+   d->url = ecore_con_url_new(full_url);
+   DBG("TIMELINE_GET_URL [%s]\n",full_url);
    h = ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,
                                _url_data_cb, d);
    d->handlers = eina_list_append(d->handlers, h);
@@ -568,7 +572,9 @@ _ebird_access_token_get_cb(void *data,
           {
              DBG("SPLIT OK");
              obj->account->access_token_key = strdup(&(access_token_prm[0][12]));
+             DBG("ACCESS_TOKEN_KEY[%s]\n",obj->account->access_token_key);
              obj->account->access_token_secret = strdup(&(access_token_prm[1][19]));
+             DBG("ACCESS_TOKEN_SECRET[%s]\n",obj->account->access_token_secret);
              obj->account->userid = strdup(&(access_token_prm[2][8]));
              obj->account->username = strdup(&(access_token_prm[3][12]));
              obj->account->passwd = strdup("nill");
@@ -584,9 +590,7 @@ _ebird_access_token_get_cb(void *data,
              return EINA_FALSE;
           }
      }
-   DBG("ICI");  
    free(access_token_prm);
-   DBG("LA");
    d->cb(obj, d->data);
  
 }
@@ -622,7 +626,6 @@ ebird_access_token_get(Async_Data *d)
 
    DBG("[URL][%s]", buf);
    ecore_con_url_get(d->url);
-
    free(acc_url);
 }
 
@@ -673,7 +676,10 @@ _ebird_direct_token_get_cb(void *data,
 
    DBG("[%s]\n", eobj->request_token->token);
    DBG("[%s]\n", eobj->request_token->key);
-
+   ecore_con_url_free(d->url);
+   eina_strbuf_free(d->http_data);
+   d->http_data = NULL;
+   d->url = NULL;
    ebird_read_pin_from_stdin(eobj);
    ebird_access_token_get(d);
   
