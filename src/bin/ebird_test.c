@@ -41,19 +41,19 @@ show_timeline(Eina_List *timeline)
                   created_at = st->retweeted_status->created_at;
                   text = st->retweeted_status->text;
                }
-             /* printf("[RT by %s][TW by%s][%s]\n\t%s\n", username, */
-             /*        username_rt, */
-             /*        created_at, */
-             /*        text); */
+              printf("[RT by %s][TW by%s][%s]\n\t%s\n", username, 
+                     username_rt, 
+                     created_at, 
+                     text); 
           }
         else
           {
              if (st->user)
                username = st->user->username;
 
-             /* printf("[TW by %s][%s]\n\t%s\n", username, */
-             /*        st->created_at, */
-             /*        st->text); */
+             printf("[TW by %s][%s]\n\t%s\n", username, 
+                    st->created_at, 
+                    st->text); 
           }
      }
 }
@@ -72,7 +72,7 @@ _timeline_get_cb(Ebird_Object *obj,
 {
    Eina_List *timeline = data;
    printf("TIMELINE GET\n");
-   //show_timeline(timeline);
+   show_timeline(timeline);
    puts("============================================");
 }
 
