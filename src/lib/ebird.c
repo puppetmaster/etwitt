@@ -540,9 +540,22 @@ ebird_timeline_public_get(Ebird_Object    *eobj,
 }
 
 EAPI void
-ebird_timeline_user_get(Ebird_Object *obj)
+ebird_timeline_user_get(Ebird_Object *eobj,
+                        Ebird_Session_Cb cb,
+                        void            *data)
 {
-   ebird_timeline_get(EBIRD_USER_TIMELINE_URL, NULL);
+   Async_Data *d;
+
+   if (!eobj)
+     return;
+
+   d = calloc(1, sizeof(Async_Data));
+   d->eobj = eobj;
+
+   d->cb = cb;
+   d->data = data;
+   
+   ebird_timeline_get(EBIRD_USER_TIMELINE_URL, d);
 }
 
 EAPI void
