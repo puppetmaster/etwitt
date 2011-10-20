@@ -76,16 +76,28 @@ _timeline_get_cb(Ebird_Object *obj,
    puts("============================================");
 }
 
+static void
+_status_update_cb(Ebird_Object *obj, void *data)
+{
+   Eina_List *timeline = data;
+   printf("STATUS_UPDATE\n");
+   show_timeline(timeline);
+   puts("============================================");
+}
+
 void
 _session_opened(Ebird_Object *obj,
                 void         *data)
 {
    printf("SESSION OPENED DEBUG MESSAGE\n");
 
-   ebird_timeline_home_get(obj, _timeline_get_cb, obj);
-   ebird_timeline_public_get(obj, _timeline_get_cb, obj);
-   ebird_timeline_user_get(obj,_timeline_get_cb,obj);
-   ebird_timeline_mentions_get(obj,_timeline_get_cb,obj);
+   ebird_timeline_home_get(obj, _timeline_get_cb, NULL);
+   ebird_timeline_public_get(obj, _timeline_get_cb, NULL);
+   ebird_timeline_user_get(obj,_timeline_get_cb,NULL);
+   ebird_timeline_mentions_get(obj,_timeline_get_cb,NULL);
+   
+   
+   //ebird_status_update("Message", obj, _status_update_cb, obj);
 }
 
 int

@@ -133,7 +133,7 @@ EAPI void ebird_timeline_free(Eina_List *timeline);
  *
  */ 
 
-EAPI Eina_Bool ebird_status_update(Ebird_Object *obj, char *message);
+EAPI void ebird_status_update(char *message, Ebird_Object *obj, Ebird_Session_Cb cb, void *data);
 
 EAPI Eina_Bool ebird_user_sync(Ebird_Object *obj);
 

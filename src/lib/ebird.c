@@ -587,6 +587,83 @@ ebird_timeline_mentions_get(Ebird_Object *eobj,
    ebird_timeline_get(EBIRD_USER_MENTIONS_URL, d);
 }
 
+static Eina_Bool
+_ebird_status_update_cb(void *data,
+                       int   type,
+                       void *event_info)
+{
+   Ecore_Event_Handler *h;
+   Async_Data *d = data;
+   Ebird_Object *eobj = d->eobj;
+   const char *xml;
+   Eina_List *timeline = NULL;
+   Ecore_Con_Event_Url_Complete *url = event_info;
+
+   if (d->url != url->url_con)
+       return EINA_TRUE;
+
+   xml = eina_strbuf_string_get(d->http_data);
+
+   DBG("%s\n", xml);
+   eina_simple_xml_parse(xml, strlen(xml), EINA_TRUE, _parse_timeline, &timeline);
+
+   EINA_LIST_FREE(d->handlers, h)
+      ecore_event_handler_del(h);
+   d->handlers = NULL;
+
+   if (d->cb)
+     d->cb(eobj, timeline);
+}
+
+EAPI void
+ebird_status_update(char *message, 
+                     Ebird_Object *obj, 
+                     Ebird_Session_Cb cb, 
+                     void *data)
+{
+   Async_Data *d;
+   Ecore_Event_Handler *h;
+
+   Ecore_Con_Url *ec_url;
+
+   char *sig_url;
+   char full_url[EBIRD_URL_MAX];
+   
+   d = calloc(1,sizeof(Async_Data));
+   d->eobj = obj;
+   
+   d->cb = cb;
+   d->data = data;
+   
+   DBG("Update Status Start Here !");
+   
+   sig_url = ebird_oauth_sign_url(EBIRD_STATUS_URL,
+                               obj->request_token->consumer_key,
+                               obj->request_token->consumer_secret,
+                               obj->account->access_token_key,
+                               obj->account->access_token_secret,"POST");
+                               
+   snprintf(full_url,sizeof(full_url),
+            "%s&status=%s&include_entities=true",
+            sig_url,
+            message);
+   
+   data = eina_strbuf_new();
+   
+   d->url = ecore_con_url_new(full_url);
+   DBG("STATUS_UPDATE_URL [%s]\n", full_url);
+   h = ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,
+                               _url_data_cb, d);
+   d->handlers = eina_list_append(d->handlers, h);
+   h = ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE,
+                               _ebird_status_update_cb, d);
+   d->handlers = eina_list_append(d->handlers, h);
+
+   ecore_con_url_get(d->url);
+   
+}
+
+
 EAPI Eina_Bool
 ebird_user_show(EbirdAccount *acc)
 {
