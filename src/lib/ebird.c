@@ -554,7 +554,7 @@ ebird_timeline_user_get(Ebird_Object *eobj,
 
    d->cb = cb;
    d->data = data;
-   
+
    ebird_timeline_get(EBIRD_USER_TIMELINE_URL, d);
 }
 
@@ -573,7 +573,7 @@ ebird_timeline_mentions_get(Ebird_Object *eobj,
 
    d->cb = cb;
    d->data = data;
-   
+
    ebird_timeline_get(EBIRD_USER_MENTIONS_URL, d);
 }
 
