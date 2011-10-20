@@ -71,5 +71,38 @@
         <note priority="medium" time="1319120677">
             GET direct_messages/show/:id
         </note>
+        <note priority="medium" time="1319120825">
+            GET followers/ids
+        </note>
+        <note priority="medium" time="1319120825">
+            GET friends/ids
+        </note>
+        <note priority="medium" time="1319120825">
+            GET friendships/exists
+        </note>
+        <note priority="medium" time="1319120825">
+            GET friendships/incoming
+        </note>
+        <note priority="medium" time="1319120825">
+            GET friendships/lookup
+        </note>
+        <note priority="medium" time="1319120825">
+            GET friendships/no_retweet_ids
+        </note>
+        <note priority="medium" time="1319120825">
+            GET friendships/outgoing
+        </note>
+        <note priority="medium" time="1319120825">
+            GET friendships/show
+        </note>
+        <note priority="medium" time="1319120825">
+            POST friendships/create
+        </note>
+        <note priority="medium" time="1319120825">
+            POST friendships/destroy
+        </note>
+        <note priority="medium" time="1319120825">
+            POST friendships/update
+        </note>
     </note>
 </todo>
