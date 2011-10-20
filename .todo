@@ -12,4 +12,64 @@
             split access_token_get into async funcs
         </note>
     </note>
+    <note priority="medium" time="1319120411">
+        Full twitter API support
+        <note priority="medium" time="1319120429">
+            GET statuses/retweeted_by_me
+        </note>
+        <note priority="medium" time="1319120450">
+            GET statuses/retweeted_to_me
+        </note>
+        <note priority="medium" time="1319120495">
+            GET statuses/retweets_of_me
+        </note>
+        <note priority="medium" time="1319120515">
+            GET statuses/retweeted_to_user
+        </note>
+        <note priority="medium" time="1319120524">
+            GET statuses/retweeted_by_user
+        </note>
+        <note priority="medium" time="1319120548">
+            GET statuses/:id/retweeted_by
+        </note>
+        <note priority="medium" time="1319120556">
+            GET statuses/:id/retweeted_by/ids
+        </note>
+        <note priority="medium" time="1319120564">
+            GET statuses/retweets/:id
+        </note>
+        <note priority="medium" time="1319120571">
+            GET statuses/show/:id
+        </note>
+        <note priority="medium" time="1319120580">
+            POST statuses/destroy/:id
+        </note>
+        <note priority="medium" time="1319120588">
+            POST statuses/retweet/:id
+        </note>
+        <note priority="medium" time="1319120599">
+            POST statuses/update
+        </note>
+        <note priority="medium" time="1319120606">
+            POST statuses/update_with_media
+        </note>
+        <note priority="medium" time="1319120637">
+            GET search
+        </note>
+        <note priority="medium" time="1319120644">
+            GET direct_messages
+        </note>
+        <note priority="medium" time="1319120653">
+            GET direct_messages/sent
+        </note>
+        <note priority="medium" time="1319120662">
+            POST direct_messages/destroy/:id
+        </note>
+        <note priority="medium" time="1319120669">
+            POST direct_messages/new
+        </note>
+        <note priority="medium" time="1319120677">
+            GET direct_messages/show/:id
+        </note>
+    </note>
 </todo>
