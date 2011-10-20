@@ -142,13 +142,16 @@ _url_data_cb(void *data,
    Async_Data *d = data;
    Ecore_Con_Event_Url_Data *url_data = event_info;
 
+   if (d->url != url_data->url_con)
+       return EINA_TRUE;
+
    if (!d->http_data)
      d->http_data = eina_strbuf_new();
 
    eina_strbuf_append_length(d->http_data,
                              url_data->data,
                              url_data->size);
-   DBG("==> [%s]", eina_strbuf_string_get(d->http_data));
+
    return EINA_TRUE;
 }
 
@@ -462,9 +465,16 @@ _ebird_timeline_get_cb(void *data,
    Ecore_Event_Handler *h;
    Async_Data *d = data;
    Ebird_Object *eobj = d->eobj;
-   const char *xml = eina_strbuf_string_get(d->http_data);
-   DBG("%s\n", xml);
+   const char *xml;
    Eina_List *timeline = NULL;
+   Ecore_Con_Event_Url_Complete *url = event_info;
+
+   if (d->url != url->url_con)
+       return EINA_TRUE;
+
+   xml = eina_strbuf_string_get(d->http_data);
+
+   //DBG("%s\n", xml);
    eina_simple_xml_parse(xml, strlen(xml), EINA_TRUE, _parse_timeline, &timeline);
 
    EINA_LIST_FREE(d->handlers, h)
@@ -608,6 +618,10 @@ _ebird_access_token_get_cb(void *data,
    char *acc_token;
    char **access_token_prm;
    int res;
+   Ecore_Con_Event_Url_Complete *url = event_info;
+
+   if (d->url != url->url_con)
+       return EINA_TRUE;
 
    access_token_prm = (char **)malloc(5 * sizeof(char *));
 
@@ -725,6 +739,10 @@ _ebird_direct_token_get_cb(void *data,
 {
    Async_Data *d = data;
    Ebird_Object *eobj = d->eobj;
+   Ecore_Con_Event_Url_Complete *url = event_info;
+
+   if (d->url != url->url_con)
+       return EINA_TRUE;
 
    if (ebird_token_authenticity_get(d) < 0)
      goto error;
@@ -781,6 +799,10 @@ _ebird_token_request_cb(void *data,
 
    int error_code;
    int res;
+   Ecore_Con_Event_Url_Complete *url = event_info;
+
+   if (d->url != url->url_con)
+       return EINA_TRUE;
 
    eobj->request_token->token = strdup(eina_strbuf_string_get(d->http_data));
 
