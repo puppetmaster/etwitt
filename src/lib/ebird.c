@@ -459,12 +459,17 @@ _ebird_timeline_get_cb(void *data,
                        int   type,
                        void *event_info)
 {
+   Ecore_Event_Handler *h;
    Async_Data *d = data;
    Ebird_Object *eobj = d->eobj;
    const char *xml = eina_strbuf_string_get(d->http_data);
    DBG("%s\n", xml);
    Eina_List *timeline = NULL;
    eina_simple_xml_parse(xml, strlen(xml), EINA_TRUE, _parse_timeline, &timeline);
+
+   EINA_LIST_FREE(d->handlers, h)
+      ecore_event_handler_del(h);
+   d->handlers = NULL;
 
    if (d->cb)
      d->cb(eobj, timeline);
@@ -477,13 +482,7 @@ ebird_timeline_get(const char *url,
    Ecore_Event_Handler *h;
    Ebird_Object *eobj = d->eobj;
    char *full_url;
-
-   if (d->handlers)
-     {
-        EINA_LIST_FREE(d->handlers, h)
-          ecore_event_handler_del(h);
-        d->handlers = NULL;
-     }
+   
    full_url = ebird_oauth_sign_url(url,
                                    eobj->request_token->consumer_key,
                                    eobj->request_token->consumer_secret,
