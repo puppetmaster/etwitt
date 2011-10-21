@@ -505,7 +505,19 @@ EAPI_MAIN int
 elm_main(int    argc,
          char **argv)
 {
+   Ebird_Object *eobj;
    Etwitt_Iface *iface;
+   
+   if (!ebird_init())
+     return -1;
+
+   if (!ecore_file_init())
+     {
+        ebird_shutdown();
+        return -1;
+     }
+
+   eobj = ebird_add();
 
    /* tell elm about our app so it can figure out where to get files */
    printf(" %s %s\n", PACKAGE_BIN_DIR, PACKAGE_DATA_DIR);
