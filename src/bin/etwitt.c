@@ -501,6 +501,21 @@ etwitt_config_iface_add(Etwitt_Iface *iface)
    }
  */
 
+static void
+_timeline_get_cb(Ebird_Object *obj,
+                 void         *data)
+{
+   Eina_List *timeline = data;
+   printf("TIMELINE GET\n");
+   puts("============================================");
+}
+
+void 
+_session_open_cb(Ebird_Object *obj, void *data)
+{
+   ebird_timeline_home_get(obj, _timeline_get_cb, data);
+}
+
 EAPI_MAIN int
 elm_main(int    argc,
          char **argv)
@@ -531,7 +546,7 @@ elm_main(int    argc,
 
    if (ecore_file_exists(EBIRD_ACCOUNT_FILE))
      {
-        ebird_account_load(iface->account);
+        ebird_account_load(eobj);
         iface->account->avatar = eina_stringshare_add("avatar.png");
      }
    else
@@ -558,6 +573,8 @@ elm_main(int    argc,
 
    // Configuration
    etwitt_config_iface_add(iface);
+   
+   ebird_session_open(eobj,_session_open_cb,iface);
 
    evas_object_resize(iface->win, 460, 540);
    evas_object_show(iface->win);
