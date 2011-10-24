@@ -48,8 +48,8 @@ struct _Interface
    Evas_Object         *tw_box;
    Evas_Object         *list;
    Elm_Theme           *theme;
-   EbirdAccount        *account;
    Etwitt_Config_Iface *config;
+   Ebird_Object        *eobj;
 };
 
 struct _ConfigIface
@@ -153,8 +153,8 @@ etwitt_add_twitt(Etwitt_Iface *interface,
 
    twitt->message = eina_stringshare_add(message);
    twitt->date = eina_stringshare_add(date);
-   twitt->icon = eina_stringshare_add(interface->account->avatar);
-   twitt->name = eina_stringshare_add(interface->account->realname);
+   twitt->icon = eina_stringshare_add(interface->eobj->account->avatar);
+   twitt->name = eina_stringshare_add(interface->eobj->account->realname);
 
    egi = elm_genlist_item_append(interface->list, &itc_default, twitt, NULL,
                                  ELM_GENLIST_ITEM_NONE, NULL, NULL);
@@ -203,6 +203,7 @@ _show_roll(void        *data,
            void        *event_info __UNUSED__)
 {
    Etwitt_Iface *iface = data;
+   
    evas_object_show(iface->list);
    evas_object_show(iface->tw_box);
    edje_object_signal_emit(elm_layout_edje_get(iface->layout), "HIDE_CONFIG", "code");
@@ -218,9 +219,10 @@ _win_del(void        *data,
 
    if(iface != NULL)
      {
-        free(iface->account);
+        free(iface->eobj->account);
         free(iface->config);
         free(iface);
+        ebird_shutdown();
      }
 
    elm_exit();
@@ -352,8 +354,8 @@ etwitt_config_iface_add(Etwitt_Iface *iface)
    elm_entry_scrollable_set(iface->config->en_name, EINA_FALSE);
    elm_entry_single_line_set(iface->config->en_name, EINA_TRUE);
    elm_layout_content_set(iface->layout, "config:entry/name", iface->config->en_name);
-   if (iface->account->username)
-     elm_object_text_set(iface->config->en_name, iface->account->username);
+   if (iface->eobj->account->username)
+     elm_object_text_set(iface->config->en_name, iface->eobj->account->username);
    evas_object_show(iface->config->en_name);
 
    iface->config->lb_passwd = elm_label_add(iface->win);
@@ -531,8 +533,7 @@ elm_main(int    argc,
         ebird_shutdown();
         return -1;
      }
-
-   eobj = ebird_add();
+   
 
    /* tell elm about our app so it can figure out where to get files */
    printf(" %s %s\n", PACKAGE_BIN_DIR, PACKAGE_DATA_DIR);
@@ -541,20 +542,21 @@ elm_main(int    argc,
    elm_app_info_set(elm_main, "etwitt", "images/logo.png");
 
    iface = calloc(1, sizeof(Etwitt_Iface));
-   iface->account = calloc(1, sizeof(EbirdAccount));
+   iface->eobj = ebird_add();
+   //iface->eobj->account = calloc(1, sizeof(EbirdAccount));
    iface->config = calloc(1, sizeof(Etwitt_Config_Iface));
 
    if (ecore_file_exists(EBIRD_ACCOUNT_FILE))
      {
-        ebird_account_load(eobj);
-        iface->account->avatar = eina_stringshare_add("avatar.png");
+        ebird_account_load(iface->eobj);
+        iface->eobj->account->avatar = eina_stringshare_add("avatar.png");
      }
    else
      {
-        iface->account->username = eina_stringshare_add("ePuppetMaster");
-        iface->account->passwd = eina_stringshare_add("QUOI COMMENT OU ...");
-        // iface->account->realname = eina_stringshare_add("Philippe Caseiro");
-        // iface->account->avatar = eina_stringshare_add("avatar.png");
+        iface->eobj->account->username = eina_stringshare_add("ePuppetMaster");
+        iface->eobj->account->passwd = eina_stringshare_add("QUOI COMMENT OU ...");
+        // iface->eobj->account->realname = eina_stringshare_add("Philippe Caseiro");
+        // iface->eobj->account->avatar = eina_stringshare_add("avatar.png");
      }
 
    iface->theme = elm_theme_new();
@@ -574,7 +576,7 @@ elm_main(int    argc,
    // Configuration
    etwitt_config_iface_add(iface);
    
-   ebird_session_open(eobj,_session_open_cb,iface);
+   ebird_session_open(iface->eobj,_session_open_cb,iface);
 
    evas_object_resize(iface->win, 460, 540);
    evas_object_show(iface->win);

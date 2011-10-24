@@ -26,8 +26,8 @@
 #define TAG_STATUS "status>"
 #define TAG_USER "user>"
 
-typedef struct _ebird_account EbirdAccount;
-typedef struct _ebird_status EbirdStatus;
+typedef struct _Ebird_Account EbirdAccount;
+typedef struct _Ebird_Status EbirdStatus;
 typedef enum   _state State;
 typedef enum   _user_state UserState;
 typedef struct _Ebird_Obj Ebird_Object;
@@ -55,7 +55,7 @@ enum _user_state
     USER_NONE
 };
 
-struct _ebird_account
+struct _Ebird_Account
 {
     const char *username;
     const char *passwd;
@@ -66,7 +66,7 @@ struct _ebird_account
     const char *realname;
 };
 
-struct _ebird_status
+struct _Ebird_Status
 {
   const char *created_at;
   const char *id;
@@ -79,6 +79,13 @@ struct _ebird_status
   EbirdStatus *retweeted_status;
 };
 
+struct _Ebird_Obj
+{
+   OauthToken *request_token;
+   EbirdAccount *account;
+
+   void (*http_complete_cb)(void *data, int type, void *event_info);
+};
 
 /*
  * API

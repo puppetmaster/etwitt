@@ -56,13 +56,7 @@ struct _oauth_token
     char *callback_confirmed;
 };
 
-struct _Ebird_Obj
-{
-   OauthToken *request_token;
-   EbirdAccount *account;
 
-   void (*http_complete_cb)(void *data, int type, void *event_info);
-};
 
 
 struct _Async_Data
