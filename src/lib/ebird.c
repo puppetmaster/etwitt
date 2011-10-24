@@ -466,7 +466,7 @@ _ebird_timeline_get_cb(void *data,
    Async_Data *d = data;
    Ebird_Object *eobj = d->eobj;
    const char *xml;
-   Eina_List *timeline = NULL;
+   Eina_List *timeline;
    Ecore_Con_Event_Url_Complete *url = event_info;
 
    if (d->url != url->url_con)
@@ -482,7 +482,7 @@ _ebird_timeline_get_cb(void *data,
    d->handlers = NULL;
 
    if (d->cb)
-     d->cb(eobj, timeline);
+     d->cb(eobj,d->data, timeline);
 }
 
 static void
@@ -612,7 +612,7 @@ _ebird_status_update_cb(void *data,
    d->handlers = NULL;
 
    if (d->cb)
-     d->cb(eobj, timeline);
+     d->cb(eobj, d->data, timeline);
 }
 
 EAPI void
@@ -733,7 +733,7 @@ _ebird_access_token_get_cb(void *data,
           }
      }
    free(access_token_prm);
-   d->cb(obj, d->data);
+   d->cb(obj, d->data,NULL);
 }
 
 void
@@ -928,7 +928,7 @@ _ebird_token_request_cb(void *data,
      {
         Ecore_Event_Handler *h;
         DBG("Access token exist");
-        d->cb(eobj, d->data);
+        d->cb(eobj, d->data,NULL);
         ecore_con_url_free(d->url);
         eina_strbuf_free(d->http_data);
         d->http_data = NULL;

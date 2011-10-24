@@ -63,7 +63,8 @@ struct _Async_Data
 {
    Ebird_Object  *eobj;
    void           (*cb)(Ebird_Object *obj,
-                        void         *data);
+                        void         *data,
+                        void         *event);
    void          *data;
    Ecore_Con_Url *url;
    Eina_Strbuf   *http_data;

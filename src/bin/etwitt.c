@@ -505,7 +505,8 @@ etwitt_config_iface_add(Etwitt_Iface *iface)
 
 static void
 _timeline_get_cb(Ebird_Object *obj,
-                 void         *data)
+                 void         *data,
+                 void         *event)
 {
    Eina_List *timeline = data;
    printf("TIMELINE GET\n");
@@ -513,7 +514,7 @@ _timeline_get_cb(Ebird_Object *obj,
 }
 
 void 
-_session_open_cb(Ebird_Object *obj, void *data)
+_session_open_cb(Ebird_Object *obj, void *data, void *event)
 {
    ebird_timeline_home_get(obj, _timeline_get_cb, data);
 }
@@ -576,7 +577,7 @@ elm_main(int    argc,
    // Configuration
    etwitt_config_iface_add(iface);
    
-   ebird_session_open(iface->eobj,_session_open_cb,iface);
+   ebird_session_open(iface->eobj, _session_open_cb, iface);
 
    evas_object_resize(iface->win, 460, 540);
    evas_object_show(iface->win);
