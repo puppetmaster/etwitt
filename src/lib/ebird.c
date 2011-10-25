@@ -49,6 +49,7 @@ ebird_init()
      goto shutdown_ecore_con_url;
 
    _ebird_log_dom_global = eina_log_domain_register("ebird", EBIRD_DEFAULT_LOG_COLOR);
+
    if (_ebird_log_dom_global < 0)
      {
         EINA_LOG_ERR("Ebird Can not create a general log domain.");
@@ -424,7 +425,9 @@ _parse_timeline(void                *_data,
      {
         if (!strncmp("RT ", cur->text, 3))
           cur->retweeted = EINA_TRUE;
-        *data = eina_list_append(*data, cur);
+         
+         DBG("eina_list_append");
+         *data = eina_list_append(*data, cur);
         cur = NULL;
      }
    else if (cur && type == EINA_SIMPLE_XML_CLOSE && !strncmp("retweeted_status", content, 16))
@@ -466,7 +469,7 @@ _ebird_timeline_get_cb(void *data,
    Async_Data *d = data;
    Ebird_Object *eobj = d->eobj;
    const char *xml;
-   Eina_List *timeline;
+   Eina_List *timeline = NULL;
    Ecore_Con_Event_Url_Complete *url = event_info;
 
    if (d->url != url->url_con)
@@ -503,9 +506,11 @@ ebird_timeline_get(const char *url,
    DBG("TIMELINE_GET_URL [%s]\n", full_url);
    h = ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,
                                _url_data_cb, d);
+   DBG("eina_list_append");
    d->handlers = eina_list_append(d->handlers, h);
    h = ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE,
                                _ebird_timeline_get_cb, d);
+   DBG("eina_list_append");
    d->handlers = eina_list_append(d->handlers, h);
 
    ecore_con_url_get(d->url);
@@ -654,15 +659,16 @@ ebird_status_update(char *message,
    DBG("STATUS_UPDATE_URL [%s]\n", full_url);
    h = ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,
                                _url_data_cb, d);
+   DBG("eina_list_append");
    d->handlers = eina_list_append(d->handlers, h);
    h = ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE,
                                _ebird_status_update_cb, d);
+   DBG("eina_list_append");
    d->handlers = eina_list_append(d->handlers, h);
 
    ecore_con_url_get(d->url);
    
 }
-
 
 EAPI Eina_Bool
 ebird_user_show(EbirdAccount *acc)
@@ -765,9 +771,11 @@ ebird_access_token_get(Async_Data *d)
    d->url = ecore_con_url_new(buf);
    h = ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE,
                                _ebird_access_token_get_cb, d);
+   DBG("eina_list_append");
    d->handlers = eina_list_append(d->handlers, h);
    h = ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,
                                _url_data_cb, d);
+   DBG("eina_list_append");
    d->handlers = eina_list_append(d->handlers, h);
 
    DBG("[URL][%s]", buf);
@@ -858,9 +866,11 @@ ebird_direct_token_get(Async_Data *d)
    d->url = ecore_con_url_new(buf);
    h = ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE,
                                _ebird_direct_token_get_cb, d);
+   DBG("eina_list_append");
    d->handlers = eina_list_append(d->handlers, h);
    h = ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,
                                _url_data_cb, d);
+   DBG("eina_list_append");
    d->handlers = eina_list_append(d->handlers, h);
 
    ecore_con_url_get(d->url);
@@ -987,9 +997,11 @@ ebird_session_open(Ebird_Object    *eobj,
 
    h = ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,
                                _url_data_cb, d);
+   DBG("eina_list_append");
    d->handlers = eina_list_append(d->handlers, h);
    h = ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE,
                                _ebird_token_request_cb, d);
+   DBG("eina_list_append");
    d->handlers = eina_list_append(d->handlers, h);
 
    ecore_con_url_get(d->url);
