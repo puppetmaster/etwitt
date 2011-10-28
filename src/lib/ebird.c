@@ -31,6 +31,12 @@ static Eina_Bool _url_complete_cb(void *data,
 static void ebird_timeline_get(const char *url,
                                Async_Data *d);
 
+/*
+ * Name   : ebird_init
+ * Params : none
+ * Aim    : initialize the library load starting stuff
+ *
+ */
 EAPI int
 ebird_init()
 {
@@ -70,9 +76,15 @@ shutdown_ecore:
 shutdown_eina:
    eina_shutdown();
 
-   return 0;
-}
+   return 0;                                            
+}                                                       
 
+/*
+ * Name   : ebird_shutdown
+ * Params : none
+ * Aim    : shutdown things 
+ *
+ */
 EAPI int
 ebird_shutdown()
 {
@@ -88,6 +100,14 @@ ebird_shutdown()
    return _ebird_main_count;
 }
 
+
+/*
+ * Name   : ebird_add
+ * Params : none
+ * Aim    : Create and initialize and Ebird_Object
+ *          This object have to be destroyed by ebird_del.
+ * Return : Ebird_Object *
+ */
 EAPI Ebird_Object *
 ebird_add(void)
 {
@@ -101,6 +121,13 @@ ebird_add(void)
    return eobj;
 }
 
+
+/*
+ * Name   : ebird_del 
+ * Params : Ebird_Object *
+ * Aim    : Free an Ebird_Object created by ebird_add 
+ * Return : void 
+ */
 EAPI void
 ebird_del(Ebird_Object *eobj)
 {
@@ -111,6 +138,19 @@ ebird_del(Ebird_Object *eobj)
      free(eobj->account);
 }
 
+/*
+ *  Name   : ebird_oauth_sign_url
+ *  Params :  
+ *      url             -> The API method URL
+ *      consumer_key    -> The application consumer key
+ *      consumer_secret -> The application consumer secret key
+ *      token_key       -> The current session token key
+ *      token_secret    -> The current session token secret key
+ *      http_data       -> The http action POST or GET
+ *  Aim    : Provide an oauth signed URL to call an API method
+ *           the return have to be free.
+ *  Return : char *
+ */ 
 static char *
 ebird_oauth_sign_url(const char *url,
                      const char *consumer_key,
@@ -135,6 +175,16 @@ ebird_oauth_sign_url(const char *url,
    return out_url;
 }
 
+/*
+ *  Name   : _url_data_cb
+ *  Params :  
+ *      data       -> Data provided to the callback by ecore_event
+ *                    In this case it contains an Async_Data
+ *      type       -> ...
+ *      event_info -> Data provided by http connection
+ *  Aim    : Action when some data is provided after an ecore_con_url_get
+ *  Return : Eina_Bool
+ */
 static Eina_Bool
 _url_data_cb(void *data,
              int   type,
