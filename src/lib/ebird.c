@@ -318,6 +318,48 @@ ebird_token_authenticity_get(Async_Data *data)
 }
 
 static Eina_Bool
+_wget_cb(void *data,
+         int   type,
+         void *event_info)
+{
+   Async_Data *d = data;
+   Ecore_Event_Handler *h;
+   
+   DBG("ebird_wget data complete callback");
+    
+   EINA_LIST_FREE(d->handlers, h)
+      ecore_event_handler_del(h);
+      
+   d->handlers = NULL;
+    
+}
+
+char *
+ebird_wget(char *url)
+{
+    Async_Data *d;
+    Ecore_Event_Handler *h;
+
+    DBG("ebird_wget_start !");
+    
+    d = calloc(1,sizeof(Async_Data));
+
+    d->url = ecore_con_url_new(url);
+
+    h = ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,
+        _url_data_cb, d);
+    DBG("eina_list_append");
+    d->handlers = eina_list_append(d->handlers, h);
+    h = ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE,
+        _wget_cb, d);
+    DBG("eina_list_append");
+    d->handlers = eina_list_append(d->handlers, h);
+
+    ecore_con_url_get(d->url);
+    
+}
+
+static Eina_Bool
 _parse_user(void                *data,
             Eina_Simple_XML_Type type,
             const char          *content,
@@ -350,7 +392,7 @@ _parse_user(void                *data,
 
            case AVATAR:
              DBG("===> [DEBUG][%s]", ptr);
-             cur->avatar = ptr;
+             cur->avatar = ebird_wget(ptr);
              break;
 
            case USER_ID:
