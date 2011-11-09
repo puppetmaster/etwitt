@@ -83,8 +83,9 @@ struct _Ebird_Obj
 {
    OauthToken *request_token;
    EbirdAccount *account;
-   Eina_List *home_timeline;
-
+   char *newer_msg_id;
+   char *older_msg_id;
+   //Eina_List *home_timeline;
    //void (*http_complete_cb)(void *data, int type, void *event_info);
 };
 

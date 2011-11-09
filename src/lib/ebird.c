@@ -515,20 +515,26 @@ _ebird_timeline_get_cb(void *data,
                        int   type,
                        void *event_info)
 {
-   Ecore_Event_Handler *h;
-   Async_Data *d = data;
-   Ebird_Object *eobj = d->eobj;
    const char *xml;
    Eina_List *timeline = NULL;
+   Ecore_Event_Handler *h;
    Ecore_Con_Event_Url_Complete *url = event_info;
+   Async_Data *d = data;
+   Ebird_Object *eobj = d->eobj;
+   EbirdStatus *lastmsg = NULL;
 
    if (d->url != url->url_con)
        return EINA_TRUE;
 
    xml = eina_strbuf_string_get(d->http_data);
 
-   //DBG("%s\n", xml);
+   DBG("\n\n%s\n\n", xml);
    eina_simple_xml_parse(xml, strlen(xml), EINA_TRUE, _parse_timeline, &timeline);
+   //lastmsg = eina_list_last(timeline);
+   lastmsg = eina_list_nth(timeline,1);
+   DBG("NTH ID [%s]\n",lastmsg->id);
+   eobj->newer_msg_id = lastmsg->id;
+   DBG("newer_msg_id = %s\n",eobj->newer_msg_id);
 
    EINA_LIST_FREE(d->handlers, h)
       ecore_event_handler_del(h);
@@ -544,16 +550,33 @@ ebird_timeline_get(const char *url,
 {
    Ecore_Event_Handler *h;
    Ebird_Object *eobj = d->eobj;
-   char *full_url;
+   char *sig_url;
+   char full_url[EBIRD_URL_MAX];
 
-   full_url = ebird_oauth_sign_url(url,
+   if (d->eobj->newer_msg_id)
+   {
+       snprintf(full_url,sizeof(full_url),
+            "%s&since_id=%i",
+            url,
+            d->eobj->newer_msg_id);
+       sig_url = ebird_oauth_sign_url(full_url,
                                    eobj->request_token->consumer_key,
                                    eobj->request_token->consumer_secret,
                                    eobj->account->access_token_key,
                                    eobj->account->access_token_secret, NULL);
+   }
+   else
+   {
+       sig_url = ebird_oauth_sign_url(url,
+                                   eobj->request_token->consumer_key,
+                                   eobj->request_token->consumer_secret,
+                                   eobj->account->access_token_key,
+                                   eobj->account->access_token_secret, NULL);
+   }
 
-   d->url = ecore_con_url_new(full_url);
-   DBG("TIMELINE_GET_URL [%s]\n", full_url);
+   d->url = ecore_con_url_new(sig_url);
+   DBG("TIMELINE_GET_URL [%s]\n", sig_url);
+
    h = ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,
                                _url_data_cb, d);
    DBG("eina_list_append");
