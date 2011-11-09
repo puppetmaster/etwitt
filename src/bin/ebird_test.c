@@ -41,19 +41,21 @@ show_timeline(Eina_List *timeline)
                   created_at = st->retweeted_status->created_at;
                   text = st->retweeted_status->text;
                }
-              printf("[RT by %s][TW by%s][%s]\n\t%s\n", username, 
-                     username_rt, 
-                     created_at, 
-                     text); 
+             printf("[RT by %s][TW by%s][%s]\n\t%s\nAvatar [%s]\n", username,
+                    username_rt,
+                    created_at,
+                    text,
+                    st->user->avatar);
           }
         else
           {
              if (st->user)
                username = st->user->username;
 
-             printf("[TW by %s][%s]\n\t%s\n", username, 
-                    st->created_at, 
-                    st->text); 
+             printf("[TW by %s][%s]\n\t%s\nAvatar [%s]\n", username,
+                    st->created_at,
+                    st->text,
+                    st->user->avatar);
           }
      }
 }
@@ -79,12 +81,14 @@ _timeline_get_cb(Ebird_Object *obj,
 }
 
 static void
-_status_update_cb(Ebird_Object *obj, void *data, void *event)
+_status_update_cb(Ebird_Object *obj,
+                  void         *data,
+                  void         *event)
 {
    Eina_List *timeline = event;
    printf("STATUS_UPDATE\n");
    show_timeline(timeline);
-   
+
    puts("============================================");
 }
 
@@ -96,11 +100,10 @@ _session_opened(Ebird_Object *obj,
    printf("SESSION OPENED DEBUG MESSAGE\n");
 
    ebird_timeline_home_get(obj, _timeline_get_cb, data);
-   ebird_timeline_public_get(obj, _timeline_get_cb, data);
-   ebird_timeline_user_get(obj,_timeline_get_cb, data);
-   ebird_timeline_mentions_get(obj,_timeline_get_cb, data);
-   
-   
+   //ebird_timeline_public_get(obj, _timeline_get_cb, data);
+   //ebird_timeline_user_get(obj, _timeline_get_cb, data);
+   //ebird_timeline_mentions_get(obj, _timeline_get_cb, data);
+
    //ebird_status_update("Message", obj, _status_update_cb, obj);
 }
 

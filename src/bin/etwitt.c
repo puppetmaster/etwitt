@@ -73,8 +73,9 @@ struct _ConfigIface
 
 static const char *_theme_file = NULL;
 
-static void _timeline_get_cb(Ebird_Object *obj, void *data, void *event);
-
+static void _timeline_get_cb(Ebird_Object *obj,
+                             void         *data,
+                             void         *event);
 
 static const char *
 _theme_file_get(void)
@@ -137,7 +138,7 @@ static Elm_Genlist_Item_Class itc_default = {
 
 static void
 etwitt_add_twitt(Etwitt_Iface *interface,
-                 char         *message)
+                 EbirdStatus  *status)
 {
    Twitt *twitt;
    Elm_Genlist_Item *egi;
@@ -152,9 +153,10 @@ etwitt_add_twitt(Etwitt_Iface *interface,
 
    twitt = calloc(1, sizeof(Twitt));
 
-   twitt->message = eina_stringshare_add(message);
+   twitt->message = eina_stringshare_add(status->text);
    twitt->date = eina_stringshare_add(date);
-   twitt->icon = eina_stringshare_add(interface->eobj->account->avatar);
+   twitt->icon = eina_stringshare_add(status->user->avatar);
+   printf("DEBUG twitt icon -> [%s]\n", twitt->icon);
    twitt->name = eina_stringshare_add(interface->eobj->account->realname);
 
    egi = elm_genlist_item_append(interface->list, &itc_default, twitt, NULL,
@@ -204,7 +206,7 @@ _show_roll(void        *data,
            void        *event_info __UNUSED__)
 {
    Etwitt_Iface *iface = data;
-   
+
    evas_object_show(iface->list);
    evas_object_show(iface->tw_box);
    edje_object_signal_emit(elm_layout_edje_get(iface->layout), "HIDE_CONFIG", "code");
@@ -243,7 +245,7 @@ _twitt_bt_press(void        *data,
 
    printf("Button pressed\n");
 
-   etwitt_add_twitt(data, msg);
+   //FIXME etwitt_add_twitt(data, msg);
    elm_entry_entry_set(infos->entry, "");
    free(msg);
 }
@@ -444,17 +446,17 @@ _timeline_get_cb(Ebird_Object *obj,
    Eina_List *l;
    Etwitt_Iface *iface = data;
    EbirdStatus *st;
-   
-   
-   
+
    EINA_LIST_FOREACH(timeline, l, st)
-   {
-      etwitt_add_twitt(iface, st->text);
-   }
+     {
+        etwitt_add_twitt(iface, st);
+     }
 }
 
-void 
-_session_open_cb(Ebird_Object *obj, void *data, void *event)
+void
+_session_open_cb(Ebird_Object *obj,
+                 void         *data,
+                 void         *event)
 {
    ebird_timeline_home_get(obj, _timeline_get_cb, data);
 }
@@ -465,7 +467,7 @@ elm_main(int    argc,
 {
    Ebird_Object *eobj;
    Etwitt_Iface *iface;
-   
+
    if (!ebird_init())
      return -1;
 
@@ -474,7 +476,6 @@ elm_main(int    argc,
         ebird_shutdown();
         return -1;
      }
-   
 
    /* tell elm about our app so it can figure out where to get files */
    printf(" %s %s\n", PACKAGE_BIN_DIR, PACKAGE_DATA_DIR);
@@ -516,7 +517,7 @@ elm_main(int    argc,
 
    // Configuration
    etwitt_config_iface_add(iface);
-   
+
    // Opening Session
    ebird_session_open(iface->eobj, _session_open_cb, iface);
 
@@ -525,10 +526,9 @@ elm_main(int    argc,
 
    //elm_run();
    ecore_main_loop_begin();
-   
+
    //elm_shutdown();
    ecore_main_loop_quit();
-
 
    return 0;
 }

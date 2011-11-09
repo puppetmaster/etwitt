@@ -23,6 +23,9 @@
 #define EBIRD_USER_SCREEN_NAME "xxxxxxx"
 #define EBIRD_USER_PASSWD "xxxxxxxx"    //<< percent encode: char "+" => %2B
 
+#define EBIRD_DATA_DIRECTORY "data"
+#define EBIRD_IMAGES_CACHE "data/images/cache"
+
 #define TAG_STATUS "status>"
 #define TAG_USER "user>"
 

@@ -66,6 +66,7 @@ struct _Async_Data
                         void         *data,
                         void         *event);
    void          *data;
+   int            fd;
    Ecore_Con_Url *url;
    Eina_Strbuf   *http_data;
    Eina_List     *handlers;
