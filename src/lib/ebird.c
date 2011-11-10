@@ -460,8 +460,12 @@ _parse_timeline(void                *_data,
 
    if (type == EINA_SIMPLE_XML_OPEN && !strncmp("status", content, length))
      {
-        cur = calloc(1, sizeof(EbirdStatus));
-        cur->user = calloc(1, sizeof(EbirdAccount));
+        //if (! cur)
+          printf("Calloc cur\n");
+          cur = calloc(1, sizeof(EbirdStatus));
+          //if (! cur->user)
+          printf("Calloc cur->user\n");
+          cur->user = calloc(1, sizeof(EbirdAccount));
      }
    else if (cur && type == EINA_SIMPLE_XML_OPEN)
      {
@@ -550,10 +554,18 @@ _parse_timeline(void                *_data,
                   cur->retweeted_status->user->username = ptr;
                   break;
 
+                case AVATAR:
+                  cur->retweeted_status->user->avatar = ebird_wget(ptr);
+                  printf("DEBUG {%s}\n", cur->retweeted_status->user->avatar);
+
                 case USER_NONE:
                   break;
                }
           }
+     }
+   else if (cur && type == EINA_SIMPLE_XML_CLOSE && !strncmp("retweeted_status", content, 16))
+     {
+        printf("\n\n\n HERE \n\n\n");
      }
    else if (cur && type == EINA_SIMPLE_XML_CLOSE && !strncmp("status", content, 6))
      {
@@ -561,8 +573,11 @@ _parse_timeline(void                *_data,
           cur->retweeted = EINA_TRUE;
 
         DBG("eina_list_append");
+        printf("=====> {%s}\n", cur->user->avatar);
         *data = eina_list_append(*data, cur);
-        //cur->user = NULL;
+        printf("NULLize cur->user\n");
+        cur->user = NULL;
+        printf("NULLize cur\n");
         cur = NULL;
      }
    else if (cur && type == EINA_SIMPLE_XML_CLOSE && !strncmp("retweeted_status", content, 16))
@@ -616,7 +631,8 @@ _ebird_timeline_get_cb(void *data,
    else
      xml = eina_stringshare_add("No timeline");
 
-   DBG("\n\n%s\n\n", xml);
+   //DBG("\n\n%s\n\n", xml);
+   //printf("%s\n",xml);
    eina_simple_xml_parse(xml, strlen(xml), EINA_TRUE, _parse_timeline, &timeline);
    //lastmsg = eina_list_last(timeline);
    lastmsg = eina_list_nth(timeline, 1);
