@@ -45,6 +45,8 @@ enum _state
     CREATEDAT,
     TEXT,
     ID,
+    IMAGE,
+    USERNAME,
     RETWEETED,
     USER,
     NONE

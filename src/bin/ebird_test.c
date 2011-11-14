@@ -50,7 +50,7 @@ show_timeline(Eina_List *timeline)
                   else
                     avatar = strdup("HOHOHOHO0ooooOOOoooOO");
 
-                  printf("[RT by %s][TW by%s][%s]\n\t%s\nAvatar [%s]\n", username,
+                  printf("[RT by %s][TW by %s][%s]\n\t%s\nAvatar [%s]\n", username,
                          username_rt,
                          created_at,
                          text,
