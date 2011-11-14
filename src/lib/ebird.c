@@ -392,7 +392,7 @@ ebird_wget(char *url)
 
         ecore_con_url_get(d->url);
      }
-   return filename;
+   return strdup(filename);
 }
 
 static Eina_Bool
@@ -460,12 +460,12 @@ _parse_timeline(void                *_data,
 
    if (type == EINA_SIMPLE_XML_OPEN && !strncmp("status", content, length))
      {
-        //if (! cur)
           printf("Calloc cur\n");
           cur = calloc(1, sizeof(EbirdStatus));
-          //if (! cur->user)
           printf("Calloc cur->user\n");
+          cur->user = NULL;
           cur->user = calloc(1, sizeof(EbirdAccount));
+          cur->retweeted = NULL;
      }
    else if (cur && type == EINA_SIMPLE_XML_OPEN)
      {
@@ -522,8 +522,7 @@ _parse_timeline(void                *_data,
 
                 case AVATAR:
                   cur->user->avatar = ebird_wget(ptr);
-                  printf("GUBED [%s]\n", cur->user->avatar);
-
+                  
                 case USER_NONE:
                   break;
                }
@@ -556,16 +555,12 @@ _parse_timeline(void                *_data,
 
                 case AVATAR:
                   cur->retweeted_status->user->avatar = ebird_wget(ptr);
-                  printf("DEBUG {%s}\n", cur->retweeted_status->user->avatar);
+                  cur->retweeted = EINA_FALSE;
 
                 case USER_NONE:
                   break;
                }
           }
-     }
-   else if (cur && type == EINA_SIMPLE_XML_CLOSE && !strncmp("retweeted_status", content, 16))
-     {
-        printf("\n\n\n HERE \n\n\n");
      }
    else if (cur && type == EINA_SIMPLE_XML_CLOSE && !strncmp("status", content, 6))
      {
@@ -573,11 +568,8 @@ _parse_timeline(void                *_data,
           cur->retweeted = EINA_TRUE;
 
         DBG("eina_list_append");
-        printf("=====> {%s}\n", cur->user->avatar);
         *data = eina_list_append(*data, cur);
-        printf("NULLize cur->user\n");
-        cur->user = NULL;
-        printf("NULLize cur\n");
+        printf("Avatar [%s]\n",cur->user->avatar);
         cur = NULL;
      }
    else if (cur && type == EINA_SIMPLE_XML_CLOSE && !strncmp("retweeted_status", content, 16))

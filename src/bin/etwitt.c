@@ -161,6 +161,7 @@ etwitt_add_twitt(Etwitt_Iface *interface,
 
    egi = elm_genlist_item_append(interface->list, &itc_default, twitt, NULL,
                                  ELM_GENLIST_ITEM_NONE, NULL, NULL);
+
    elm_genlist_item_show(egi);
 }
 

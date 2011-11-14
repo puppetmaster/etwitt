@@ -18,8 +18,6 @@ show_timeline(Eina_List *timeline)
    Eina_List *l;
    EbirdStatus *st;
 
-   printf("ICI\n");
-
    EINA_LIST_FOREACH(timeline, l, st)
      {
         const char *username = NULL;
@@ -28,49 +26,48 @@ show_timeline(Eina_List *timeline)
         const char *text = NULL;
         const char *avatar = NULL;
 
-        printf("La\n");
         if (!st)
           continue;
 
-        printf("ici\n");
         if (st->retweeted)
           {
-             printf("Heuu\n");
              if (st->user)
-               username = st->user->username;
-             else
-               username = strdup("ERROR\n");
-
-             if (st->retweeted_status && st->retweeted_status->user)
-               username_rt = st->retweeted_status->user->username;
-
-             if (st->retweeted_status)
                {
-                  created_at = st->retweeted_status->created_at;
-                  text = st->retweeted_status->text;
-               }
-             if (st->user->avatar)
-               {
-                  avatar = st->user->avatar;
+                  username = st->user->username;
+
+                  if (st->retweeted_status && st->retweeted_status->user)
+                    username_rt = st->retweeted_status->user->username;
+
+                  if (st->retweeted_status)
+                    {
+                       created_at = st->retweeted_status->created_at;
+                       text = st->retweeted_status->text;
+                    }
+                  if (st->user->avatar)
+                    {
+                       avatar = st->user->avatar;
+                    }
+                  else
+                    avatar = strdup("HOHOHOHO0ooooOOOoooOO");
+
+                  printf("[RT by %s][TW by%s][%s]\n\t%s\nAvatar [%s]\n", username,
+                         username_rt,
+                         created_at,
+                         text,
+                         avatar);
                }
              else
-               avatar = strdup("HOHOHOHO0ooooOOOoooOO");
-             printf("heuuuuu\n");
-             printf("[RT by %s][TW by%s][%s]\n\t%s\nAvatar [%s]\n", username,
-                    username_rt,
-                    created_at,
-                    text,
-                    avatar);
+               puts("RETWITTED STATUS USER IS MISSING !!!");
           }
         else
           {
              if (st->user)
-               username = st->user->username;
-
-             printf("[TW by %s][%s]\n\t%s\nAvatar [%s]\n", username,
-                    st->created_at,
-                    st->text,
-                    st->user->avatar);
+               printf("[TW by %s][%s]\n\t%s\nAvatar [%s]\n", st->user->username,
+                      st->created_at,
+                      st->text,
+                      st->user->avatar);
+             else
+               puts("STATUS USER IS MISSING !!!");
           }
      }
 }
