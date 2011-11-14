@@ -463,9 +463,8 @@ _parse_timeline(void                *_data,
           printf("Calloc cur\n");
           cur = calloc(1, sizeof(EbirdStatus));
           printf("Calloc cur->user\n");
-          cur->user = NULL;
           cur->user = calloc(1, sizeof(EbirdAccount));
-          cur->retweeted = NULL;
+          //cur->retweeted = NULL;
      }
    else if (cur && type == EINA_SIMPLE_XML_OPEN)
      {
@@ -569,6 +568,8 @@ _parse_timeline(void                *_data,
 
         DBG("eina_list_append");
         *data = eina_list_append(*data, cur);
+        //EbirdStatus *tmpst = eina_list_data_get(eina_list_last(*data));
+        //printf("Avatér registred in list : %s\n",tmpst->user->avatar);
         printf("Avatar [%s]\n",cur->user->avatar);
         cur = NULL;
      }
