@@ -457,13 +457,10 @@ _parse_timeline2(void                *_data,
    static EbirdStatus *current = NULL;
    static State s = NONE;
 
-   printf("DEBUG START\n");
    void **data = (void **)_data;
    
-   printf("OK first IF\n");
    if (type == EINA_SIMPLE_XML_OPEN && !strncmp("status", content, length))
      {
-        printf("Heuu je calloc !\n");
         current = calloc(1, sizeof(EbirdStatus));
         current->user = calloc(1, sizeof(EbirdAccount));
         current->retweeted_status = calloc(1, sizeof(EbirdStatus));
@@ -471,7 +468,6 @@ _parse_timeline2(void                *_data,
      }
    else if (current && type == EINA_SIMPLE_XML_OPEN)
      {
-        printf("Ok first else if\n");
         if (!strncmp("retweeted_status", content, 16))
           {
              s = RETWEETED;
@@ -507,34 +503,28 @@ _parse_timeline2(void                *_data,
    else if (current && type == EINA_SIMPLE_XML_DATA)
      {
         char *ptr = strndup(content, length);
-        printf("DBG ==> %s\n",ptr);
-        if (current->retweeted)
+        if (!current->retweeted)
           {
              switch(s)
                {
                 case CREATEDAT:
                   current->created_at = ptr;
-                  printf("DEBUG ==> [%s]\n",current->created_at);
                   break;
 
                 case TEXT:
                   current->text = ptr;
-                  printf("DEBUG ===> [%s]\n",current->text);
                   break;
 
                 case ID:
                   current->id = ptr;
-                  printf("DEBUG ===> [%s]\n",current->id);
                   break;
 
                 case IMAGE:
                   current->user->avatar = ebird_wget(ptr);
-                  printf("DEBUG ===> [%s]\n",current->user->avatar);
                   break;
 
                 case USERNAME:
                   current->user->username = ptr;
-                  printf("DEBUG ===> [%s]\n",current->user->username);
                   break;
                }
           }
@@ -544,28 +534,22 @@ _parse_timeline2(void                *_data,
                {
                 case CREATEDAT:
                   current->retweeted_status->created_at = ptr;
-                  printf("DEBUG ===> [%s]\n",current->retweeted_status->created_at);
                   break;
 
                 case TEXT:
                   current->retweeted_status->text = ptr;
-                  printf("DEBUG ===> [%s]\n",current->retweeted_status->text);
-
                   break;
 
                 case ID:
                   current->retweeted_status->id = ptr;
-                  printf("DEBUG ===> [%s]\n",current->retweeted_status->id);
                   break;
 
                 case IMAGE:
                   current->retweeted_status->user->avatar = ebird_wget(ptr);
-                  printf("DEBUG ===> [%s]\n",current->retweeted_status->user->avatar);
                   break;
 
                 case USERNAME:
                   current->retweeted_status->user->username = ptr;
-                  printf("DEBUG ===> [%s]\n",current->retweeted_status->user->username);
                   break;
                }
           }
@@ -576,19 +560,21 @@ _parse_timeline2(void                *_data,
      }
    else if (current && type == EINA_SIMPLE_XML_CLOSE && !strncmp("status", content, 6))
      {
-      
-        if (current->text)
+        if ( ! current->retweeted)
         {
-           if (!strncmp("RT ", current->text, 3))
-             {
-                current->retweeted = EINA_TRUE;
+           if (current->text)
+           {
+              if (!strncmp("RT ", current->text, 3))
+                {
+                   current->retweeted = EINA_TRUE;
+                }
              }
-          }
-        DBG("eina_list_append");
-        *data = eina_list_append(*data, current);
-        puts("=============================================================\n");
-        current = NULL;
+           DBG("eina_list_append");
+           *data = eina_list_append(*data, current);
+           current = NULL;
+        }
      }
+     return EINA_TRUE;
 }
 
 static Eina_Bool
@@ -788,8 +774,8 @@ _ebird_timeline_get_cb(void *data,
 
    //DBG("\n\n%s\n\n", xml);
    //printf("%s\n",xml);
-   //eina_simple_xml_parse(xml, strlen(xml), EINA_TRUE, _parse_timeline2, &timeline);
-   eina_simple_xml_parse(xml, strlen(xml), EINA_TRUE, _parse_timeline,&timeline);
+   eina_simple_xml_parse(xml, strlen(xml), EINA_TRUE, _parse_timeline2, &timeline);
+   //eina_simple_xml_parse(xml, strlen(xml), EINA_TRUE, _parse_timeline,&timeline);
    //lastmsg = eina_list_last(timeline);
    lastmsg = eina_list_nth(timeline, 1);
    DBG("NTH ID [%s]\n", lastmsg->id);
