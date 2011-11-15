@@ -3,7 +3,7 @@ test*
 /ebird
 out.*
 /try/
-*.eet
+ebird_user.eet
 mkid*
 *.edj
 *.lo
