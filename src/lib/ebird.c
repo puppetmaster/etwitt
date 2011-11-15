@@ -448,7 +448,7 @@ _parse_user(void                *data,
 }
 
 static Eina_Bool
-_parse_timeline2(void                *_data,
+_parse_timeline(void                *_data,
                  Eina_Simple_XML_Type type,
                  const char          *content,
                  unsigned             offset,
@@ -577,6 +577,7 @@ _parse_timeline2(void                *_data,
      return EINA_TRUE;
 }
 
+/* TO REMOVE
 static Eina_Bool
 _parse_timeline(void                *_data,
                 Eina_Simple_XML_Type type,
@@ -728,6 +729,7 @@ _parse_timeline(void                *_data,
      }
    return EINA_TRUE;
 }
+*/
 
 EAPI void
 ebird_timeline_free(Eina_List *timeline)
@@ -774,8 +776,7 @@ _ebird_timeline_get_cb(void *data,
 
    //DBG("\n\n%s\n\n", xml);
    //printf("%s\n",xml);
-   eina_simple_xml_parse(xml, strlen(xml), EINA_TRUE, _parse_timeline2, &timeline);
-   //eina_simple_xml_parse(xml, strlen(xml), EINA_TRUE, _parse_timeline,&timeline);
+   eina_simple_xml_parse(xml, strlen(xml), EINA_TRUE, _parse_timeline, &timeline);
    //lastmsg = eina_list_last(timeline);
    lastmsg = eina_list_nth(timeline, 1);
    DBG("NTH ID [%s]\n", lastmsg->id);
