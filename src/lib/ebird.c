@@ -927,9 +927,13 @@ _ebird_status_update_cb(void *data,
    if (d->url != url->url_con)
      return EINA_TRUE;
 
-   xml = eina_strbuf_string_get(d->http_data);
+   if (d->http_data)
+      xml = eina_strbuf_string_get(d->http_data);
+   else
+      return EINA_FALSE;
 
    DBG("%s\n", xml);
+   printf("%s\n",xml);
    eina_simple_xml_parse(xml, strlen(xml), EINA_TRUE, _parse_timeline, &timeline);
 
    EINA_LIST_FREE(d->handlers, h)
@@ -938,6 +942,8 @@ _ebird_status_update_cb(void *data,
 
    if (d->cb)
      d->cb(eobj, d->data, timeline);
+   
+   return EINA_TRUE;
 }
 
 EAPI void
@@ -961,21 +967,24 @@ ebird_status_update(char            *message,
    d->data = data;
 
    DBG("Update Status Start Here !");
+   
+   snprintf(full_url, sizeof(full_url),
+            "%s&status=%s&include_entities=true",
+            EBIRD_STATUS_URL,
+            message);
 
-   sig_url = ebird_oauth_sign_url(EBIRD_STATUS_URL,
+   sig_url = ebird_oauth_sign_url(full_url,
                                   obj->request_token->consumer_key,
                                   obj->request_token->consumer_secret,
                                   obj->account->access_token_key,
                                   obj->account->access_token_secret, "POST");
 
-   snprintf(full_url, sizeof(full_url),
-            "%s&status=%s&include_entities=true",
-            sig_url,
-            message);
+   
+   printf("DEBUG [%s]\n",sig_url);
 
    data = eina_strbuf_new();
 
-   d->url = ecore_con_url_new(full_url);
+   d->url = ecore_con_url_new(sig_url);
    DBG("STATUS_UPDATE_URL [%s]\n", full_url);
    h = ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,
                                _url_data_cb, d);

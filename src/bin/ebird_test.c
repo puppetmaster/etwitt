@@ -116,7 +116,7 @@ _session_opened(Ebird_Object *obj,
    //ebird_timeline_user_get(obj, _timeline_get_cb, data);
    //ebird_timeline_mentions_get(obj, _timeline_get_cb, data);
 
-   //ebird_status_update("Message", obj, _status_update_cb, obj);
+   ebird_status_update("Twitted-by-ebird", obj, _status_update_cb, obj);
 }
 
 int
