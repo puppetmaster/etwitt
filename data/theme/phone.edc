@@ -36,7 +36,7 @@ collections {
       data.item: "selectraise" "on";
       data.item: "treesize" "20";
       data.item: "labels" "elm.text elm.date elm.name";
-      data.item: "icons" "elm.swallow.icon";
+      data.item: "contents" "elm.swallow.icon";
 
       styles {
          style { name: "twitt_textblock_style";
