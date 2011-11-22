@@ -301,7 +301,12 @@ ebird_token_authenticity_get(Async_Data *data)
 {
    char *key,
    *end;
-   char *web_script = eina_strbuf_string_get(data->http_data);
+   char *web_script;
+   
+   if (data->http_data)
+      web_script = eina_strbuf_string_get(data->http_data);
+   else
+      return 1;
 
    //printf("DEBUG webscript=%s\n", web_script);
    key = strstr(web_script, "twttr.form_authenticity_token");
@@ -1036,8 +1041,14 @@ _ebird_access_token_get_cb(void *data,
 
    access_token_prm = (char **)malloc(5 * sizeof(char *));
 
-   acc_token = eina_strbuf_string_get(d->http_data);
-   DBG("DATA : %s", acc_token);
+   if (d->http_data)
+   {
+      acc_token = eina_strbuf_string_get(d->http_data);
+      DBG("DATA : %s", acc_token);
+   }
+   else
+      return EINA_FALSE;
+      
    if (acc_token)
      {
         DBG("DEBUG[ebird_access_token_get][RESULT]{%s}", acc_token);
@@ -1219,7 +1230,10 @@ _ebird_token_request_cb(void *data,
    if (d->url != url->url_con)
      return EINA_TRUE;
 
-   eobj->request_token->token = strdup(eina_strbuf_string_get(d->http_data));
+   if (d->http_data)
+      eobj->request_token->token = strdup(eina_strbuf_string_get(d->http_data));
+   else
+      return EINA_FALSE;
 
    DBG("request token: '%s'", eobj->request_token->token);
    if (eobj->request_token->token)

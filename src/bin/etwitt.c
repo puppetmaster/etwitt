@@ -119,6 +119,7 @@ _list_item_default_icon_get(void        *data,
      {
         ic = elm_icon_add(obj);
         //elm_icon_file_set(ic, _theme_file_get(), twitt->icon);
+        puts("HERE!!!");
         elm_icon_file_set(ic, twitt->icon, "elm.swallow.icon");
         evas_object_size_hint_min_set(ic, 32, 32);
         evas_object_show(ic);
