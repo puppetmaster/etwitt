@@ -783,7 +783,7 @@ _ebird_timeline_get_cb(void *data,
      xml = eina_stringshare_add("No timeline");
 
    //DBG("\n\n%s\n\n", xml);
-   printf("%s\n",xml);
+  // printf("%s\n",xml);
    eina_simple_xml_parse(xml, strlen(xml), EINA_TRUE, _parse_timeline, &timeline);
    //lastmsg = eina_list_last(timeline);
    lastmsg = eina_list_nth(timeline, 1);
