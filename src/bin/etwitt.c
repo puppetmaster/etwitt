@@ -115,12 +115,14 @@ _list_item_default_icon_get(void        *data,
    Evas_Object *ic = NULL;
    Twitt *twitt = data;
 
+   printf("ICON GET !!\n");
+
    if (!strcmp(part, "elm.swallow.icon"))
      {
         ic = elm_icon_add(obj);
         //elm_icon_file_set(ic, _theme_file_get(), twitt->icon);
         puts("HERE!!!");
-        elm_icon_file_set(ic, twitt->icon, "elm.swallow.icon");
+        elm_icon_file_set(ic, twitt->icon, NULL);
         evas_object_size_hint_min_set(ic, 32, 32);
         evas_object_show(ic);
      }
@@ -156,7 +158,8 @@ etwitt_add_twitt(Etwitt_Iface *interface,
    twitt = calloc(1, sizeof(Twitt));
 
    twitt->message = eina_stringshare_add(status->text);
-   twitt->date = eina_stringshare_add(date);
+   printf("DEBUG twitt date -> [%s]\n",status->created_at);
+   twitt->date = eina_stringshare_add(status->created_at);
    twitt->icon = eina_stringshare_add(status->user->avatar);
    printf("DEBUG twitt icon -> [%s]\n", twitt->icon);
    twitt->name = eina_stringshare_add(interface->eobj->account->realname);

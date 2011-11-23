@@ -382,7 +382,7 @@ ebird_wget(char *url)
 
    DBG("\nFILENAME [%s]]", filename);
 
-   if ( !ebird_file_exists(filename))
+   if ( !ebird_file_exists(filename) || ecore_file_size(filename) == 0)
      {
         DBG("FILE [%s] have to be downloaded", filename);
 
