@@ -461,7 +461,7 @@ _parse_timeline(void                *_data,
 {
    static EbirdStatus *current = NULL;
    static State s = NONE;
-
+   
    void **data = (void **)_data;
    
    if (type == EINA_SIMPLE_XML_OPEN && !strncmp("status", content, length))
@@ -503,7 +503,9 @@ _parse_timeline(void                *_data,
              s = IMAGE;
           }
         else
-          s = NONE;
+          {
+             s = NONE;
+          }
      }
    else if (current && type == EINA_SIMPLE_XML_DATA)
      {
@@ -513,7 +515,8 @@ _parse_timeline(void                *_data,
              switch(s)
                {
                 case CREATEDAT:
-                  current->created_at = ptr;
+                  if (! current->created_at )
+                     current->created_at = ptr;
                   break;
 
                 case TEXT:
@@ -780,7 +783,7 @@ _ebird_timeline_get_cb(void *data,
      xml = eina_stringshare_add("No timeline");
 
    //DBG("\n\n%s\n\n", xml);
-   //printf("%s\n",xml);
+   printf("%s\n",xml);
    eina_simple_xml_parse(xml, strlen(xml), EINA_TRUE, _parse_timeline, &timeline);
    //lastmsg = eina_list_last(timeline);
    lastmsg = eina_list_nth(timeline, 1);
