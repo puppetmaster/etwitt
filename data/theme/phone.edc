@@ -40,7 +40,7 @@ collections {
 
       styles {
          style { name: "twitt_textblock_style";
-            base: "font=Sans font_size=10 color=#000 wrap=mixed text_class=entry";
+            base: "font=Sans font_size=12 color=#000 wrap=mixed text_class=entry";
             tag:  "br" "\n";
             tag:  "ps" "ps";
             tag:  "tab" "\t";
@@ -55,7 +55,7 @@ collections {
       images {
          image: "list_bg.png" COMP;
          image: "list_selected.png" COMP;
-
+         image: "stamps.png" COMP;
       }
 
       parts {
@@ -78,6 +78,20 @@ collections {
             }
          }
 
+         part { name: "stamps";
+            description {
+               state: "default" 0.0;
+               image.normal: "stamps.png";
+               rel1.to: "elm.swallow.icon";
+               rel2.to: "elm.swallow.icon";
+               rel1.offset: -7 -9;
+               rel2.offset: 6 8;
+               map.on: 1;
+               map.perspective_on: 1;
+               map.rotation.z: -7.0;
+            }
+         }
+
          part {	name: "elm.swallow.icon";
             type: SWALLOW;
             scale: 1;
@@ -90,9 +104,12 @@ collections {
                rel1 {
                   to: "elm.name";
                   relative: 0 1;
-                  offset: 5 -5;
+                  offset: 15 -5;
                }
                rel2.relative: 0.2 1;
+               map.on: 1;
+               map.perspective_on: 1;
+               map.rotation.z: -7.0;
             }
          }
 
@@ -135,10 +152,10 @@ collections {
                align: 1.0 0.0;
                rel1 {
                   to: "elm.name";
-                  relative: 1.0 0.0;
+                  relative: 1.0 1.0;
                   offset: 0 0;
                }
-               color: 0 0 0 255;
+               color: 100 100 100 255;
                color3: 0 0 0 0;
                text {
                   text: "No date";
@@ -166,8 +183,8 @@ collections {
                fixed: 0 1;
                rel1 {
                   to: "elm.swallow.icon";
-                  relative: 1.0 0.0;
-                  offset: 0 -5;
+                  relative: 1.0 0.8;
+                  offset: 10 -5;
                }
                image {
                   //normal: "bubble_3.png";
@@ -191,11 +208,11 @@ collections {
                rel1 {
                   to: "bubble";
                   relative: 0.0 0.0;
-                  offset: 21 12;
+                  offset: 21 22;
                }
                rel2 {
                   to: "bubble";
-                  offset: -10 -10;
+                  offset: -10 -20;
                }
                color: 0 0 0 255;
                color3: 0 0 0 0;

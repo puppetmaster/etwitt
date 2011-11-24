@@ -384,7 +384,7 @@ ebird_wget(char *url)
 
    if ( !ebird_file_exists(filename) || ecore_file_size(filename) == 0)
      {
-        DBG("FILE [%s] have to be downloaded", filename);
+        DBG("FILE [%s] have to be downloaded from [%s]", filename, url);
 
         d->url = ecore_con_url_new(url);
 

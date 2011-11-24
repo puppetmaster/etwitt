@@ -97,6 +97,7 @@ _list_item_default_label_get(void        *data,
                              const char  *part)
 {
    Twitt *twitt = data;
+
    if (!strcmp(part, "elm.text") && twitt->message)
      return strdup(twitt->message);
    else if (!strcmp(part, "elm.date") && twitt->date)
