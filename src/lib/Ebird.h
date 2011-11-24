@@ -46,6 +46,7 @@ enum _state
     TEXT,
     ID,
     IMAGE,
+    REALNAME,
     USERNAME,
     RETWEETED,
     USER,

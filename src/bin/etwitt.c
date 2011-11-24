@@ -156,11 +156,10 @@ etwitt_add_twitt(Etwitt_Iface *interface,
    twitt = calloc(1, sizeof(Twitt));
 
    twitt->message = eina_stringshare_add(status->text);
-   printf("DEBUG twitt date -> [%s]\n",status->created_at);
    twitt->date = eina_stringshare_add(status->created_at);
    twitt->icon = eina_stringshare_add(status->user->avatar);
-   printf("DEBUG twitt icon -> [%s]\n", twitt->icon);
-   twitt->name = eina_stringshare_add(interface->eobj->account->realname);
+   printf("DEBUG REALNAME[%s]==>USERNAME[%s]\n",status->user->realname,status->user->username);
+   twitt->name = eina_stringshare_add(status->user->realname);
 
    egi = elm_genlist_item_append(interface->list, &itc_default, twitt, NULL,
                                  ELM_GENLIST_ITEM_NONE, NULL, NULL);

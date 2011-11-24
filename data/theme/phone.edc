@@ -40,7 +40,7 @@ collections {
 
       styles {
          style { name: "twitt_textblock_style";
-            base: "font=Sans font_size=12 color=#000 wrap=mixed text_class=entry";
+            base: "font=Sans font_size=10 color=#000 wrap=mixed text_class=entry";
             tag:  "br" "\n";
             tag:  "ps" "ps";
             tag:  "tab" "\t";
@@ -126,12 +126,12 @@ collections {
                color3: 0 0 0 0;
                rel1.offset: 0 3;
                text {	text: "Unnamed";
-                  font: "Sans:style=Bold";
-                  size: 8;
+                  font: "Sans:style=Oblique:color=#000:wrap=mixed:text_class=entry";
+                  size: 11;
                   min: 1 1;
                   elipsis: 0;
                   max: 0.5 1;
-                  align: 0.0 0.0;
+                  align: 0.15 0.0;
                }
             }
             description {

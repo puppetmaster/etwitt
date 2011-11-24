@@ -498,6 +498,10 @@ _parse_timeline(void                *_data,
           {
              s = USERNAME;
           }
+        else if (!strncmp("name", content, 4))
+          {
+             s = REALNAME;
+          }
         else if (!strncmp("profile_image_url_https", content, 23))
           {
              s = IMAGE;
@@ -530,7 +534,11 @@ _parse_timeline(void                *_data,
                 case IMAGE:
                   current->user->avatar = ebird_wget(ptr);
                   break;
-
+                  
+                case REALNAME:
+                  current->user->realname = ptr;
+                  break;
+         
                 case USERNAME:
                   current->user->username = ptr;
                   break;
@@ -782,8 +790,7 @@ _ebird_timeline_get_cb(void *data,
    else
      xml = eina_stringshare_add("No timeline");
 
-   //DBG("\n\n%s\n\n", xml);
-  // printf("%s\n",xml);
+   DBG("%s", xml);
    eina_simple_xml_parse(xml, strlen(xml), EINA_TRUE, _parse_timeline, &timeline);
    //lastmsg = eina_list_last(timeline);
    lastmsg = eina_list_nth(timeline, 1);
