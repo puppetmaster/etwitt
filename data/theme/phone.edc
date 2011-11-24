@@ -49,6 +49,10 @@ collections {
             tag:  "link" "+ color=#800 underline=on underline_color=#8008";
             tag:  "hilight" "+ font_weight=Bold";
          }
+
+         style { name: "twitt_name_textblock_style";
+            base: "font=Sans font_size=10 color=#646464 font_weight=Bold wrap=mixed text_class=entry";
+         }
       }
 
 
@@ -104,7 +108,7 @@ collections {
                rel1 {
                   to: "elm.name";
                   relative: 0 1;
-                  offset: 15 -5;
+                  offset: 15 15;
                }
                rel2.relative: 0.2 1;
                map.on: 1;
@@ -114,7 +118,7 @@ collections {
          }
 
          part {	name: "elm.name";
-            type: TEXT;
+            type: TEXTBLOCK;
             effect: SOFT_SHADOW;
             mouse_events: 0;
             scale: 1;
@@ -122,16 +126,13 @@ collections {
                state: "default" 0.0;
                fixed: 1 1;
                align: 0.0 0.0;
-               color: 0 0 0 255;
-               color3: 0 0 0 0;
-               rel1.offset: 0 3;
+               rel1.offset: 3 3;
                text {	text: "Unnamed";
-                  font: "Sans:style=Oblique:color=#000:wrap=mixed:text_class=entry";
-                  size: 11;
+                  style: "twitt_name_textblock_style";
                   min: 1 1;
                   elipsis: 0;
                   max: 0.5 1;
-                  align: 0.15 0.0;
+                  align: 0.0 0.0;
                }
             }
             description {
