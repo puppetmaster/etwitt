@@ -452,7 +452,7 @@ _timeline_get_cb(Ebird_Object *obj,
    Etwitt_Iface *iface = data;
    EbirdStatus *st;
 
-   EINA_LIST_FOREACH(timeline, l, st)
+   EINA_LIST_REVERSE_FOREACH(timeline, l, st)
      {
         etwitt_add_twitt(iface, st);
      }
