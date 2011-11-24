@@ -50,7 +50,7 @@ show_timeline(Eina_List *timeline)
                   else
                     avatar = strdup("HOHOHOHO0ooooOOOoooOO");
 
-                  printf("[RT by %s][TW by %s][%s]\n\t%s\nAvatar [%s]\n", username,
+                  printf("[ID][%s][RT by %s][TW by %s][%s]\n\t%s\nAvatar [%s]\n", st->id, username,
                          username_rt,
                          created_at,
                          text,
@@ -62,7 +62,7 @@ show_timeline(Eina_List *timeline)
         else
           {
              if (st->user)
-               printf("[TW by %s][%s]\n\t%s\nAvatar [%s]\n", st->user->username,
+               printf("[ID][%s][TW by %s][%s]\n\t%s\nAvatar [%s]\n", st->id, st->user->username,
                       st->created_at,
                       st->text,
                       st->user->avatar);
@@ -116,7 +116,7 @@ _session_opened(Ebird_Object *obj,
    //ebird_timeline_user_get(obj, _timeline_get_cb, data);
    //ebird_timeline_mentions_get(obj, _timeline_get_cb, data);
 
-   ebird_status_update("Twitted-by-ebird", obj, _status_update_cb, obj);
+   //ebird_status_update("Twitted-by-ebird", obj, _status_update_cb, obj);
 }
 
 int

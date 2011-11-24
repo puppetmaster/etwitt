@@ -528,7 +528,10 @@ _parse_timeline(void                *_data,
                   break;
 
                 case ID:
-                  current->id = ptr;
+                  if (! current->id)
+                     current->id = ptr;
+                  else if ( current->id && current->user)
+                     current->user->userid = ptr;
                   break;
 
                 case IMAGE:
@@ -792,12 +795,15 @@ _ebird_timeline_get_cb(void *data,
 
    DBG("%s", xml);
    eina_simple_xml_parse(xml, strlen(xml), EINA_TRUE, _parse_timeline, &timeline);
-   //lastmsg = eina_list_last(timeline);
-   lastmsg = eina_list_nth(timeline, 1);
-   DBG("NTH ID [%s]\n", lastmsg->id);
-   eobj->newer_msg_id = lastmsg->id;
-   DBG("newer_msg_id = %s\n", eobj->newer_msg_id);
-
+   
+   if (timeline)//lastmsg = eina_list_last(timeline);
+   {
+      lastmsg = eina_list_nth(timeline, 0);
+      DBG("NTH ID [%s]\n", lastmsg->id);
+      eobj->newer_msg_id = lastmsg->id;
+      DBG("newer_msg_id = %s\n", eobj->newer_msg_id);
+   }
+   
    EINA_LIST_FREE(d->handlers, h)
      ecore_event_handler_del(h);
    d->handlers = NULL;
@@ -818,7 +824,7 @@ ebird_timeline_get(const char *url,
    if (d->eobj->newer_msg_id)
      {
         snprintf(full_url, sizeof(full_url),
-                 "%s&since_id=%i",
+                 "%s&since_id=%s",
                  url,
                  d->eobj->newer_msg_id);
         sig_url = ebird_oauth_sign_url(full_url,
@@ -826,6 +832,7 @@ ebird_timeline_get(const char *url,
                                        eobj->request_token->consumer_secret,
                                        eobj->account->access_token_key,
                                        eobj->account->access_token_secret, NULL);
+        DBG("SIGNED URL IS [%s]",sig_url);
      }
    else
      {
