@@ -3,7 +3,6 @@
 #endif
 
 #include <time.h>
-
 #include <oauth.h>
 
 #include <Eina.h>
@@ -146,19 +145,14 @@ etwitt_add_twitt(Etwitt_Iface *interface,
    Elm_Genlist_Item *egi;
 
    char date[PATH_MAX];
-   time_t tw_time;
-   struct tm *tb;
-
-   tw_time = time(NULL);
-   tb = localtime(&tw_time);
-   strftime(date, sizeof(date), "%a %d %b %Y %H:%M:%S", tb);
+   
+   strftime(date, sizeof(date), "%a %d %b %Y %H:%M:%S", status->created_at);
 
    twitt = calloc(1, sizeof(Twitt));
 
    twitt->message = eina_stringshare_add(status->text);
-   twitt->date = eina_stringshare_add(status->created_at);
+   twitt->date = eina_stringshare_add(date);
    twitt->icon = eina_stringshare_add(status->user->avatar);
-   printf("DEBUG REALNAME[%s]==>USERNAME[%s]\n",status->user->realname,status->user->username);
    twitt->name = eina_stringshare_add(status->user->realname);
 
    egi = elm_genlist_item_append(interface->list, &itc_default, twitt, NULL,
@@ -201,8 +195,6 @@ _show_configuration(void        *data,
    Etwitt_Iface *iface = data;
    edje_object_signal_emit(elm_layout_edje_get(iface->layout), "SHOW_CONFIG", "code");
    elm_photo_file_set(iface->config->ph_avatar,iface->eobj->account->avatar);
-   printf("DEBUG {[%s]}\n",iface->eobj->account->avatar);
-   printf("Callback _show_configuration\n");
 }
 
 static void

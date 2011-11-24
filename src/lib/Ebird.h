@@ -74,7 +74,8 @@ struct _Ebird_Account
 
 struct _Ebird_Status
 {
-  const char *created_at;
+  //const char *created_at;
+  struct tm  *created_at;
   const char *id;
   const char *text;
   const char *truncated;

@@ -2,6 +2,7 @@
 # include <config.h>
 #endif
 
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,6 +10,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+ 
 #include <oauth.h>
 
 #include <Eina.h>
@@ -520,7 +522,10 @@ _parse_timeline(void                *_data,
                {
                 case CREATEDAT:
                   if (! current->created_at )
-                     current->created_at = ptr;
+                  {
+                     getdate_r(ptr,current->created_at);
+                     //current->created_at = ptr;
+                  }
                   break;
 
                 case TEXT:
@@ -552,7 +557,8 @@ _parse_timeline(void                *_data,
              switch(s)
                {
                 case CREATEDAT:
-                  current->retweeted_status->created_at = ptr;
+                  //current->retweeted_status->created_at = ptr;
+                  current->retweeted_status->created_at = getdate(ptr);
                   break;
 
                 case TEXT:
@@ -804,12 +810,22 @@ _ebird_timeline_get_cb(void *data,
       DBG("newer_msg_id = %s\n", eobj->newer_msg_id);
    }
    
+   printf("ICI\n");
+   
    EINA_LIST_FREE(d->handlers, h)
+   {
+     printf("LA\n");
      ecore_event_handler_del(h);
+   }
+   printf("heuuu\n");
    d->handlers = NULL;
+   
+   printf("!!!!!!\n");
 
    if (d->cb)
      d->cb(eobj, d->data, timeline);
+
+   printf("Et puis voila !\n");
 }
 
 static void
@@ -1002,8 +1018,6 @@ ebird_status_update(char            *message,
                                   obj->account->access_token_secret, "POST");
 
    
-   printf("DEBUG [%s]\n",sig_url);
-
    data = eina_strbuf_new();
 
    d->url = ecore_con_url_new(sig_url);
