@@ -145,18 +145,17 @@ etwitt_add_twitt(Etwitt_Iface *interface,
    Twitt *twitt;
    Elm_Genlist_Item *egi;
 
-   char date[PATH_MAX];
+   char *date;
    time_t tw_time;
    struct tm *tb;
 
    tw_time = time(NULL);
    tb = localtime(&tw_time);
-   strftime(date, sizeof(date), "%a %d %b %Y %H:%M:%S", tb);
 
    twitt = calloc(1, sizeof(Twitt));
 
    twitt->message = eina_stringshare_add(status->text);
-   twitt->date = eina_stringshare_add(status->created_at);
+   twitt->date = eina_stringshare_add(status->date);
    twitt->icon = eina_stringshare_add(status->user->avatar);
    printf("DEBUG REALNAME[%s]==>USERNAME[%s]\n",status->user->realname,status->user->username);
    twitt->name = eina_stringshare_add(status->user->realname);
