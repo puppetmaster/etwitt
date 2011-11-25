@@ -144,14 +144,12 @@ etwitt_add_twitt(Etwitt_Iface *interface,
    Twitt *twitt;
    Elm_Genlist_Item *egi;
 
-   char date[PATH_MAX];
+   char *date;
    
-   strftime(date, sizeof(date), "%a %d %b %Y %H:%M:%S", status->created_at);
-
    twitt = calloc(1, sizeof(Twitt));
 
    twitt->message = eina_stringshare_add(status->text);
-   twitt->date = eina_stringshare_add(date);
+   twitt->date = eina_stringshare_add(status->date);
    twitt->icon = eina_stringshare_add(status->user->avatar);
    twitt->name = eina_stringshare_add(status->user->realname);
 
@@ -443,6 +441,8 @@ _timeline_get_cb(Ebird_Object *obj,
    Eina_List *l;
    Etwitt_Iface *iface = data;
    EbirdStatus *st;
+
+   printf("JE SUIS ICI !!!\n");
 
    EINA_LIST_REVERSE_FOREACH(timeline, l, st)
      {

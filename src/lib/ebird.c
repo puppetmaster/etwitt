@@ -2,6 +2,7 @@
 # include <config.h>
 #endif
 
+#define _GNU_SOURCE 500
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,6 +46,8 @@ static void ebird_timeline_get(const char *url,
 EAPI int
 ebird_init()
 {
+   //Eina_Prefix *pfx = NULL;
+   
    if (EINA_LIKELY(_ebird_main_count > 0))
      return ++_ebird_main_count;
 
@@ -68,6 +71,20 @@ ebird_init()
         EINA_LOG_ERR("Ebird Can not create a general log domain.");
         goto shutdown_ecore_con_url;
      }
+   /*
+   pfx = eina_prefix_new(NULL, ebird_init, "EBIRD", "Ebird", NULL,
+                         PACKAGE_BIN_DIR, 
+                         PACKAGE_LIB_DIR,
+                         PACKAGE_DATA_DIR, 
+                         "/tmp");
+   if (!pfx) printf("ERROR: Critical error in finding prefix\n");
+   printf("install prefix is: %s\n", eina_prefix_get(pfx));
+   printf("binaries are in: %s\n", eina_prefix_bin_get(pfx));
+   printf("libraries are in: %s\n", eina_prefix_lib_get(pfx));
+   printf("data files are in: %s\n", eina_prefix_data_get(pfx));
+   eina_prefix_free(pfx);
+   * 
+   */
 
    DBG("Ebird Init done");
 
@@ -469,6 +486,8 @@ _parse_timeline(void                *_data,
    if (type == EINA_SIMPLE_XML_OPEN && !strncmp("status", content, length))
      {
         current = calloc(1, sizeof(EbirdStatus));
+        current->created_at = NULL;
+        current->date = NULL;
         current->user = calloc(1, sizeof(EbirdAccount));
         current->retweeted_status = calloc(1, sizeof(EbirdStatus));
         current->retweeted_status->user = calloc(1, sizeof(EbirdAccount));
@@ -482,7 +501,10 @@ _parse_timeline(void                *_data,
           }
         else if (!strncmp("created_at", content, 10))
           {
-             s = CREATEDAT;
+             if (!current->created_at && ! current->date)
+               s = CREATEDAT;
+             else
+               s = NONE;
           }
         else if (!strncmp("text", content, 4))
           {
@@ -521,11 +543,8 @@ _parse_timeline(void                *_data,
              switch(s)
                {
                 case CREATEDAT:
-                  if (! current->created_at )
-                  {
-                     getdate_r(ptr,current->created_at);
-                     //current->created_at = ptr;
-                  }
+                  current->created_at = getdate(ptr);
+                  current->date = ptr;
                   break;
 
                 case TEXT:
@@ -557,8 +576,8 @@ _parse_timeline(void                *_data,
              switch(s)
                {
                 case CREATEDAT:
-                  //current->retweeted_status->created_at = ptr;
-                  current->retweeted_status->created_at = getdate(ptr);
+                  current->created_at = getdate(ptr);
+                  current->date = ptr;
                   break;
 
                 case TEXT:
@@ -823,8 +842,10 @@ _ebird_timeline_get_cb(void *data,
    printf("!!!!!!\n");
 
    if (d->cb)
+   {
+     printf("TOTO\n");
      d->cb(eobj, d->data, timeline);
-
+   }
    printf("Et puis voila !\n");
 }
 
