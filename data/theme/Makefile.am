@@ -7,9 +7,8 @@ phonedir = $(pkgdatadir)/theme
 
 phone_DATA = phone.edj
 
-
 EDC = \
-phone.edc
+phone_new.edc
 
 IMGS = \
 ../images/*.png
@@ -20,7 +19,7 @@ EXTRA_DIST = \
 
 phone.edj: Makefile $(EXTRA_DIST)
 	$(AM_V_GEN)@edje_cc@ $(EDJE_FLAGS) \
-	$(top_srcdir)/data/theme/phone.edc \
+	$(top_srcdir)/data/theme/phone_new.edc \
 	$(top_builddir)/data/theme/phone.edj
 
 clean-local:

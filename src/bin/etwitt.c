@@ -3,6 +3,7 @@
 #endif
 
 #include <time.h>
+
 #include <oauth.h>
 
 #include <Eina.h>
@@ -49,6 +50,7 @@ struct _Interface
    Elm_Theme           *theme;
    Etwitt_Config_Iface *config;
    Ebird_Object        *eobj;
+   Elm_Genlist_Item    *header;
 };
 
 struct _ConfigIface
@@ -144,16 +146,23 @@ etwitt_add_twitt(Etwitt_Iface *interface,
    Twitt *twitt;
    Elm_Genlist_Item *egi;
 
-   char *date;
-   
+   char date[PATH_MAX];
+   time_t tw_time;
+   struct tm *tb;
+
+   tw_time = time(NULL);
+   tb = localtime(&tw_time);
+   strftime(date, sizeof(date), "%a %d %b %Y %H:%M:%S", tb);
+
    twitt = calloc(1, sizeof(Twitt));
 
    twitt->message = eina_stringshare_add(status->text);
-   twitt->date = eina_stringshare_add(status->date);
+   twitt->date = eina_stringshare_add(status->created_at);
    twitt->icon = eina_stringshare_add(status->user->avatar);
+   printf("DEBUG REALNAME[%s]==>USERNAME[%s]\n",status->user->realname,status->user->username);
    twitt->name = eina_stringshare_add(status->user->realname);
 
-   egi = elm_genlist_item_append(interface->list, &itc_default, twitt, NULL,
+   egi = elm_genlist_item_append(interface->list, &itc_default, twitt, interface->header,
                                  ELM_GENLIST_ITEM_NONE, NULL, NULL);
 
    elm_genlist_item_show(egi);
@@ -193,6 +202,8 @@ _show_configuration(void        *data,
    Etwitt_Iface *iface = data;
    edje_object_signal_emit(elm_layout_edje_get(iface->layout), "SHOW_CONFIG", "code");
    elm_photo_file_set(iface->config->ph_avatar,iface->eobj->account->avatar);
+   printf("DEBUG {[%s]}\n",iface->eobj->account->avatar);
+   printf("Callback _show_configuration\n");
 }
 
 static void
@@ -327,6 +338,16 @@ etwitt_twitt_bar_add(Etwitt_Iface *interface)
    evas_object_show(interface->tw_box);
 }
 
+static Elm_Genlist_Item_Class itc_timeline_header = {
+        "twitt_header",
+        {
+                NULL,
+                NULL,
+                NULL,
+                NULL
+        }
+};
+
 static void
 etwitt_roll_add(Etwitt_Iface *interface)
 {
@@ -335,6 +356,11 @@ etwitt_roll_add(Etwitt_Iface *interface)
    evas_object_show(interface->list);
    elm_genlist_homogeneous_set(interface->list, EINA_FALSE);
    elm_object_part_content_set(interface->layout, "roll", interface->list);
+   elm_object_style_set(interface->list, "etwitt");
+
+   
+   interface->header = elm_genlist_item_append(interface->list, &itc_timeline_header, NULL, NULL,
+                                 ELM_GENLIST_ITEM_GROUP, NULL, NULL);
 }
 
 static void
@@ -441,8 +467,6 @@ _timeline_get_cb(Ebird_Object *obj,
    Eina_List *l;
    Etwitt_Iface *iface = data;
    EbirdStatus *st;
-
-   printf("JE SUIS ICI !!!\n");
 
    EINA_LIST_REVERSE_FOREACH(timeline, l, st)
      {
