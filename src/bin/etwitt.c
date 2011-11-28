@@ -333,6 +333,8 @@ etwitt_roll_add(Etwitt_Iface *interface)
    interface->list = elm_genlist_add(interface->win);
    elm_genlist_height_for_width_mode_set(interface->list, EINA_TRUE);
    evas_object_show(interface->list);
+   elm_genlist_scroller_policy_set(interface->list, ELM_SCROLLER_POLICY_OFF,
+                                   ELM_SCROLLER_POLICY_ON);
    elm_genlist_homogeneous_set(interface->list, EINA_FALSE);
    elm_object_part_content_set(interface->layout, "roll", interface->list);
    elm_object_style_set(interface->list, "etwitt");
