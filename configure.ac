@@ -79,6 +79,7 @@ AC_CONFIG_FILES([
 Makefile
 data/Makefile
 data/theme/Makefile
+data/theme/phone/Makefile
 src/Makefile
 src/bin/Makefile
 src/lib/Makefile

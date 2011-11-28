@@ -1,0 +1,215 @@
+
+   /*
+    *  Redefine the elm_genlist theme
+    */
+   group {	name: "elm/genlist/item/twitt/default";
+      alias: "elm/genlist/item_odd/twitt/default";
+      alias: "elm/genlist/item_compress/twitt/default";
+      alias: "elm/genlist/item_compress_odd/twitt/default";
+      data.item: "stacking" "above";
+      data.item: "selectraise" "on";
+      data.item: "treesize" "20";
+      data.item: "labels" "elm.text elm.date elm.name";
+      data.item: "contents" "elm.swallow.icon";
+
+      styles {
+         style { name: "twitt_textblock_style";
+            base: "font=Sans font_size=12 color=#000 wrap=mixed text_class=entry";
+            tag:  "br" "\n";
+            tag:  "ps" "ps";
+            tag:  "tab" "\t";
+            tag:  "em" "+ font_style=Oblique";
+            tag:  "b" "+ font_weight=Bold";
+            tag:  "a" "+ color=#0585d0 underline=on underline_color=#0585d0";
+            tag:  "hashtag" "+ font_weight=Bold color=#69994f";
+            tag:  "username" "+ font_weight=Bold color=#69994f";
+            tag:  "hilight" "+ font_weight=Bold";
+         }
+
+         style { name: "twitt_name_textblock_style";
+            base: "font=Sans font_size=11 color=#7f7f7f font_weight=Bold wrap=mixed text_class=entry";
+         }
+      }
+
+      parts {
+         part {	name: "elm.swallow.icon";
+            type: SWALLOW;
+            scale: 1;
+            description {
+               state: "default" 0.0;
+               fixed: 1 0;
+               align: 0.0 0.0;
+               rel1 {
+                  relative: 0 0;
+                  offset: 9 7;
+               }
+               rel2 {
+                  relative: 0 0;
+                  offset: 46 45;
+               }
+            }
+         }
+
+         part {	name: "item_bg";
+            type: IMAGE;
+            mouse_events: 0;
+            scale: 1;
+            description {
+               state: "default" 0.0;
+               min: 0 54;
+               fixed: 0 0;
+               image {
+                  normal: "back_item_tweet.png";
+                  border: 54 5 50 3;
+               }
+            }
+         }
+
+         part { name: "elm.name";
+            type: TEXTBLOCK;
+            effect: SOFT_SHADOW;
+            mouse_events: 0;
+            scale: 1;
+            description {
+               state: "default" 0.0;
+               fixed: 1 1;
+               align: 0.0 0.5;
+               rel1.offset: 55 7;
+               rel2 {
+                  relative: 1 0;
+                  offset: -1 16;
+               }
+               text {   text: "Unnamed";
+                  style: "twitt_name_textblock_style";
+                  min: 1 1;
+                  elipsis: 0;
+                  max: 0.5 1;
+                  align: 0.0 0.5;
+               }
+            }
+            description {
+               state: "selected" 0.0;
+               inherit: "default" 0.0;
+               color: 255 255 255 255;
+            }
+         }
+
+         part { name: "elm.date";
+            type: TEXT;
+            effect: SOFT_SHADOW;
+            mouse_events: 0;
+            scale: 1;
+            description {
+               state: "default" 0.0;
+               fixed: 1 1;
+               align: 1.0 0.5;
+               rel1 {
+                  relative: 0 0;
+                  offset: 0 7;
+               }
+               rel2 {
+                  relative: 1 0;
+                  offset: -1 16;
+               }
+               color: 149 149 149 255;
+               color3: 0 0 0 0;
+               text {
+                  text: "No date";
+                  font: "Sans:style=Oblique";
+                  size: 8;
+                  min: 1 1;
+                  align: 1.0 0.5;
+               }
+            }
+            description {
+               state: "selected" 0.0;
+               inherit: "default" 0.0;
+               color: 255 255 255 255;
+            }
+         }
+
+         part {	name: "elm.text";
+            type: TEXTBLOCK;
+            //effect: SOFT_SHADOW;
+            mouse_events: 0;
+            scale: 1;
+            description {
+               state: "default" 0.0;
+               align: 0.0 0.0;
+               rel1 {
+                  to: "item_bg";
+                  relative: 0.0 0.0;
+                  offset: 55 20;
+               }
+               rel2 {
+                  to: "item_bg";
+                  offset: -10 -10;
+               }
+               text {
+                  style: "twitt_textblock_style";
+                  min: 0 1;
+                  align: 0.0 0.0;
+                  text: "The quick brown fox jumped over the lazy dog? Yes, the quick brown fox did indeed jump over the lazy dog.";
+               }
+            }
+            description {
+               state: "selected" 0.0;
+               inherit: "default" 0.0;
+               text.style: "twitt_textblock_style";
+            }
+         }
+
+      }
+   }
+
+   group {      name: "elm/genlist/item/twitt_header/default";
+      alias: "elm/genlist/item_odd/twitt_header/default";
+      alias: "elm/genlist/item_compress/twitt_header/default";
+      alias: "elm/genlist/item_compress_odd/twitt_header/default";
+      data.item: "stacking" "above";
+      data.item: "selectraise" "on";
+      data.item: "labels" "elm.text";
+
+      styles {
+         style { name: "twitt_title_textblock_style";
+            base: "font=Sans font_size=14 color=#525252 font_weight=Bold wrap=mixed text_class=entry";
+         }
+      }
+
+      parts {
+
+         part { name: "item_bg";
+            type: IMAGE;
+            mouse_events: 0;
+            scale: 1;
+            description {
+               state: "default" 0.0;
+               min: 20 29;
+               fixed: 0 0;
+               image {
+                  normal: "back_item_header.png";
+                  border: 5 5 13 13;
+               }
+            }
+         }
+
+         part { name: "elm.text";
+            type: TEXTBLOCK;
+            effect: SOFT_SHADOW;
+            mouse_events: 0;
+            scale: 1;
+            description {
+               state: "default" 0.0;
+               fixed: 1 1;
+               align: 0.0 0.5;
+               rel1.offset: 16 0;
+               text {   text: "Timeline";
+                  style: "twitt_title_textblock_style";
+                  min: 1 1;
+                  elipsis: 0;
+                  align: 0.0 0.5;
+               }
+            }
+         }
+      }
+   }
