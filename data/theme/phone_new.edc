@@ -56,9 +56,9 @@ collections {
             tag:  "tab" "\t";
             tag:  "em" "+ font_style=Oblique";
             tag:  "b" "+ font_weight=Bold";
-            tag:  "a" "+ color=#FF0000FF underline=on underline_color=#8008";
-            tag:  "hashtag" "+ color=#FF0000FF underline=on underline_color=#8008";
-            tag:  "username" "+ color=#FF0000FF underline=on underline_color=#8008";
+            tag:  "a" "+ color=#0585d0 underline=on underline_color=#0585d0";
+            tag:  "hashtag" "+ font_weight=Bold color=#69994f";
+            tag:  "username" "+ font_weight=Bold color=#69994f";
             tag:  "hilight" "+ font_weight=Bold";
          }
 
@@ -181,8 +181,6 @@ collections {
                   to: "item_bg";
                   offset: -10 -10;
                }
-               color: 0 0 0 255;
-               color3: 0 0 0 0;
                text {
                   style: "twitt_textblock_style";
                   min: 0 1;
@@ -193,7 +191,6 @@ collections {
             description {
                state: "selected" 0.0;
                inherit: "default" 0.0;
-               color: 255 0 0 255;
                text.style: "twitt_textblock_style";
             }
          }
