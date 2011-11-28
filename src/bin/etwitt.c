@@ -138,6 +138,41 @@ static Elm_Genlist_Item_Class itc_default = {
    }
 };
 
+static const char *
+_markup_add(const char *text)
+{
+   Eina_Strbuf *strbuf;
+   const char *ret;
+   char **elts = eina_str_split(text, " ", 0);
+   int i;
+
+   strbuf = eina_strbuf_new();
+
+   for (i = 0; elts[i]; i++)
+     {
+        if (strstr(elts[i], "http://"))
+          {
+             eina_strbuf_append_printf(strbuf, "<a>%s</a> ", elts[i]);
+          }
+        else if (elts[i][0] == '#')
+          {
+             eina_strbuf_append_printf(strbuf, "<hashtag>%s</hashtag> ", elts[i]);
+          }
+        else if (elts[i][0] == '@')
+          {
+             eina_strbuf_append_printf(strbuf, "<username>%s</username> ", elts[i]);
+          }
+        else
+          {
+             eina_strbuf_append_printf(strbuf, "%s ", elts[i]);
+          }
+     }
+
+   ret = eina_stringshare_add(eina_strbuf_string_get(strbuf));
+   eina_strbuf_free(strbuf);
+   return ret;
+}
+
 static void
 etwitt_add_twitt(Etwitt_Iface *interface,
                  EbirdStatus  *status)
@@ -154,7 +189,7 @@ etwitt_add_twitt(Etwitt_Iface *interface,
 
    twitt = calloc(1, sizeof(Twitt));
 
-   twitt->message = eina_stringshare_add(status->text);
+   twitt->message = _markup_add(status->text);
    twitt->date = eina_stringshare_add(status->date);
    twitt->icon = eina_stringshare_add(status->user->avatar);
    printf("DEBUG REALNAME[%s]==>USERNAME[%s]\n",status->user->realname,status->user->username);
