@@ -11,7 +11,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
- 
+
 #include <oauth.h>
 
 #include <Eina.h>
@@ -47,7 +47,7 @@ EAPI int
 ebird_init()
 {
    //Eina_Prefix *pfx = NULL;
-   
+
    if (EINA_LIKELY(_ebird_main_count > 0))
      return ++_ebird_main_count;
 
@@ -73,9 +73,9 @@ ebird_init()
      }
    /*
    pfx = eina_prefix_new(NULL, ebird_init, "EBIRD", "Ebird", NULL,
-                         PACKAGE_BIN_DIR, 
+                         PACKAGE_BIN_DIR,
                          PACKAGE_LIB_DIR,
-                         PACKAGE_DATA_DIR, 
+                         PACKAGE_DATA_DIR,
                          "/tmp");
    if (!pfx) printf("ERROR: Critical error in finding prefix\n");
    printf("install prefix is: %s\n", eina_prefix_get(pfx));
@@ -83,7 +83,7 @@ ebird_init()
    printf("libraries are in: %s\n", eina_prefix_lib_get(pfx));
    printf("data files are in: %s\n", eina_prefix_data_get(pfx));
    eina_prefix_free(pfx);
-   * 
+   *
    */
 
    DBG("Ebird Init done");
@@ -321,7 +321,7 @@ ebird_token_authenticity_get(Async_Data *data)
    char *key,
    *end;
    char *web_script;
-   
+
    if (data->http_data)
       web_script = eina_strbuf_string_get(data->http_data);
    else
@@ -480,9 +480,9 @@ _parse_timeline(void                *_data,
 {
    static EbirdStatus *current = NULL;
    static State s = NONE;
-   
+
    void **data = (void **)_data;
-   
+
    if (type == EINA_SIMPLE_XML_OPEN && !strncmp("status", content, length))
      {
         current = calloc(1, sizeof(EbirdStatus));
@@ -561,11 +561,11 @@ _parse_timeline(void                *_data,
                 case IMAGE:
                   current->user->avatar = ebird_wget(ptr);
                   break;
-                  
+
                 case REALNAME:
                   current->user->realname = ptr;
                   break;
-         
+
                 case USERNAME:
                   current->user->username = ptr;
                   break;
@@ -820,7 +820,7 @@ _ebird_timeline_get_cb(void *data,
 
    DBG("%s", xml);
    eina_simple_xml_parse(xml, strlen(xml), EINA_TRUE, _parse_timeline, &timeline);
-   
+
    if (timeline)//lastmsg = eina_list_last(timeline);
    {
       lastmsg = eina_list_nth(timeline, 0);
@@ -828,9 +828,9 @@ _ebird_timeline_get_cb(void *data,
       eobj->newer_msg_id = lastmsg->id;
       DBG("newer_msg_id = %s\n", eobj->newer_msg_id);
    }
-   
+
    printf("ICI\n");
-   
+
    EINA_LIST_FREE(d->handlers, h)
    {
      printf("LA\n");
@@ -838,7 +838,7 @@ _ebird_timeline_get_cb(void *data,
    }
    printf("heuuu\n");
    d->handlers = NULL;
-   
+
    printf("!!!!!!\n");
 
    if (d->cb)
@@ -1001,7 +1001,7 @@ _ebird_status_update_cb(void *data,
 
    if (d->cb)
      d->cb(eobj, d->data, timeline);
-   
+
    return EINA_TRUE;
 }
 
@@ -1026,7 +1026,7 @@ ebird_status_update(char            *message,
    d->data = data;
 
    DBG("Update Status Start Here !");
-   
+
    snprintf(full_url, sizeof(full_url),
             "%s&status=%s&include_entities=true",
             EBIRD_STATUS_URL,
@@ -1038,7 +1038,7 @@ ebird_status_update(char            *message,
                                   obj->account->access_token_key,
                                   obj->account->access_token_secret, "POST");
 
-   
+
    data = eina_strbuf_new();
 
    d->url = ecore_con_url_new(sig_url);
@@ -1100,7 +1100,7 @@ _ebird_access_token_get_cb(void *data,
    }
    else
       return EINA_FALSE;
-      
+
    if (acc_token)
      {
         DBG("DEBUG[ebird_access_token_get][RESULT]{%s}", acc_token);
