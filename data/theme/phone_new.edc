@@ -460,7 +460,7 @@ group {
          part {
             name: "background";
             mouse_events: 0;
-            type: RECT; 
+            type: RECT;
             description {
                state: "default" 0.0;
 //                color: 45 45 45 255;
@@ -535,7 +535,7 @@ group {
             }
 
          }
-         
+
          part {
             name: "background_rounded";
             mouse_events: 0;
@@ -545,7 +545,7 @@ group {
                image.border: 118 100 67 155;
             };
          }
-         
+
          part {
             type: SWALLOW;
             name: "button.tweet";
@@ -1067,7 +1067,7 @@ group {
             set_int(sbvis_timer, v);
          }
       }
-      
+
       program { name: "disable";
          signal: "elm,state,disabled";
          source: "elm";
