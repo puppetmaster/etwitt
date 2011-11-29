@@ -45,6 +45,8 @@ mkid*
 /src/lib/Makefile.in
 /stamp-h1
 /compile
+/data/theme/phone/Makefile
+/data/theme/phone/Makefile.in
 /data/Makefile
 /data/Makefile.in
 /data/theme/Makefile
