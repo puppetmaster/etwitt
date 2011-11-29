@@ -228,11 +228,8 @@ _cfg_clear_bt_cb(void        *data,
 }
 
 static void
-_show_configuration(void        *data,
-                    Evas_Object *obj __UNUSED__,
-                    void        *event_info __UNUSED__)
+_show_configuration(Etwitt_Iface *iface)
 {
-   Etwitt_Iface *iface = data;
    edje_object_signal_emit(elm_layout_edje_get(iface->layout), "SHOW_CONFIG", "code");
    elm_photo_file_set(iface->config->ph_avatar,iface->eobj->account->avatar);
    printf("DEBUG {[%s]}\n",iface->eobj->account->avatar);
@@ -240,12 +237,8 @@ _show_configuration(void        *data,
 }
 
 static void
-_show_roll(void        *data,
-           Evas_Object *obj __UNUSED__,
-           void        *event_info __UNUSED__)
+_show_roll(Etwitt_Iface *iface)
 {
-   Etwitt_Iface *iface = data;
-
    evas_object_show(iface->list);
    edje_object_signal_emit(elm_layout_edje_get(iface->layout), "HIDE_CONFIG", "code");
    ebird_timeline_home_get(iface->eobj, _timeline_get_cb, iface);
@@ -306,8 +299,29 @@ etwitt_win_add(Etwitt_Iface *interface)
 }
 
 static void
+_toolbar_changed_cb(void *data, Evas_Object *obj, void *event_info)
+{
+   Etwitt_Iface *interface = data;
+   Elm_Segment_Item *it = elm_segment_control_item_selected_get(interface->toolbar);
+
+   switch(elm_segment_control_item_index_get(it))
+     {
+      case 0:
+         _show_roll(interface);
+         break;
+      case 1:
+         _show_configuration(interface);
+         break;
+      default:
+         return;
+     }
+}
+
+
+static void
 etwitt_main_toolbar_add(Etwitt_Iface *interface)
 {
+#if 0
    /*
       interface->panel = elm_panel_add(interface->win);
       elm_panel_orient_set(interface->panel, ELM_PANEL_ORIENT_TOP);
@@ -331,6 +345,31 @@ etwitt_main_toolbar_add(Etwitt_Iface *interface)
      //elm_object_part_content_set(interface->layout,"toolbar",interface->panel);
      elm_object_part_content_set(interface->layout, "toolbar", interface->toolbar);
      //evas_object_show(interface->panel);
+#endif
+     Evas_Object *ic;
+     Elm_Segment_Item *it;
+
+     interface->toolbar = elm_segment_control_add(interface->win);
+     elm_object_style_set(interface->toolbar, "etwitt");
+     //evas_object_size_hint_weight_set(interface->toolbar, EVAS_HINT_EXPAND, 0);
+     //evas_object_size_hint_align_set(interface->toolbar, EVAS_HINT_FILL, EVAS_HINT_FILL);
+     evas_object_show(interface->toolbar);
+     elm_object_part_content_set(interface->layout, "toolbar", interface->toolbar);
+
+     ic = elm_icon_add(interface->toolbar);
+     evas_object_show(ic);
+     elm_icon_file_set(ic, _theme_file_get(), "icon/refresh");
+     it = elm_segment_control_item_add(interface->toolbar, ic, NULL);
+     elm_segment_control_item_selected_set(it, EINA_TRUE);
+
+
+     ic = elm_icon_add(interface->toolbar);
+     evas_object_show(ic);
+     elm_icon_file_set(ic, _theme_file_get(), "icon/preferences");
+     evas_object_smart_callback_add(interface->toolbar, "changed", _toolbar_changed_cb, interface);
+     it = elm_segment_control_item_add(interface->toolbar, ic, NULL);
+     elm_segment_control_item_selected_set(it, EINA_FALSE);
+
 }
 
 static void
@@ -558,7 +597,7 @@ elm_main(int    argc,
    // Opening Session
    ebird_session_open(iface->eobj, _session_open_cb, iface);
 
-   evas_object_resize(iface->win, 460, 540);
+   evas_object_resize(iface->win, 400, 600);
    evas_object_show(iface->win);
 
    //elm_run();

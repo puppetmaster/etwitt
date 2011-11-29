@@ -19,6 +19,22 @@
  * if not, see <http://www.gnu.org/licenses/>.
  */
 
+
+#define ICON(icon_file, icon_name)            \
+images {                                            \
+   image: icon_file COMP;                           \
+}                                                   \
+group {                                             \
+   name: icon_name;                                 \
+    parts {                                         \
+        part { name: "icon";                        \
+            description { state: "default" 0.0;     \
+            image.normal: icon_file;                \
+            }                                       \
+        }                                           \
+    }                                               \
+}
+
 images{
    image: "bg.jpg" COMP;
    image: "back_item_tweet.png" COMP;
@@ -39,8 +55,12 @@ collections {
 #include "widgets/entry.edc"
 #include "widgets/genlist.edc"
 #include "widgets/scroller.edc"
+#include "widgets/segment_control.edc"
 #include "widgets/toolbar.edc"
 
+ICON("speechbubble.png", "icon/speechbubble");
+ICON("preferences.png", "icon/preferences");
+ICON("refresh.png", "icon/refresh");
    /*
     *  Configuration interface
     *

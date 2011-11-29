@@ -4,7 +4,7 @@ EDJE_FLAGS = \
 	-id $(top_srcdir)/data/images \
 	-id $(top_srcdir)/data/theme/phone/images
 
-phonedir = $(pkgdatadir)/theme/phone
+phonedir = $(pkgdatadir)/theme
 
 phone_DATA = phone.edj
 
