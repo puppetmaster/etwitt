@@ -382,7 +382,7 @@ _wget_cb(void *data,
 }
 
 char *
-ebird_wget(char *url)
+ebird_wget(char *url, const char *prefix)
 {
    Async_Data *d;
    Ecore_Event_Handler *h;
@@ -397,7 +397,7 @@ ebird_wget(char *url)
 
    file = ebird_avatar_filename_get(url);
 
-   snprintf(filename, sizeof(filename), "%s/%s", EBIRD_IMAGES_CACHE, file);
+   snprintf(filename, sizeof(filename), "%s/%s-%s", EBIRD_IMAGES_CACHE, prefix, file);
 
    DBG("\nFILENAME [%s]]", filename);
 
@@ -416,6 +416,7 @@ ebird_wget(char *url)
 
         ecore_con_url_get(d->url);
      }
+   DBG("RETURN : %s",filename);
    return strdup(filename);
 }
 
@@ -456,7 +457,7 @@ _parse_user(void                *data,
 
            case AVATAR:
              DBG("===> [DEBUG][%s]", ptr);
-             cur->avatar = ebird_wget(ptr);
+             cur->avatar = ebird_wget(ptr,cur->username);
              break;
 
            case USER_ID:
@@ -559,7 +560,7 @@ _parse_timeline(void                *_data,
                   break;
 
                 case IMAGE:
-                  current->user->avatar = ebird_wget(ptr);
+                  current->user->avatar = ebird_wget(ptr,current->user->username);
                   break;
 
                 case REALNAME:
@@ -589,7 +590,7 @@ _parse_timeline(void                *_data,
                   break;
 
                 case IMAGE:
-                  current->retweeted_status->user->avatar = ebird_wget(ptr);
+                  current->retweeted_status->user->avatar = ebird_wget(ptr, current->retweeted_status->user->username);
                   break;
 
                 case USERNAME:
