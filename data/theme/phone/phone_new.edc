@@ -265,6 +265,14 @@ ICON("refresh.png", "icon/refresh");
    group {
       name: "elm/layout/roll";
       min: 32 32;
+
+      styles {
+         style { name: "char_left";
+            base: "font=Sans font_size=10 color=#FFF align=center wrap=mixed text_class=entry";
+            tag:  "error" "+ color=#e34141";
+         }
+      }
+
       parts {
 
          part {
@@ -378,7 +386,7 @@ ICON("refresh.png", "icon/refresh");
             }
          }
          part { name: "tweet.left";
-            type: TEXT;
+            type: TEXTBLOCK;
             //             effect: SOFT_SHADOW;
             mouse_events: 0;
             scale: 1;
@@ -399,8 +407,7 @@ ICON("refresh.png", "icon/refresh");
                }
                text {
                   text: "123 left.";
-                  font: "Sans";
-                  size: 10;
+                  style: "char_left";
                   min: 1 1;
                   align: 0.5 0.5;
                }

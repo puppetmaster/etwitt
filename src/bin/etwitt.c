@@ -373,6 +373,21 @@ etwitt_main_toolbar_add(Etwitt_Iface *interface)
 }
 
 static void
+_entry_changed_cb(void *data, Evas_Object *obj, void *event_info)
+{
+   Etwitt_Iface *interface = data;
+   const char *text = elm_entry_markup_to_utf8(elm_object_text_get(interface->entry));
+   char char_left[255];
+   int nbchar = eina_unicode_utf8_get_len(text);
+
+   if (140 - nbchar < 0)
+     snprintf(char_left, sizeof(char_left), "<error>%d left</error>", 140 - nbchar);
+   else
+     snprintf(char_left, sizeof(char_left), "%d left", 140 - nbchar);
+   elm_object_part_text_set(interface->layout, "tweet.left", char_left);
+}
+
+static void
 etwitt_twitt_bar_add(Etwitt_Iface *interface)
 {
    Evas_Object *button;
@@ -381,6 +396,7 @@ etwitt_twitt_bar_add(Etwitt_Iface *interface)
    elm_entry_scrollable_set(interface->entry, EINA_TRUE);
    elm_object_part_content_set(interface->layout, "entry", interface->entry);
    elm_object_style_set(interface->entry, "twitt");
+   evas_object_smart_callback_add(interface->entry, "changed", _entry_changed_cb, interface);
    evas_object_show(interface->entry);
 
    button = elm_button_add(interface->win);
@@ -389,6 +405,8 @@ etwitt_twitt_bar_add(Etwitt_Iface *interface)
    elm_object_part_content_set(interface->layout, "button.tweet", button);
    elm_object_style_set(button, "twitt");
    evas_object_show(button);
+
+   elm_object_part_text_set(interface->layout, "tweet.left", "140 left");
 }
 
 static Elm_Genlist_Item_Class itc_timeline_header = {
