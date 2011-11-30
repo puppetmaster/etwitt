@@ -152,7 +152,7 @@ _markup_add(const char *text)
      {
         if (strstr(elts[i], "http://"))
           {
-             eina_strbuf_append_printf(strbuf, "<a>%s</a> ", elts[i]);
+             eina_strbuf_append_printf(strbuf, "<a href=%s><link>%s</link></a> ", elts[i], elts[i]);
           }
         else if (elts[i][0] == '#')
           {
