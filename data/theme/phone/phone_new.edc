@@ -293,7 +293,7 @@ ICON("refresh.png", "icon/refresh");
                state: "default" 0.0;
                rel1 {
                   relative: 0 1;
-                  offset: 100 -126;
+                  offset: 100 -100;
                }
                rel2 {
                   relative: 1 1;
@@ -316,11 +316,11 @@ ICON("refresh.png", "icon/refresh");
                state: "default" 0.0;
                rel1 {
                   relative: 0 1;
-                  offset: 13 -127;
+                  offset: 13 -100;
                }
                rel2 {
                   relative: 0 1;
-                  offset: 85 -54;
+                  offset: 85 -28;
                }
                fixed: 1 1;
             }
@@ -360,7 +360,7 @@ ICON("refresh.png", "icon/refresh");
             description {
                state: "default" 0.0;
                image.normal: "back_rounded.png";
-               image.border: 118 100 67 155;
+               image.border: 118 100 67 130;
             };
          }
 
@@ -371,11 +371,11 @@ ICON("refresh.png", "icon/refresh");
                state: "default" 0.0;
                rel1 {
                   relative: 1 1;
-                  offset: -65 -111;
+                  offset: -67 -98;
                }
                rel2 {
                   relative: 1 1;
-                  offset: -12 -87;
+                  offset: -12 -64;
                }
                fixed: 1 1;
             }
@@ -399,11 +399,11 @@ ICON("refresh.png", "icon/refresh");
                color3: 0 0 0 45;
                rel1 {
                   relative: 1 1;
-                  offset: -65 -75;
+                  offset: -67 -60;
                }
                rel2 {
                   relative: 1 1;
-                  offset: -12 -60;
+                  offset: -12 -45;
                }
                text {
                   text: "123 left.";

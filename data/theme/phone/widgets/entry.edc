@@ -2,7 +2,7 @@ group { name: "elm/entry/base/twitt";
    styles
    {
       style { name: "entry_textblock_style";
-         base: "font=Sans font_size=12 color=#000 wrap=word text_class=entry";
+         base: "font=Sans font_size=12 color=#000 wrap=mixed text_class=entry";
          tag:  "br" "\n";
          tag:  "ps" "ps";
          tag:  "tab" "\t";
@@ -12,7 +12,7 @@ group { name: "elm/entry/base/twitt";
          tag:  "hilight" "+ font_weight=Bold";
       }
       style { name: "entry_textblock_disabled_style";
-         base: "font=Sans font_size=12 color=#00000080 wrap=word text_class=entry";
+         base: "font=Sans font_size=12 color=#00000080 wrap=mixed text_class=entry";
          tag:  "br" "\n";
          tag:  "ps" "ps";
          tag:  "tab" "\t";
