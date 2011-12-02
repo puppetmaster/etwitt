@@ -192,7 +192,6 @@ etwitt_add_twitt(Etwitt_Iface *interface,
    twitt->message = _markup_add(status->text);
    twitt->date = eina_stringshare_add(status->date);
    twitt->icon = eina_stringshare_add(status->user->avatar);
-   printf("DEBUG REALNAME[%s]==>USERNAME[%s]\n",status->user->realname,status->user->username);
    twitt->name = eina_stringshare_add(status->user->realname);
 
    egi = elm_genlist_item_append(interface->list, &itc_default, twitt, interface->header,

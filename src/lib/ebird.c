@@ -830,24 +830,17 @@ _ebird_timeline_get_cb(void *data,
       DBG("newer_msg_id = %s\n", eobj->newer_msg_id);
    }
 
-   printf("ICI\n");
-
    EINA_LIST_FREE(d->handlers, h)
    {
-     printf("LA\n");
      ecore_event_handler_del(h);
    }
-   printf("heuuu\n");
    d->handlers = NULL;
 
-   printf("!!!!!!\n");
 
    if (d->cb)
    {
-     printf("TOTO\n");
      d->cb(eobj, d->data, timeline);
    }
-   printf("Et puis voila !\n");
 }
 
 static void
