@@ -357,10 +357,15 @@ etwitt_main_toolbar_add(Etwitt_Iface *interface)
 
      ic = elm_icon_add(interface->toolbar);
      evas_object_show(ic);
-     elm_icon_file_set(ic, _theme_file_get(), "icon/refresh");
+     elm_icon_file_set(ic, _theme_file_get(), "icon/home");
      it = elm_segment_control_item_add(interface->toolbar, ic, NULL);
      elm_segment_control_item_selected_set(it, EINA_TRUE);
 
+     ic = elm_icon_add(interface->toolbar);
+     evas_object_show(ic);
+     elm_icon_file_set(ic, _theme_file_get(), "icon/refresh");
+     it = elm_segment_control_item_add(interface->toolbar, ic, NULL);
+     elm_segment_control_item_selected_set(it, EINA_TRUE);
 
      ic = elm_icon_add(interface->toolbar);
      evas_object_show(ic);
