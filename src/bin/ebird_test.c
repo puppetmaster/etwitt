@@ -40,7 +40,7 @@ show_timeline(Eina_List *timeline)
 
                   if (st->retweeted_status)
                     {
-                       created_at = st->retweeted_status->created_at;
+                       created_at = st->retweeted_status->date;
                        text = st->retweeted_status->text;
                     }
                   if (st->user->avatar)
@@ -111,12 +111,12 @@ _session_opened(Ebird_Object *obj,
 {
    printf("SESSION OPENED DEBUG MESSAGE\n");
 
-   ebird_timeline_home_get(obj, _timeline_get_cb, data);
+   //ebird_timeline_home_get(obj, _timeline_get_cb, data);
    //ebird_timeline_public_get(obj, _timeline_get_cb, data);
    //ebird_timeline_user_get(obj, _timeline_get_cb, data);
    //ebird_timeline_mentions_get(obj, _timeline_get_cb, data);
 
-   //ebird_status_update("Twitted-by-ebird", obj, _status_update_cb, obj);
+   ebird_status_update("Twitted-by-ebird-01", obj, _status_update_cb, obj);
 }
 
 int

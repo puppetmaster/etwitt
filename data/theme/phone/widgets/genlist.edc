@@ -20,7 +20,8 @@
             tag:  "tab" "\t";
             tag:  "em" "+ font_style=Oblique";
             tag:  "b" "+ font_weight=Bold";
-            tag:  "a" "+ color=#0585d0 underline=on underline_color=#0585d0";
+            tag:  "a" "";
+            tag:  "link" "+ color=#0585d0 underline=on underline_color=#0585d0";
             tag:  "hashtag" "+ font_weight=Bold color=#69994f";
             tag:  "username" "+ font_weight=Bold color=#69994f";
             tag:  "hilight" "+ font_weight=Bold";
@@ -133,6 +134,8 @@
             //effect: SOFT_SHADOW;
             mouse_events: 0;
             scale: 1;
+            entry_mode: EDITABLE;
+            source5: "anchor"; // anchor under
             description {
                state: "default" 0.0;
                align: 0.0 0.0;
@@ -161,6 +164,45 @@
 
       }
    }
+
+group { name: "anchor";
+
+   parts {
+      part { name: "bg";
+         type: RECT;
+         description {
+            state: "default" 0.0;
+            rel1.offset: -1 -1;
+            rel2.offset: 2 2;
+            color: 45 45 45 0;
+         }
+         description {
+            state: "down" 0.0;
+            inherit: "default" 0.0;
+            color: 45 45 45 200;
+
+         }
+      }
+   }
+   programs {
+      program {
+         name: "mouse_down";
+         signal: "anchor,mouse,down,1,*";
+         source: "*";
+         action: STATE_SET "down" 0.0;
+         transition: LINEAR 0.3;
+         target: "bg";
+      }
+      program {
+         name: "mouse_up";
+         signal: "anchor,mouse,up,1,*";
+         source: "*";
+         action: STATE_SET "default" 0.0;
+         transition: LINEAR 1.0;
+         target: "bg";
+      }
+   }
+}
 
    group {      name: "elm/genlist/item/twitt_header/default";
       alias: "elm/genlist/item_odd/twitt_header/default";
