@@ -19,22 +19,6 @@
  * if not, see <http://www.gnu.org/licenses/>.
  */
 
-
-#define ICON(icon_file, icon_name)            \
-images {                                            \
-   image: icon_file COMP;                           \
-}                                                   \
-group {                                             \
-   name: icon_name;                                 \
-    parts {                                         \
-        part { name: "icon";                        \
-            description { state: "default" 0.0;     \
-            image.normal: icon_file;                \
-            }                                       \
-        }                                           \
-    }                                               \
-}
-
 images{
    image: "bg.jpg" COMP;
    image: "back_item_tweet.png" COMP;
@@ -57,12 +41,8 @@ collections {
 #include "widgets/entry.edc"
 #include "widgets/genlist.edc"
 #include "widgets/scroller.edc"
-#include "widgets/segment_control.edc"
 #include "widgets/toolbar.edc"
 
-ICON("speechbubble.png", "icon/speechbubble");
-ICON("preferences.png", "icon/preferences");
-ICON("refresh.png", "icon/refresh");
    /*
     *  Configuration interface
     *
@@ -267,14 +247,6 @@ ICON("refresh.png", "icon/refresh");
    group {
       name: "elm/layout/roll";
       min: 32 32;
-
-      styles {
-         style { name: "char_left";
-            base: "font=Sans font_size=10 color=#FFF align=center wrap=mixed text_class=entry";
-            tag:  "error" "+ color=#e34141";
-         }
-      }
-
       parts {
 
          part {
@@ -292,22 +264,10 @@ ICON("refresh.png", "icon/refresh");
             type: RECT;
             description {
                state: "default" 0.0;
-<<<<<<< HEAD
                rel1 { offset: 1 1; }
                rel2 { offset: -2 -2; }
                rel1.to: "back_list_rounded";
                rel2.to: "back_list_rounded";
-=======
-               rel1 {
-                  relative: 0 1;
-                  offset: 100 -100;
-               }
-               rel2 {
-                  relative: 1 1;
-                  offset: -78 -11;
-               }
-               fixed: 1 1;
->>>>>>> bf7da2ea0171fef2143b6ae1053eb33385498409
             }
          }
 
@@ -326,19 +286,8 @@ ICON("refresh.png", "icon/refresh");
             clip_to: "roll_clip";
             description {
                state: "default" 0.0;
-<<<<<<< HEAD
                rel1.to: "roll_clip";
                rel2.to: "roll_clip";
-=======
-               rel1 {
-                  relative: 0 1;
-                  offset: 13 -100;
-               }
-               rel2 {
-                  relative: 0 1;
-                  offset: 85 -28;
-               }
->>>>>>> bf7da2ea0171fef2143b6ae1053eb33385498409
                fixed: 1 1;
             }
          }
@@ -440,7 +389,6 @@ ICON("refresh.png", "icon/refresh");
             mouse_events: 0;
             description {
                state: "default" 0.0;
-<<<<<<< HEAD
                image.normal: "back_avatar_rounded.png";
                image.border: 8 8 8 8;
                rel1 { relative: 0.0 1.0; offset: 11-100 -101; }
@@ -452,11 +400,6 @@ ICON("refresh.png", "icon/refresh");
                rel1 { relative: 0.0 1.0; offset: 11 -101; }
                rel2 { relative: 0.0 1.0; offset: 85 -28; }
             }
-=======
-               image.normal: "back_rounded.png";
-               image.border: 118 100 67 130;
-            };
->>>>>>> bf7da2ea0171fef2143b6ae1053eb33385498409
          }
 
          part {
@@ -464,19 +407,8 @@ ICON("refresh.png", "icon/refresh");
             type: SWALLOW;
             description {
                state: "default" 0.0;
-<<<<<<< HEAD
                rel1 { relative: 1.0 1.0; offset: -67+80 -98; }
                rel2 { relative: 1.0 1.0; offset: -12+80 -64; }
-=======
-               rel1 {
-                  relative: 1 1;
-                  offset: -67 -98;
-               }
-               rel2 {
-                  relative: 1 1;
-                  offset: -12 -64;
-               }
->>>>>>> bf7da2ea0171fef2143b6ae1053eb33385498409
                fixed: 1 1;
             }
             description {
@@ -486,16 +418,10 @@ ICON("refresh.png", "icon/refresh");
                rel2 { relative: 1.0 1.0; offset: -12 -64; }
             }
          }
-<<<<<<< HEAD
 
          part { 
             name: "tweet.left";
             type: TEXT;
-=======
-         part { name: "tweet.left";
-            type: TEXTBLOCK;
-            //             effect: SOFT_SHADOW;
->>>>>>> bf7da2ea0171fef2143b6ae1053eb33385498409
             mouse_events: 0;
             scale: 1;
             description {
@@ -508,20 +434,10 @@ ICON("refresh.png", "icon/refresh");
                rel2 { relative: 1.0 1.0; offset: -1 20; }
                color: 255 255 255 255;
                color3: 0 0 0 45;
-<<<<<<< HEAD
-=======
-               rel1 {
-                  relative: 1 1;
-                  offset: -67 -60;
-               }
-               rel2 {
-                  relative: 1 1;
-                  offset: -12 -45;
-               }
->>>>>>> bf7da2ea0171fef2143b6ae1053eb33385498409
                text {
                   text: "123 left.";
-                  style: "char_left";
+                  font: "Sans";
+                  size: 10;
                   min: 1 1;
                   align: 0.5 0.5;
                }
