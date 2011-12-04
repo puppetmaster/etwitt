@@ -218,6 +218,15 @@ group { name: "anchor";
          }
       }
 
+      images {
+         image: "loader_01.png" COMP;
+         image: "loader_02.png" COMP;
+         image: "loader_03.png" COMP;
+         image: "loader_04.png" COMP;
+         image: "loader_05.png" COMP;
+         image: "loader_06.png" COMP;
+      }
+
       parts {
 
          part { name: "item_bg";
@@ -232,6 +241,51 @@ group { name: "anchor";
                   normal: "back_item_header.png";
                   border: 5 5 13 13;
                }
+            }
+         }
+
+         part {
+            name: "loader_clip";
+            type: RECT;
+            mouse_events: 0;
+            description {
+                state: "default" 0.0;
+                visible: 0;
+                color: 255 255 255 0;
+            }
+            description {
+                state: "visible" 0.0;
+                visible: 1;
+                color: 255 255 255 255;
+            }
+         }
+
+         part {
+            name: "loader";
+            clip_to: "loader_clip";
+            mouse_events: 0;
+            description {
+                state: "default" 0.0;
+                fixed: 1 1;
+                min: 16 16;
+                max: 16 16;
+                rel1 { relative: 1.0 0.5; offset: -25 0; }
+                rel2 { relative: 1.0 0.5; offset: -5 0; }
+                image {
+                    normal: "loader_01.png";
+                }
+            }
+            description {
+                state: "load" 0.0;
+                inherit: "default" 0.0;
+                image {
+                    normal: "loader_01.png";
+                    tween: "loader_02.png";
+                    tween: "loader_03.png";
+                    tween: "loader_04.png";
+                    tween: "loader_05.png";
+                    tween: "loader_06.png";
+                }
             }
          }
 
@@ -253,5 +307,48 @@ group { name: "anchor";
                }
             }
          }
+      }
+
+      programs {
+        program {
+            name: "on_show";
+            signal: "show,loader";
+            source: "etwitt";
+            action: STATE_SET "visible" 0.0;
+            transition: ACCELERATE 0.10;
+            target: "loader_clip";
+            after: "start_anim";
+        }
+
+        program {
+            name: "hide_loader";
+            signal: "hide,loader";
+            source: "etwitt";
+            action: STATE_SET "default" 0.0;
+            transition: DECELERATE 0.8;
+            target: "loader_clip";
+            after: "stop_anim";
+        }
+
+        program {
+            name: "start_anim";
+            action: STATE_SET "load" 0.0;
+            transition: LINEAR 0.6;
+            target: "loader";
+            after: "anim_loop";
+        }
+        program {
+            name: "anim_loop";
+            action: STATE_SET "default" 0.0;
+            target: "loader";
+            after: "start_anim";
+        }
+
+        program {
+            name: "stop_anim";
+            action: ACTION_STOP;
+            target: "start_anim";
+            target: "anim_loop";
+        }
       }
    }

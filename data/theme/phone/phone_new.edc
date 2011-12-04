@@ -2,7 +2,8 @@
  *
  * phone.edc
  *
- * Copyright (C) 20011-2012 Philippe Caseiro, Nicolas Aguirre
+ * Copyright (C) 20011-2012 Philippe Caseiro, Nicolas Aguirre,
+ *                          Raoul Hecky
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,9 +31,13 @@ images{
    image: "bt_sm_base2.png" COMP;
    image: "bt_sm_hilight.png" COMP;
    image: "bt_sm_shine.png" COMP;
-
+   
    image: "button_pressed.png" COMP;
    image: "button_normal.png" COMP;
+
+   image: "toolbar_selected.png" COMP;
+   image: "icon_roll.png" COMP;
+   image: "icon_account.png" COMP;
 }
 
 collections {
@@ -41,7 +46,6 @@ collections {
 #include "widgets/entry.edc"
 #include "widgets/genlist.edc"
 #include "widgets/scroller.edc"
-#include "widgets/toolbar.edc"
 
    /*
     *  Configuration interface
@@ -243,6 +247,78 @@ collections {
       }
    }
 
+   #define TOOLBAR_ICON(id, ic) \
+   group { \
+      name: "button_"id; \
+      min: 35 35; \
+      parts { \
+         part { \
+            name: "icon"; \
+            mouse_events: 0; \
+            description { \
+               min: 35 35; \
+               max: 35 35; \
+               fixed: 1 1; \
+               image.normal: ic; \
+            } \
+         } \
+         part { \
+            name: "selector"; \
+            mouse_events: 0; \
+            description { \
+                state: "default" 0.0; \
+                image.normal: "toolbar_selected.png"; \
+                min: 49 6; \
+                max: 49 6; \
+                rel1 { relative: 0.0 1.0; offset: 0 5; to: "icon"; } \
+                rel2 { relative: 1.0 1.0; offset: -1 5; to: "icon"; } \
+                visible: 0; \
+                color: 255 255 255 0; \
+            } \
+            description { \
+                state: "selected" 0.0; \
+                inherit: "default" 0.0; \
+                visible: 1; \
+                color: 255 255 255 255; \
+            } \
+         } \
+         part { \
+            name: "event"; \
+            type: RECT; \
+            description { \
+                state: "default" 0.0; \
+                color: 255 255 255 0; \
+            } \
+         } \
+      } \
+      programs { \
+         program { \
+            name: "select"; \
+            signal: "select"; \
+            source: "toolbar"; \
+            action: STATE_SET "selected" 0.0; \
+            transition: ACCELERATE 0.15; \
+            target: "selector"; \
+         } \
+         program { \
+            name: "unselect"; \
+            signal: "unselect"; \
+            source: "toolbar"; \
+            action: STATE_SET "default" 0.0; \
+            transition: DECELERATE 0.45; \
+            target: "selector"; \
+         } \
+         program { \
+            name: "event"; \
+            signal: "mouse,clicked,1"; \
+            source: "event"; \
+            action: SIGNAL_EMIT "clicked" id; \
+         } \
+      } \
+   }
+
+   TOOLBAR_ICON("timeline", "icon_roll.png")
+   TOOLBAR_ICON("account", "icon_account.png")
 
    group {
       name: "elm/layout/roll";
@@ -260,7 +336,18 @@ collections {
          }
 
          part {
+            name: "content_clip";
+            type: RECT;
+            description {
+               state: "default" 0.0;
+               rel1.to: "back_list_rounded";
+               rel2.to: "back_list_rounded";
+            }
+         }
+
+         part {
             name: "roll_clip";
+            clip_to: "content_clip";
             type: RECT;
             description {
                state: "default" 0.0;
@@ -269,14 +356,23 @@ collections {
                rel1.to: "back_list_rounded";
                rel2.to: "back_list_rounded";
             }
+            description {
+               state: "config" 0.0;
+               inherit: "default" 0.0;
+               rel1 { relative: 0.0 0.0; offset: 1-400 1; }
+               rel2 { relative: 0.0 1.0; offset: -2 -2; }
+               rel1.to: "back_list_rounded";
+               rel2.to: "back_list_rounded";
+               color: 255 255 255 0;
+            }
          }
 
          part {
             name: "roll_bg";
             type: RECT;
             description {
-                rel1.to: "roll";
-                rel2.to: "roll";
+                rel1.to: "back_list_rounded";
+                rel2.to: "back_list_rounded";
             }
          }
 
@@ -376,6 +472,7 @@ collections {
             name: "user.avatar";
             type: GROUP;
             source: "avatar";
+            mouse_events: 0;
             description {
                state: "default" 0.0;
                rel1.to: "back_avatar_rounded";
@@ -445,8 +542,8 @@ collections {
          }
 
          part {
-            name: "toolbar";
-            type: SWALLOW;
+            name: "toolbar_clip";
+            type: RECT;
             description {
                state: "default" 0.0;
                rel1 { relative: 0.0 0.0; offset: 0  0-55; }
@@ -462,21 +559,74 @@ collections {
          }
 
          part {
-            type: GROUP;
+            name: "toolbar";
+            type: BOX;
+            clip_to: "toolbar_clip";
+            description {
+                state: "default" 0.0;
+                rel1.to: "toolbar_clip";
+                rel2.to: "toolbar_clip";
+                align: 0.5 0.5;
+                box { layout: "horizontal"; }
+            }
+            box {
+                items {
+                    item {
+                        name: "button_timeline";
+                        type: GROUP;
+                        source: "button_timeline";
+                        align: 0.5 0.5;
+                        weight: 0 0;
+                        padding: 10 10 0 5;
+                    }
+                    item {
+                        name: "button_account";
+                        type: GROUP;
+                        source: "button_account";
+                        align: 0.5 0.5;
+                        weight: 0 0;
+                        padding: 10 10 0 5;
+                    }
+                }
+            }
+         }
+
+         part {
+            name: "config_clip";
+            type: RECT;
+            mouse_events: 0;
+            clip_to: "content_clip";
+            description {
+               state: "default" 0.0;
+               rel1 { relative: 1.0 0.0; offset: 1 1; }
+               rel2 { relative: 1.0 0.0; offset: -2+100 -2; }
+               rel1.to: "back_list_rounded";
+               rel2.to: "back_list_rounded";
+               color: 255 255 255 0;
+               fixed: 1 1;
+            }
+            description {
+               state: "config" 0.0;
+               inherit: "default" 0.0;
+               rel1 { relative: 0.0 0.0; offset: 1 1; }
+               rel2 { relative: 1.0 1.0; offset: -2 -2; }
+               rel1.to: "back_list_rounded";
+               rel2.to: "back_list_rounded";
+               color: 255 255 255 255;
+            }
+         }
+
+         part {
             name: "config";
+            type: GROUP;
+            clip_to: "config_clip";
             repeat_events: 1;
             source: "etwitt/config";
             description {
                visible: 0;
                state: "default" 0.0;
-               rel1.to: "roll";
-               rel2.to: "roll";
-               fixed: 1 1;
-            }
-            description {
-               state: "visible" 0.0;
-               inherit: "default" 0.0;
-               visible: 1;
+               rel1.to: "config_clip";
+               rel2.to: "config_clip";
             }
          }
 
@@ -486,15 +636,15 @@ collections {
             name: "on_show";
             in: 0.4 0.0;
             signal: "show";
-            after: "show_timeline";
+            after: "show_roll";
             after: "show_avatar";
          }
          program {
-            name: "show_timeline";
+            name: "show_roll";
             action: STATE_SET "timeline" 0.0;
             transition: DECELERATE 0.3 CURRENT;
             target: "back_list_rounded";
-            target: "toolbar";
+            target: "toolbar_clip";
          }
          program {
             name: "show_avatar";
@@ -511,6 +661,60 @@ collections {
             transition: DECELERATE 0.45;
             target: "back_entry_rounded";
             target: "entry_clip";
+         }
+
+         program {
+            name: "toolbar_select_timeline";
+            signal: "show,timeline";
+            source: "etwitt";
+            after: "select_timeline";
+            after: "unselect_account";
+         }
+         program {
+            name: "toolbar_select_account";
+            signal: "show,config";
+            source: "etwitt";
+            after: "unselect_timeline";
+            after: "select_account";
+         }
+
+         #define PROG_TOOLBAR_BUTTON(id) \
+         program { \
+            name: "select_"id; \
+            action: SIGNAL_EMIT "toolbar[button_"id"]:select" "toolbar"; \
+         } \
+         program { \
+            name: "unselect_"id; \
+            action: SIGNAL_EMIT "toolbar[button_"id"]:unselect" "toolbar"; \
+         } \
+         program { \
+            name: "sig_click_"id; \
+            signal: "clicked"; \
+            source: "toolbar*"id; \
+            action: SIGNAL_EMIT id "toolbar"; \
+         }
+
+         PROG_TOOLBAR_BUTTON("timeline")
+         PROG_TOOLBAR_BUTTON("account")
+
+         program {
+            name: "show_config";
+            signal: "show,config";
+            source: "etwitt";
+            action: STATE_SET "config" 0.0;
+            transition: DECELERATE 0.5 CURRENT;
+            target: "config_clip";
+            target: "roll_clip";
+         }
+
+         program {
+            name: "show_timeline";
+            signal: "show,timeline";
+            source: "etwitt";
+            action: STATE_SET "default" 0.0;
+            transition: DECELERATE 0.5 CURRENT;
+            target: "config_clip";
+            target: "roll_clip";
          }
       }
    }
