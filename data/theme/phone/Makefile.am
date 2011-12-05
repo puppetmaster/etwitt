@@ -1,8 +1,7 @@
 MAINTAINERCLEANFILES = Makefile.in
 
 EDJE_FLAGS = \
-	-id $(top_srcdir)/data/images \
-	-id $(top_srcdir)/data/theme/phone/images
+	-id $(top_srcdir)/data/images 
 
 phonedir = $(pkgdatadir)/theme
 
@@ -13,8 +12,7 @@ phone_new.edc \
 widgets/*.edc
 
 IMGS = \
-$(top_srcdir)/data/images/*.png \
-$(top_srcdir)/data/theme/phone/images
+$(top_srcdir)/data/images/*.png 
 
 EXTRA_DIST = \
 	$(EDC) \
