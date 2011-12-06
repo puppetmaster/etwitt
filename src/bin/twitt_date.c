@@ -235,7 +235,7 @@ time_t decode_twitt_date(const char *date)
     if ((t = mktime(&tm)) == -1)
         return t;
 
-    // Convert with timezone infos
+    // Convert with timezone infos to have GMT
     t -= ((tzone / 100) * 60 * 60) + (tzone % 100) * 60;
 
     return t;

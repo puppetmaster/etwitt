@@ -97,8 +97,10 @@ _get_nice_date(time_t date)
     int diff, day_diff;
     Eina_Strbuf *strbuf;
     strbuf = eina_strbuf_new();
-
-    time_t now = time(NULL);
+    time_t now;
+    
+    time(&now);
+    now = mktime(gmtime(&now));
     diff = (int)(now - date);
     day_diff = diff / 86400;
 
