@@ -179,7 +179,7 @@ _avatar_download_event_cb(void        *data,
 {
    Etwitt_Iface *iface;
    
-   printf("AVATAR DOWNLOAD COMPLETED !!\n\n");
+   printf("AVATAR DOWNLOAD COMPLETED !!\n");
 }
 
 static void
@@ -534,6 +534,7 @@ elm_main(int    argc,
 {
    Ebird_Object *eobj;
    Etwitt_Iface *iface;
+   Ecore_Event_Handler *avatar_hdl;
 
    if (!ebird_init())
      return -1;
@@ -543,6 +544,9 @@ elm_main(int    argc,
         ebird_shutdown();
         return -1;
      }
+     
+   avatar_hdl = ecore_event_handler_add(EBIRD_EVENT_AVATAR_DOWNLOAD,
+                                    _avatar_download_event_cb, iface);
 
    /* tell elm about our app so it can figure out where to get files */
    printf(" %s %s\n", PACKAGE_BIN_DIR, PACKAGE_DATA_DIR);

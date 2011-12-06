@@ -24,7 +24,6 @@
 #include "ebird_private.h"
 
 static int _ebird_main_count = 0;
-static int _ebird_event_download_complete = 0;
 
 /* log domain variable */
 int _ebird_log_dom_global = -1;
@@ -73,7 +72,7 @@ ebird_init()
         goto shutdown_ecore_con_url;
      }
    
-   _ebird_event_download_complete = ecore_event_type_new();
+   EBIRD_EVENT_AVATAR_DOWNLOAD = ecore_event_type_new();
    
    /*
    pfx = eina_prefix_new(NULL, ebird_init, "EBIRD", "Ebird", NULL,
@@ -377,8 +376,8 @@ _wget_cb(void *data,
    Async_Data *d = data;
    Ecore_Event_Handler *h;
    
-   ecore_event_add(_ebird_event_download_complete,NULL,NULL,NULL);
-   printf("Download OK !\n");
+   ecore_event_add(EBIRD_EVENT_AVATAR_DOWNLOAD,NULL,NULL,NULL);
+   
    DBG("ebird_wget data complete callback");
 
    EINA_LIST_FREE(d->handlers, h)
