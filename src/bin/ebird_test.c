@@ -40,7 +40,7 @@ show_timeline(Eina_List *timeline)
 
                   if (st->retweeted_status)
                     {
-                       created_at = st->retweeted_status->date;
+                       created_at = st->retweeted_status->created_at;
                        text = st->retweeted_status->text;
                     }
                   if (st->user->avatar)

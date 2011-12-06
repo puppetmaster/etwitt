@@ -13,6 +13,7 @@
 #include <Elementary.h>
 
 #include <Ebird.h>
+#include "twitt_date.h"
 
 typedef struct _Twitt       Twitt;
 typedef struct _Account     Account;
@@ -210,8 +211,8 @@ _markup_add(const char *text)
 
 static Eina_Bool
  _avatar_download_event_cb(void        *data,
-                          Evas_Object *obj __UNUSED__,
-                          void        *event_info __UNUSED__)
+                          int           type  __UNUSED__,
+                          void         *event __UNUSED__)
 {
    Etwitt_Iface *iface = data;
 
@@ -240,7 +241,7 @@ etwitt_add_twitt(Etwitt_Iface *interface,
    twitt = calloc(1, sizeof(Twitt));
 
    twitt->message = _markup_add(status->text);
-   twitt->date = decode_twitt_date(status->date);
+   twitt->date = decode_twitt_date(status->created_at);
    twitt->icon = eina_stringshare_add(status->user->avatar);
    twitt->name = eina_stringshare_add(status->user->realname);
 
@@ -290,7 +291,7 @@ static void
 _show_roll(Etwitt_Iface *iface)
 {
    elm_object_signal_emit(iface->layout, "show,timeline", "etwitt");
-   edje_object_signal_emit(elm_genlist_item_object_get(iface->header),
+   edje_object_signal_emit((Evas_Object *)elm_genlist_item_object_get(iface->header),
                                  "show,loader", "etwitt");
    ebird_timeline_home_get(iface->eobj, _timeline_get_cb, iface);
 
@@ -422,7 +423,7 @@ _start_loading_anim(void *data)
 {
     Etwitt_Iface *interface = data;
     
-    edje_object_signal_emit(elm_genlist_item_object_get(interface->header),
+    edje_object_signal_emit((Evas_Object *)elm_genlist_item_object_get(interface->header),
                                  "show,loader", "etwitt");
 
     return EINA_FALSE;
@@ -557,7 +558,7 @@ _timeline_get_cb(Ebird_Object *obj,
         etwitt_add_twitt(iface, st);
      }
 
-   edje_object_signal_emit(elm_genlist_item_object_get(iface->header),
+   edje_object_signal_emit((Evas_Object *)elm_genlist_item_object_get(iface->header),
                                  "hide,loader", "etwitt");
 }
 

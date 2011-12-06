@@ -323,7 +323,7 @@ ebird_token_authenticity_get(Async_Data *data)
 {
    char *key,
    *end;
-   char *web_script;
+   const char *web_script;
 
    if (data->http_data)
       web_script = eina_strbuf_string_get(data->http_data);
@@ -493,7 +493,6 @@ _parse_timeline(void                *_data,
      {
         current = calloc(1, sizeof(EbirdStatus));
         current->created_at = NULL;
-        current->date = NULL;
         current->user = calloc(1, sizeof(EbirdAccount));
         current->retweeted_status = calloc(1, sizeof(EbirdStatus));
         current->retweeted_status->user = calloc(1, sizeof(EbirdAccount));
@@ -507,7 +506,7 @@ _parse_timeline(void                *_data,
           }
         else if (!strncmp("created_at", content, 10))
           {
-             if (!current->created_at && ! current->date)
+             if (!current->created_at)
                s = CREATEDAT;
              else
                s = NONE;
@@ -549,8 +548,7 @@ _parse_timeline(void                *_data,
              switch(s)
                {
                 case CREATEDAT:
-                  current->created_at = getdate(ptr);
-                  current->date = ptr;
+                  current->created_at = ptr;
                   break;
 
                 case TEXT:
@@ -582,8 +580,7 @@ _parse_timeline(void                *_data,
              switch(s)
                {
                 case CREATEDAT:
-                  current->created_at = getdate(ptr);
-                  current->date = ptr;
+                  current->created_at = ptr;
                   break;
 
                 case TEXT:
@@ -1082,7 +1079,7 @@ _ebird_access_token_get_cb(void *data,
 {
    Async_Data *d = data;
    Ebird_Object *obj = d->eobj;
-   char *acc_token;
+   const char *acc_token;
    char **access_token_prm;
    int res;
    Ecore_Con_Event_Url_Complete *url = event_info;

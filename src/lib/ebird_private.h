@@ -50,9 +50,9 @@ struct _oauth_token
     char **token_prm;
     char *key;
     char *secret;
-    char *authorisation_url;
+    const char *authorisation_url;
     char *authorisation_pin;
-    char *authenticity_token;
+    const char *authenticity_token;
     char *callback_confirmed;
 };
 

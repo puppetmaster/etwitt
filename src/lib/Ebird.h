@@ -74,9 +74,7 @@ struct _Ebird_Account
 
 struct _Ebird_Status
 {
-  //const char *created_at;
-  const struct tm  *created_at;
-  char *date;
+  const char *created_at;
   const char *id;
   const char *text;
   const char *truncated;
@@ -91,8 +89,8 @@ struct _Ebird_Obj
 {
    OauthToken *request_token;
    EbirdAccount *account;
-   char *newer_msg_id;
-   char *older_msg_id;
+   const char *newer_msg_id;
+   const char *older_msg_id;
    //Eina_List *home_timeline;
    //void (*http_complete_cb)(void *data, int type, void *event_info);
 };
