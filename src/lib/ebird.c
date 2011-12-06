@@ -24,6 +24,7 @@
 #include "ebird_private.h"
 
 static int _ebird_main_count = 0;
+static int _ebird_event_download_complete = 0;
 
 /* log domain variable */
 int _ebird_log_dom_global = -1;
@@ -71,6 +72,9 @@ ebird_init()
         EINA_LOG_ERR("Ebird Can not create a general log domain.");
         goto shutdown_ecore_con_url;
      }
+   
+   _ebird_event_download_complete = ecore_event_type_new();
+   
    /*
    pfx = eina_prefix_new(NULL, ebird_init, "EBIRD", "Ebird", NULL,
                          PACKAGE_BIN_DIR,
@@ -372,7 +376,9 @@ _wget_cb(void *data,
 {
    Async_Data *d = data;
    Ecore_Event_Handler *h;
-
+   
+   ecore_event_add(_ebird_event_download_complete,NULL,NULL,NULL);
+   printf("Download OK !\n");
    DBG("ebird_wget data complete callback");
 
    EINA_LIST_FREE(d->handlers, h)

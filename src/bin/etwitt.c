@@ -173,6 +173,16 @@ _markup_add(const char *text)
 }
 
 static void
+_avatar_download_event_cb(void        *data,
+                          Evas_Object *obj __UNUSED__,
+                          void        *event_info __UNUSED__)
+{
+   Etwitt_Iface *iface;
+   
+   printf("AVATAR DOWNLOAD COMPLETED !!\n\n");
+}
+
+static void
 etwitt_add_twitt(Etwitt_Iface *interface,
                  EbirdStatus  *status)
 {
