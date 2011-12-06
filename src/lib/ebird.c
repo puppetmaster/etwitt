@@ -71,6 +71,9 @@ ebird_init()
         EINA_LOG_ERR("Ebird Can not create a general log domain.");
         goto shutdown_ecore_con_url;
      }
+   
+   EBIRD_EVENT_AVATAR_DOWNLOAD = ecore_event_type_new();
+   
    /*
    pfx = eina_prefix_new(NULL, ebird_init, "EBIRD", "Ebird", NULL,
                          PACKAGE_BIN_DIR,
@@ -372,7 +375,9 @@ _wget_cb(void *data,
 {
    Async_Data *d = data;
    Ecore_Event_Handler *h;
-
+   
+   ecore_event_add(EBIRD_EVENT_AVATAR_DOWNLOAD,d,NULL,NULL);
+   
    DBG("ebird_wget data complete callback");
 
    EINA_LIST_FREE(d->handlers, h)

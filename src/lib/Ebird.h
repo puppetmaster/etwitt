@@ -97,6 +97,9 @@ struct _Ebird_Obj
    //void (*http_complete_cb)(void *data, int type, void *event_info);
 };
 
+EAPI int EBIRD_EVENT_AVATAR_DOWNLOAD = 0;
+
+
 /*
  * API
  *
