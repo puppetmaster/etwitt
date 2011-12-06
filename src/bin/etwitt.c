@@ -32,7 +32,7 @@ struct _Account
 struct _Twitt
 {
    const char *message;
-   const char *date;
+   time_t date;
    const char *name;
    const char *icon;
 };
@@ -90,6 +90,40 @@ _theme_file_get(void)
    return _theme_file;
 }
 
+static const char *
+_get_nice_date(time_t date)
+{
+    const char *ret;
+    int diff, day_diff;
+    Eina_Strbuf *strbuf;
+    strbuf = eina_strbuf_new();
+
+    time_t now = time(NULL);
+    diff = (int)(now - date);
+    day_diff = diff / 86400;
+
+    if (diff < 60)
+        eina_strbuf_append_printf(strbuf, "Just now");
+    else if (diff < 120)
+        eina_strbuf_append_printf(strbuf, "1 minute ago");
+    else if (diff < 3600)
+        eina_strbuf_append_printf(strbuf, "%d minute ago", diff / 60);
+    else if (diff < 7200)
+        eina_strbuf_append_printf(strbuf, "1 hour ago");
+    else if (diff < 86400)
+        eina_strbuf_append_printf(strbuf, "%d hours ago", diff / 3600);
+    else if (day_diff == 1)
+        eina_strbuf_append_printf(strbuf, "Yesterday");
+    else if (day_diff < 7)
+        eina_strbuf_append_printf(strbuf, "%d days ago", day_diff);
+    else if (day_diff < 31)
+        eina_strbuf_append_printf(strbuf, "%d weeks ago", day_diff / 7);
+
+    ret = eina_stringshare_add(eina_strbuf_string_get(strbuf));
+    eina_strbuf_free(strbuf);
+    return ret;
+}
+
 static char *
 _list_item_default_label_get(void        *data,
                              Evas_Object *obj __UNUSED__,
@@ -100,7 +134,7 @@ _list_item_default_label_get(void        *data,
    if (!strcmp(part, "elm.text") && twitt->message)
      return strdup(twitt->message);
    else if (!strcmp(part, "elm.date") && twitt->date)
-     return strdup(twitt->date);
+     return strdup(_get_nice_date(twitt->date));
    else if (!strcmp(part, "elm.name") && twitt->name)
      return strdup(twitt->name);
    else
@@ -189,7 +223,7 @@ etwitt_add_twitt(Etwitt_Iface *interface,
    twitt = calloc(1, sizeof(Twitt));
 
    twitt->message = _markup_add(status->text);
-   twitt->date = eina_stringshare_add(status->date);
+   twitt->date = decode_twitt_date(status->date);
    twitt->icon = eina_stringshare_add(status->user->avatar);
    twitt->name = eina_stringshare_add(status->user->realname);
 
