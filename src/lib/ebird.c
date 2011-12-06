@@ -376,7 +376,7 @@ _wget_cb(void *data,
    Async_Data *d = data;
    Ecore_Event_Handler *h;
    
-   ecore_event_add(EBIRD_EVENT_AVATAR_DOWNLOAD,NULL,NULL,NULL);
+   ecore_event_add(EBIRD_EVENT_AVATAR_DOWNLOAD,d,NULL,NULL);
    
    DBG("ebird_wget data complete callback");
 

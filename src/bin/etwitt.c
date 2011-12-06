@@ -172,14 +172,19 @@ _markup_add(const char *text)
    return ret;
 }
 
-static void
-_avatar_download_event_cb(void        *data,
+static Eina_Bool
+ _avatar_download_event_cb(void        *data,
                           Evas_Object *obj __UNUSED__,
                           void        *event_info __UNUSED__)
 {
-   Etwitt_Iface *iface;
-   
-   printf("AVATAR DOWNLOAD COMPLETED !!\n");
+   Etwitt_Iface *iface = data;
+
+   if (data)
+      elm_genlist_realized_items_update(iface->list);
+   else
+      printf("No list to refresh\n");
+
+   return EINA_TRUE;
 }
 
 static void
@@ -545,8 +550,7 @@ elm_main(int    argc,
         return -1;
      }
      
-   avatar_hdl = ecore_event_handler_add(EBIRD_EVENT_AVATAR_DOWNLOAD,
-                                    _avatar_download_event_cb, iface);
+   
 
    /* tell elm about our app so it can figure out where to get files */
    printf(" %s %s\n", PACKAGE_BIN_DIR, PACKAGE_DATA_DIR);
@@ -583,6 +587,9 @@ elm_main(int    argc,
 
    // Configuration
    etwitt_config_iface_add(iface);
+
+   avatar_hdl = ecore_event_handler_add(EBIRD_EVENT_AVATAR_DOWNLOAD,
+                                    _avatar_download_event_cb, iface);
 
    // Opening Session
    ebird_session_open(iface->eobj, _session_open_cb, iface);
