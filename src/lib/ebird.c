@@ -37,6 +37,8 @@ static Eina_Bool _url_complete_cb(void *data,
 static void ebird_timeline_get(const char *url,
                                Async_Data *d);
 
+static const char *_ebird_config_dir_get(const char *suffix);
+
 /*
  * Name   : ebird_init
  * Params : none
@@ -46,6 +48,7 @@ static void ebird_timeline_get(const char *url,
 EAPI int
 ebird_init()
 {
+   const char *dir;
    //Eina_Prefix *pfx = NULL;
 
    if (EINA_LIKELY(_ebird_main_count > 0))
@@ -73,6 +76,14 @@ ebird_init()
      }
    
    EBIRD_EVENT_AVATAR_DOWNLOAD = ecore_event_type_new();
+
+   dir = _ebird_config_dir_get(NULL);
+   if (!ecore_file_is_dir(dir))
+      ecore_file_mkdir(dir);
+
+   dir = _ebird_config_dir_get(EBIRD_IMAGES_CACHE);
+   if (!ecore_file_is_dir(dir))
+      ecore_file_mkdir(dir);
    
    /*
    pfx = eina_prefix_new(NULL, ebird_init, "EBIRD", "Ebird", NULL,
@@ -88,6 +99,8 @@ ebird_init()
    eina_prefix_free(pfx);
    *
    */
+
+    printf("data files are in: %s\n", PACKAGE_DATA_DIR);
 
    DBG("Ebird Init done");
 
@@ -239,8 +252,10 @@ ebird_account_save(Ebird_Object *obj)
 {
    Eet_File *file;
    int size;
-   DBG("Opening %s", EBIRD_ACCOUNT_FILE);
-   file = eet_open(EBIRD_ACCOUNT_FILE, EET_FILE_MODE_WRITE);
+
+   
+   DBG("Opening %s", _ebird_config_dir_get(EBIRD_ACCOUNT_FILE));
+   file = eet_open(_ebird_config_dir_get(EBIRD_ACCOUNT_FILE), EET_FILE_MODE_WRITE);
    DBG("Saving username");
    eet_write(file, "username", obj->account->username,
              strlen(obj->account->username) + 1, 0);
@@ -261,7 +276,7 @@ ebird_account_save(Ebird_Object *obj)
      eet_write(file, "avatar", obj->account->avatar,
                strlen(obj->account->avatar) + 1, 0);
 
-   DBG("Closing %s", EBIRD_ACCOUNT_FILE);
+   DBG("Closing %s", _ebird_config_dir_get(EBIRD_ACCOUNT_FILE));
    eet_close(file);
 
    return EINA_TRUE;
@@ -274,9 +289,12 @@ ebird_account_load(Ebird_Object *obj)
    int size;
 
    if (!obj)
-     return EINA_FALSE;
+      return EINA_FALSE;
 
-   file = eet_open(EBIRD_ACCOUNT_FILE, EET_FILE_MODE_READ);
+   if (!ecore_file_exists(_ebird_config_dir_get(EBIRD_ACCOUNT_FILE)))
+      return EINA_FALSE;
+
+   file = eet_open(_ebird_config_dir_get(EBIRD_ACCOUNT_FILE), EET_FILE_MODE_READ);
    obj->account->username = eina_stringshare_add(eet_read(file, "username", &size));
    obj->account->passwd = eina_stringshare_add(eet_read(file, "passwd", &size));
    obj->account->access_token_key = eina_stringshare_add(eet_read(file, "access_token_key", &size));
@@ -294,7 +312,7 @@ ebird_id_load(OauthToken *request_token)
    Eet_File *file;
    int size;
 
-   file = eet_open(EBIRD_ID_FILE, EET_FILE_MODE_READ);
+   file = eet_open(PACKAGE_DATA_DIR"/"EBIRD_ID_FILE, EET_FILE_MODE_READ);
    request_token->consumer_key = strdup(eet_read(file, "key", &size));
    request_token->consumer_secret = strdup(eet_read(file, "secret", &size));
    eet_close(file);
@@ -402,7 +420,7 @@ ebird_wget(char *url, const char *prefix)
 
    file = ebird_avatar_filename_get(url);
 
-   snprintf(filename, sizeof(filename), "%s/%s-%s", EBIRD_IMAGES_CACHE, prefix, file);
+   snprintf(filename, sizeof(filename), "%s/%s-%s", _ebird_config_dir_get(EBIRD_IMAGES_CACHE), prefix, file);
 
    DBG("\nFILENAME [%s]]", filename);
 
@@ -1397,5 +1415,25 @@ ebird_session_open(Ebird_Object    *eobj,
    ecore_con_url_get(d->url);
 
    return EINA_TRUE;
+}
+
+const char *
+_ebird_config_dir_get(const char *suffix)
+{
+   char *homedir;
+   const char *ret;
+   Eina_Strbuf *strbuf = eina_strbuf_new();
+   
+   if ((homedir = getenv("HOME")))
+   {
+      if (suffix)
+         eina_strbuf_append_printf(strbuf, "%s/.config/ebird/%s", homedir, suffix);
+      else
+         eina_strbuf_append_printf(strbuf, "%s/.config/ebird", homedir);
+   }
+
+   ret = eina_stringshare_add(eina_strbuf_string_get(strbuf));
+   eina_strbuf_free(strbuf);
+   return ret;
 }
 

@@ -600,9 +600,8 @@ elm_main(int    argc,
    //iface->eobj->account = calloc(1, sizeof(EbirdAccount));
    iface->config = calloc(1, sizeof(Etwitt_Config_Iface));
 
-   if (ecore_file_exists(EBIRD_ACCOUNT_FILE))
+   if (ebird_account_load(iface->eobj))
      {
-        ebird_account_load(iface->eobj);
         iface->eobj->account->avatar = eina_stringshare_add("avatar.png");
      }
    else
