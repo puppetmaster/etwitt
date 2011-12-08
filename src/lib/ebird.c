@@ -76,6 +76,7 @@ ebird_init()
      }
    
    EBIRD_EVENT_AVATAR_DOWNLOAD = ecore_event_type_new();
+   EBIRD_EVENT_PIN_NEED = ecore_event_type_new();
 
    dir = _ebird_config_dir_get(NULL);
    if (!ecore_file_is_dir(dir))
@@ -1197,6 +1198,12 @@ ebird_authorisation_pin_set(Ebird_Object *obj,
 }
 
 Eina_Bool
+ebird_pin_set(Ebird_Object *obj,char *pin)
+{
+   obj->request_token->authorisation_pin = strdup(pin);
+}
+
+Eina_Bool
 ebird_read_pin_from_stdin(Ebird_Object *obj)
 {
    char buffer[EBIRD_PIN_SIZE];
@@ -1222,6 +1229,24 @@ to access to your account.\n%s\n",
    return EINA_TRUE;
 }
 
+Eina_Bool
+ebird_authorisation_url_send(Ebird_Object *obj)
+{
+   char buffer[EBIRD_PIN_SIZE];
+   char url[EBIRD_URL_MAX];
+
+   snprintf(url, sizeof(url),
+            EBIRD_DIRECT_TOKEN_URL "?authenticity_token=%s&oauth_token=%s",
+            obj->request_token->authenticity_token,
+            obj->request_token->key);
+
+   obj->request_token->authorisation_url = eina_stringshare_add(url);
+
+   ecore_event_add(EBIRD_EVENT_PIN_NEED,strdup(url),NULL,NULL);
+
+   return EINA_TRUE;
+}
+
 static Eina_Bool
 _ebird_direct_token_get_cb(void *data,
                            int   type,
@@ -1243,7 +1268,8 @@ _ebird_direct_token_get_cb(void *data,
    eina_strbuf_free(d->http_data);
    d->http_data = NULL;
    d->url = NULL;
-   ebird_read_pin_from_stdin(eobj);
+   //ebird_read_pin_from_stdin(eobj);
+   ebird_authorisation_url_send(eobj);
    ebird_access_token_get(d);
 
 error:
@@ -1371,6 +1397,14 @@ _ebird_token_request_cb(void *data,
 
    return EINA_TRUE;
 }
+
+EAPI Eina_Bool
+ebird_app_authorise(Ebird_Object *eobj)
+{
+   printf("Ebird need to be authorised !");
+   return EINA_TRUE;
+}
+
 
 EAPI Eina_Bool
 ebird_session_open(Ebird_Object    *eobj,

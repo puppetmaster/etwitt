@@ -47,6 +47,7 @@ struct _Interface
    Evas_Object         *roll;
    Evas_Object         *entry;
    Evas_Object         *list;
+   Evas_Object         *web;
    Etwitt_Config_Iface *config;
    Ebird_Object        *eobj;
    Elm_Genlist_Item    *header;
@@ -222,6 +223,28 @@ static Eina_Bool
       printf("No list to refresh\n");
 
    return EINA_TRUE;
+}
+
+
+static Eina_Bool
+_pin_need_cb(void *data,
+             int  type __UNUSED__,
+             void *event)
+{
+    Etwitt_Iface *iface = data;
+    char *url = event;
+
+
+
+    printf("\n\nDEBUG %s\n",url);
+
+    iface->web = elm_web_add(iface->win);
+    evas_object_size_hint_weight_set(iface->web, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+    elm_win_resize_object_add(iface->win, iface->web);
+    evas_object_show(iface->web);
+
+    return EINA_TRUE;
+
 }
 
 static void
@@ -577,6 +600,7 @@ elm_main(int    argc,
    Ebird_Object *eobj;
    Etwitt_Iface *iface;
    Ecore_Event_Handler *avatar_hdl;
+   Ecore_Event_Handler *pin_hdl;
 
    if (!ebird_init())
      return -1;
@@ -600,17 +624,7 @@ elm_main(int    argc,
    //iface->eobj->account = calloc(1, sizeof(EbirdAccount));
    iface->config = calloc(1, sizeof(Etwitt_Config_Iface));
 
-   if (ebird_account_load(iface->eobj))
-     {
-        iface->eobj->account->avatar = eina_stringshare_add("avatar.png");
-     }
-   else
-     {
-        iface->eobj->account->username = eina_stringshare_add("ePuppetMaster");
-        iface->eobj->account->passwd = eina_stringshare_add("QUOI COMMENT OU ...");
-        // iface->eobj->account->realname = eina_stringshare_add("Philippe Caseiro");
-        // iface->eobj->account->avatar = eina_stringshare_add("avatar.png");
-     }
+  
 
    elm_theme_extension_add(NULL, _theme_file_get());
 
@@ -628,10 +642,16 @@ elm_main(int    argc,
    avatar_hdl = ecore_event_handler_add(EBIRD_EVENT_AVATAR_DOWNLOAD,
                                     _avatar_download_event_cb, iface);
 
-   // Opening Session
+   pin_hdl = ecore_event_handler_add(EBIRD_EVENT_PIN_NEED,
+                                     _pin_need_cb, iface);
+
+   if (ebird_account_load(iface->eobj))
+      iface->eobj->account->avatar = eina_stringshare_add("avatar.png");
+
    ebird_session_open(iface->eobj, _session_open_cb, iface);
 
    evas_object_resize(iface->win, 400, 600);
+
    evas_object_show(iface->win);
 
    elm_run();

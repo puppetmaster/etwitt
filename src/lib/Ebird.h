@@ -68,6 +68,8 @@ struct _Ebird_Obj
 };
 
 EAPI int EBIRD_EVENT_AVATAR_DOWNLOAD = 0;
+EAPI int EBIRD_EVENT_PIN_NEED = 0;
+EAPI int EBIRD_EVENT_PIN_RECEIVE = 0;
 
 
 /*
@@ -135,5 +137,6 @@ EAPI char *ebird_credentials_verify(Ebird_Object *obj);
 
 
 EAPI Eina_Bool ebird_session_open(Ebird_Object *obj, Ebird_Session_Cb cb, void *data);
+EAPI Eina_Bool ebird_app_authorise(Ebird_Object *obj);
 
 #endif
