@@ -588,6 +588,7 @@ elm_main(int    argc,
    // Configuration
    etwitt_config_iface_add(iface);
 
+   //FIXME HAVE TO BE FREE !!
    avatar_hdl = ecore_event_handler_add(EBIRD_EVENT_AVATAR_DOWNLOAD,
                                     _avatar_download_event_cb, iface);
 
@@ -600,6 +601,8 @@ elm_main(int    argc,
    elm_run();
 
    elm_shutdown();
+   
+   ebird_shutdown();
 
    return 0;
 }
