@@ -40,7 +40,7 @@ show_timeline(Eina_List *timeline)
 
                   if (st->retweeted_status)
                     {
-                       created_at = st->retweeted_status->date;
+                       created_at = st->retweeted_status->created_at;
                        text = st->retweeted_status->text;
                     }
                   if (st->user->avatar)
@@ -143,12 +143,9 @@ main(int    argc __UNUSED__,
 
    eobj = ebird_add();
 
-   if (ecore_file_exists(EBIRD_ACCOUNT_FILE))
-     ebird_account_load(eobj);
-   else
+   if (!ebird_account_load(eobj))
      {
-        printf("User account configuration file %s is missing or corrupted\n",
-               EBIRD_ACCOUNT_FILE);
+        printf("User account configuration file is missing or corrupted\n");
      }
 /*
     if (ebird_session_open(eobj,_session_opened, NULL))

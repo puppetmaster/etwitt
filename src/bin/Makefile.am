@@ -3,7 +3,8 @@ MAINTAINERCLEANFILES = Makefile.in
 bin_PROGRAMS = ebird_test etwitt
 
 etwitt_SOURCES = \
-	etwitt.c
+	etwitt.c \
+	twitt_date.c
 
 etwitt_CPPFLAGS = \
 	-I$(top_srcdir)/src/lib \
@@ -34,3 +35,5 @@ ebird_test_LDADD = \
 
 clean-local:
 	rm -rf *~
+
+EXTRA_DIST = twitt_date.h

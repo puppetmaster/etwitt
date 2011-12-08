@@ -13,6 +13,7 @@
 #include <Elementary.h>
 
 #include <Ebird.h>
+#include "twitt_date.h"
 
 typedef struct _Twitt       Twitt;
 typedef struct _Account     Account;
@@ -32,7 +33,7 @@ struct _Account
 struct _Twitt
 {
    const char *message;
-   const char *date;
+   time_t date;
    const char *name;
    const char *icon;
 };
@@ -90,6 +91,42 @@ _theme_file_get(void)
    return _theme_file;
 }
 
+static const char *
+_get_nice_date(time_t date)
+{
+    const char *ret;
+    int diff, day_diff;
+    Eina_Strbuf *strbuf;
+    strbuf = eina_strbuf_new();
+    time_t now;
+    
+    time(&now);
+    now = mktime(gmtime(&now));
+    diff = (int)(now - date);
+    day_diff = diff / 86400;
+
+    if (diff < 60)
+        eina_strbuf_append_printf(strbuf, "Just now");
+    else if (diff < 120)
+        eina_strbuf_append_printf(strbuf, "1 minute ago");
+    else if (diff < 3600)
+        eina_strbuf_append_printf(strbuf, "%d minute ago", diff / 60);
+    else if (diff < 7200)
+        eina_strbuf_append_printf(strbuf, "1 hour ago");
+    else if (diff < 86400)
+        eina_strbuf_append_printf(strbuf, "%d hours ago", diff / 3600);
+    else if (day_diff == 1)
+        eina_strbuf_append_printf(strbuf, "Yesterday");
+    else if (day_diff < 7)
+        eina_strbuf_append_printf(strbuf, "%d days ago", day_diff);
+    else if (day_diff < 31)
+        eina_strbuf_append_printf(strbuf, "%d weeks ago", day_diff / 7);
+
+    ret = eina_stringshare_add(eina_strbuf_string_get(strbuf));
+    eina_strbuf_free(strbuf);
+    return ret;
+}
+
 static char *
 _list_item_default_label_get(void        *data,
                              Evas_Object *obj __UNUSED__,
@@ -100,7 +137,7 @@ _list_item_default_label_get(void        *data,
    if (!strcmp(part, "elm.text") && twitt->message)
      return strdup(twitt->message);
    else if (!strcmp(part, "elm.date") && twitt->date)
-     return strdup(twitt->date);
+     return strdup(_get_nice_date(twitt->date));
    else if (!strcmp(part, "elm.name") && twitt->name)
      return strdup(twitt->name);
    else
@@ -174,8 +211,8 @@ _markup_add(const char *text)
 
 static Eina_Bool
  _avatar_download_event_cb(void        *data,
-                          Evas_Object *obj __UNUSED__,
-                          void        *event_info __UNUSED__)
+                          int           type  __UNUSED__,
+                          void         *event __UNUSED__)
 {
    Etwitt_Iface *iface = data;
 
@@ -204,7 +241,7 @@ etwitt_add_twitt(Etwitt_Iface *interface,
    twitt = calloc(1, sizeof(Twitt));
 
    twitt->message = _markup_add(status->text);
-   twitt->date = eina_stringshare_add(status->date);
+   twitt->date = decode_twitt_date(status->created_at);
    twitt->icon = eina_stringshare_add(status->user->avatar);
    twitt->name = eina_stringshare_add(status->user->realname);
 
@@ -254,7 +291,7 @@ static void
 _show_roll(Etwitt_Iface *iface)
 {
    elm_object_signal_emit(iface->layout, "show,timeline", "etwitt");
-   edje_object_signal_emit(elm_genlist_item_object_get(iface->header),
+   edje_object_signal_emit((Evas_Object *)elm_genlist_item_object_get(iface->header),
                                  "show,loader", "etwitt");
    ebird_timeline_home_get(iface->eobj, _timeline_get_cb, iface);
 
@@ -386,7 +423,7 @@ _start_loading_anim(void *data)
 {
     Etwitt_Iface *interface = data;
     
-    edje_object_signal_emit(elm_genlist_item_object_get(interface->header),
+    edje_object_signal_emit((Evas_Object *)elm_genlist_item_object_get(interface->header),
                                  "show,loader", "etwitt");
 
     return EINA_FALSE;
@@ -521,7 +558,7 @@ _timeline_get_cb(Ebird_Object *obj,
         etwitt_add_twitt(iface, st);
      }
 
-   edje_object_signal_emit(elm_genlist_item_object_get(iface->header),
+   edje_object_signal_emit((Evas_Object *)elm_genlist_item_object_get(iface->header),
                                  "hide,loader", "etwitt");
 }
 
@@ -563,9 +600,8 @@ elm_main(int    argc,
    //iface->eobj->account = calloc(1, sizeof(EbirdAccount));
    iface->config = calloc(1, sizeof(Etwitt_Config_Iface));
 
-   if (ecore_file_exists(EBIRD_ACCOUNT_FILE))
+   if (ebird_account_load(iface->eobj))
      {
-        ebird_account_load(iface->eobj);
         iface->eobj->account->avatar = eina_stringshare_add("avatar.png");
      }
    else
