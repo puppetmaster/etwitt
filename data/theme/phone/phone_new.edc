@@ -47,11 +47,37 @@ collections {
 #include "widgets/genlist.edc"
 #include "widgets/scroller.edc"
 
+   group {
+      name : "etwitt/web";
+      parts {
+         part {
+            type: RECT;
+            name: "message_bg";
+            mouse_events: 0;
+            description {
+               state: "default" 0.0;
+               rel1.to: "label/message";
+               rel2.to: "label/message";
+               color: 255 0 255 0;
+            }
+         }
+         part {
+            type: SWALLOW;
+            name: "label/message";
+            description {
+               state: "default" 0.0;
+               rel1.relative: 0.55 0.05;
+               rel2.relative: 0.85 0.10;
+            }
+         }
+         
+      }
+   }
+
    /*
     *  Configuration interface
     *
     */
-
    group {
       name: "etwitt/config";
       parts {
@@ -365,6 +391,10 @@ collections {
                rel2.to: "back_list_rounded";
                color: 255 255 255 0;
             }
+            description {
+               state: "web" 0.0;
+               inherit: "default" 0.0;
+            }
          }
 
          part {
@@ -614,8 +644,12 @@ collections {
                rel2.to: "back_list_rounded";
                color: 255 255 255 255;
             }
+            description {
+               state: "web" 0.0;
+               inherit: "default" 0.0;
+            }
          }
-
+         
          part {
             name: "config";
             type: GROUP;
@@ -627,6 +661,44 @@ collections {
                state: "default" 0.0;
                rel1.to: "config_clip";
                rel2.to: "config_clip";
+            }
+         }
+         
+         part {
+            name: "web_clip";
+            clip_to: "content_clip";
+            type: RECT;
+            description {
+               state: "default" 0.0;
+               rel1 { relative: 1.0 0.0; offset: 1 1; }
+               rel2 { relative: 1.0 0.0; offset: -2+100 -2; }
+               rel1.to: "back_list_rounded";
+               rel2.to: "back_list_rounded";
+               color: 255 255 255 0;
+               fixed: 1 1;
+            }
+            description {
+               state: "web" 0.0;
+               inherit: "default" 0.0;
+               rel1 { relative: 0.0 0.0; offset: 1 1; }
+               rel2 { relative: 1.0 1.0; offset: -2 -2; }
+               rel1.to: "back_list_rounded";
+               rel2.to: "back_list_rounded";
+               color: 0 255 255 0;
+            }
+         }
+         
+         part {
+            name : "web";
+            type : GROUP;
+            source : "etwitt/web";
+            clip_to : "web_clip";
+            repeat_events: 1;
+            description {
+               visible: 0;
+               state: "default" 0.0;
+               rel1.to: "web_clip";
+               rel2.to: "web_clip";
             }
          }
 
@@ -705,6 +777,7 @@ collections {
             transition: DECELERATE 0.5 CURRENT;
             target: "config_clip";
             target: "roll_clip";
+            target: "web_clip";
          }
 
          program {
@@ -715,6 +788,18 @@ collections {
             transition: DECELERATE 0.5 CURRENT;
             target: "config_clip";
             target: "roll_clip";
+            target: "web_clip";
+         }
+         
+         program {
+            name : "show_web";
+            signal: "show,web";
+            source: "etwitt";
+            action: STATE_SET "web" 0.0;
+            transition: DECELERATE 0.5 CURRENT;
+            target: "config_clip";
+            target: "roll_clip";
+            target: "web_clip";
          }
       }
    }

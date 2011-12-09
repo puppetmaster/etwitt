@@ -22,6 +22,9 @@ typedef struct _ConfigIface Etwitt_Config_Iface;
 
 #define MESSAGES_LIMIT 140
 
+static void etwitt_web_add(Etwitt_Iface *iface);
+static void _show_web(Etwitt_Iface *iface);
+
 struct _Account
 {
    const char *username;
@@ -236,12 +239,10 @@ _pin_need_cb(void *data,
 
 
 
-    printf("\n\nDEBUG %s\n",url);
+   printf("\n\nDEBUG %s\n",url);
 
-    iface->web = elm_web_add(iface->win);
-    evas_object_size_hint_weight_set(iface->web, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-    elm_win_resize_object_add(iface->win, iface->web);
-    evas_object_show(iface->web);
+   etwitt_web_add(iface);
+   _show_web(iface);
 
     return EINA_TRUE;
 
@@ -306,8 +307,13 @@ _show_configuration(Etwitt_Iface *iface)
    elm_object_signal_emit(iface->layout, "show,config", "etwitt");
 
    elm_photo_file_set(iface->config->ph_avatar,iface->eobj->account->avatar);
-   printf("DEBUG {[%s]}\n",iface->eobj->account->avatar);
-   printf("Callback _show_configuration\n");
+}
+
+static void
+_show_web(Etwitt_Iface *iface)
+{
+   puts("DEBUG SINAL show,web EMIT");
+   elm_object_signal_emit(iface->layout, "show,web", "etwitt");
 }
 
 static void
@@ -453,6 +459,34 @@ _start_loading_anim(void *data)
 }
 
 static void
+etwitt_web_add(Etwitt_Iface *iface)
+{   
+   if (!elm_need_web())
+   {
+      puts("ICI");
+      iface->web = elm_web_add(iface->win);
+      puts("La !");
+      evas_object_size_hint_weight_set(iface->web, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+      elm_win_resize_object_add(iface->win, iface->web);
+      evas_object_show(iface->web);
+      elm_object_part_content_set(iface->layout, "roll:web", iface->web);
+   }
+   else
+   {
+      printf("Elmentary don't have ewebkit support\n");
+      iface->web = elm_label_add(iface->win);
+      elm_object_style_set(iface->web, "default");
+      elm_object_text_set(iface->web,"<b>Etwitt</b> is going to open your<br>"
+                                     "web browser. Please visit the page and<br>"
+                                     "authorise Ebird to use your account<br>"
+                                     "and paste PIN here.<br>");
+      evas_object_show(iface->web);
+      elm_object_part_content_set(iface->layout,"web:label/message",iface->web);
+      
+   }
+}
+
+static void
 etwitt_roll_add(Etwitt_Iface *interface)
 {
    interface->list = elm_genlist_add(interface->win);
@@ -461,7 +495,7 @@ etwitt_roll_add(Etwitt_Iface *interface)
    elm_genlist_scroller_policy_set(interface->list, ELM_SCROLLER_POLICY_OFF,
                                    ELM_SCROLLER_POLICY_ON);
    elm_genlist_homogeneous_set(interface->list, EINA_FALSE);
-   elm_object_part_content_set(interface->layout, "roll", interface->list);
+   elm_object_part_content_set(interface->layout, "roll:web", interface->list);
    elm_object_style_set(interface->list, "etwitt");
 
    
@@ -610,8 +644,6 @@ elm_main(int    argc,
         ebird_shutdown();
         return -1;
      }
-     
-   
 
    /* tell elm about our app so it can figure out where to get files */
    printf(" %s %s\n", PACKAGE_BIN_DIR, PACKAGE_DATA_DIR);
@@ -621,10 +653,7 @@ elm_main(int    argc,
 
    iface = calloc(1, sizeof(Etwitt_Iface));
    iface->eobj = ebird_add();
-   //iface->eobj->account = calloc(1, sizeof(EbirdAccount));
    iface->config = calloc(1, sizeof(Etwitt_Config_Iface));
-
-  
 
    elm_theme_extension_add(NULL, _theme_file_get());
 
