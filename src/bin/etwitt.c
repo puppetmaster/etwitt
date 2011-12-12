@@ -22,7 +22,7 @@ typedef struct _ConfigIface Etwitt_Config_Iface;
 
 #define MESSAGES_LIMIT 140
 
-static void etwitt_web_add(Etwitt_Iface *iface);
+static void etwitt_web_add(Etwitt_Iface *iface, char *url);
 static void _show_web(Etwitt_Iface *iface);
 
 struct _Account
@@ -239,9 +239,9 @@ _pin_need_cb(void *data,
 
 
 
-   printf("\n\nDEBUG %s\n",url);
+   printf("DEBUG URL {%s}\n",url);
 
-   etwitt_web_add(iface);
+   etwitt_web_add(iface,url);
    _show_web(iface);
 
     return EINA_TRUE;
@@ -459,7 +459,7 @@ _start_loading_anim(void *data)
 }
 
 static void
-etwitt_web_add(Etwitt_Iface *iface)
+etwitt_web_add(Etwitt_Iface *iface, char *url)
 {   
    if (!elm_need_web())
    {
@@ -473,6 +473,12 @@ etwitt_web_add(Etwitt_Iface *iface)
    }
    else
    {
+      char cmd[2048];
+
+      printf("DEBUG URL : [%s]\n",url);
+      snprintf(cmd,sizeof(cmd),"xdg-open '%s'",url);
+      printf("DEBUG CMD : [%s]\n",cmd);
+      
       printf("Elmentary don't have ewebkit support\n");
       iface->web = elm_label_add(iface->win);
       elm_object_style_set(iface->web, "default");
@@ -481,6 +487,7 @@ etwitt_web_add(Etwitt_Iface *iface)
                                      "authorise Ebird to use your account<br>"
                                      "and paste PIN here.<br>");
       evas_object_show(iface->web);
+      ecore_exe_run(cmd,NULL);
       elm_object_part_content_set(iface->layout,"web:label/message",iface->web);
       
    }
