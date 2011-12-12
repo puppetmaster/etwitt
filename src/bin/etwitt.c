@@ -461,7 +461,7 @@ _start_loading_anim(void *data)
 static void
 etwitt_web_add(Etwitt_Iface *iface, char *url)
 {   
-   if (!elm_need_web())
+   if (elm_need_web())
    {
       puts("ICI");
       iface->web = elm_web_add(iface->win);
@@ -469,7 +469,7 @@ etwitt_web_add(Etwitt_Iface *iface, char *url)
       evas_object_size_hint_weight_set(iface->web, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
       elm_win_resize_object_add(iface->win, iface->web);
       evas_object_show(iface->web);
-      elm_object_part_content_set(iface->layout, "roll:web", iface->web);
+      elm_object_part_content_set(iface->layout, "web:label/message", iface->web);
    }
    else
    {
@@ -489,7 +489,6 @@ etwitt_web_add(Etwitt_Iface *iface, char *url)
       evas_object_show(iface->web);
       ecore_exe_run(cmd,NULL);
       elm_object_part_content_set(iface->layout,"web:label/message",iface->web);
-      
    }
 }
 
@@ -502,7 +501,7 @@ etwitt_roll_add(Etwitt_Iface *interface)
    elm_genlist_scroller_policy_set(interface->list, ELM_SCROLLER_POLICY_OFF,
                                    ELM_SCROLLER_POLICY_ON);
    elm_genlist_homogeneous_set(interface->list, EINA_FALSE);
-   elm_object_part_content_set(interface->layout, "roll:web", interface->list);
+   elm_object_part_content_set(interface->layout, "roll", interface->list);
    elm_object_style_set(interface->list, "etwitt");
 
    
