@@ -459,13 +459,22 @@ _start_loading_anim(void *data)
 }
 
 static void
+_pin_input_bt_cb(void        *data,
+                 Evas_Object *obj __UNUSED__,
+                 void        *event_info __UNUSED__)
+{
+   Etwitt_Config_Iface *iface = data;
+   
+   printf("Click !\n");
+}
+
+
+static void
 etwitt_web_add(Etwitt_Iface *iface, char *url)
 {   
-   if (elm_need_web())
+   if (!elm_need_web())
    {
-      puts("ICI");
       iface->web = elm_web_add(iface->win);
-      puts("La !");
       evas_object_size_hint_weight_set(iface->web, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
       elm_win_resize_object_add(iface->win, iface->web);
       evas_object_show(iface->web);
@@ -474,18 +483,50 @@ etwitt_web_add(Etwitt_Iface *iface, char *url)
    else
    {
       char cmd[2048];
+      Evas_Object *lbl, *entry, *box, *bt;
 
       printf("DEBUG URL : [%s]\n",url);
       snprintf(cmd,sizeof(cmd),"xdg-open '%s'",url);
       printf("DEBUG CMD : [%s]\n",cmd);
       
       printf("Elmentary don't have ewebkit support\n");
-      iface->web = elm_label_add(iface->win);
+      iface->web = elm_win_inwin_add(iface->win);
       elm_object_style_set(iface->web, "default");
-      elm_object_text_set(iface->web,"<b>Etwitt</b> is going to open your<br>"
-                                     "web browser. Please visit the page and<br>"
-                                     "authorise Ebird to use your account<br>"
-                                     "and paste PIN here.<br>");
+      
+      box = elm_box_add(iface->win);
+      elm_box_horizontal_set(box, EINA_FALSE);
+      elm_box_homogeneous_set(box, EINA_FALSE);
+      evas_object_show(box);
+      
+      lbl = elm_label_add(iface->win);
+      elm_object_text_set(lbl,"<b>Etwitt</b> is going to open your<br>"
+                              "web browser. Please visit the page and<br>"
+                              "authorise Ebird to use your account<br>"
+                              "and paste PIN here.<br>");
+      evas_object_show(lbl);
+      
+      entry = elm_entry_add(iface->win);
+      evas_object_size_hint_weight_set(entry, EVAS_HINT_FILL, 0.0);
+      evas_object_size_hint_align_set(entry, EVAS_HINT_FILL, EVAS_HINT_FILL);
+      elm_entry_scrollable_set(entry, EINA_FALSE);
+      //elm_entry_single_line_set(iface->config->en_name, EINA_TRUE);
+      elm_object_style_set(entry, "twitt");
+      elm_entry_single_line_set(entry, EINA_TRUE);
+      evas_object_show(entry);      
+
+      bt = elm_button_add(iface->win);
+      evas_object_size_hint_weight_set(bt, EVAS_HINT_EXPAND, 0.5);
+      evas_object_size_hint_align_set(bt, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+      evas_object_show(bt);
+      elm_object_style_set(bt, "twitt");
+      evas_object_smart_callback_add(bt, "clicked", _pin_input_bt_cb, iface);
+      elm_object_text_set(bt, "Ok");
+      
+      elm_box_pack_end(box,lbl);
+      elm_box_pack_end(box,entry);
+      elm_box_pack_end(box,bt);
+      
+      elm_win_inwin_content_set(iface->web,box);
       evas_object_show(iface->web);
       ecore_exe_run(cmd,NULL);
       elm_object_part_content_set(iface->layout,"web:label/message",iface->web);

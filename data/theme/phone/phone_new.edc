@@ -58,12 +58,28 @@ collections {
                state: "default" 0.0;
                rel1.to: "label/message";
                rel2.to: "label/message";
-               color: 255 0 255 255;
+               color: 0 0 0 0;
             }
          }
          part {
             type: SWALLOW;
             name: "label/message";
+            description {
+               state: "default" 0.0;
+               rel1.relative: 0 0;
+               rel2.relative: 1 0.5;
+            }
+         }
+         part {
+            type: SWALLOW;
+            name: "ewk/authorise";
+            description {
+               state: "default" 0.0;
+            }
+         }
+         part {
+            type: SWALLOW;
+            name: "entry/pin";
             description {
                state: "default" 0.0;
             }
