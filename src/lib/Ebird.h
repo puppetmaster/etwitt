@@ -70,7 +70,7 @@ struct _Ebird_Obj
 EAPI int EBIRD_EVENT_AVATAR_DOWNLOAD = 0;
 EAPI int EBIRD_EVENT_PIN_NEED = 0;
 EAPI int EBIRD_EVENT_PIN_RECEIVE = 0;
-
+EAPI int EBIRD_EVENT_AUTHORISATION_DONE = 0;
 
 /*
  * API
@@ -101,7 +101,7 @@ EAPI Eina_Bool ebird_account_load(Ebird_Object *obj);
  * 
  */ 
  
-EAPI Eina_Bool ebird_authorisation_pin_set(Ebird_Object *obj,char *pin);
+EAPI Eina_Bool ebird_authorisation_pin_set(Ebird_Object *obj, const char *pin);
 
 /* 
  *

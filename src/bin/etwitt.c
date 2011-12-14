@@ -24,6 +24,7 @@ typedef struct _ConfigIface Etwitt_Config_Iface;
 
 static void etwitt_web_add(Etwitt_Iface *iface, char *url);
 static void _show_web(Etwitt_Iface *iface);
+static void _show_roll(Etwitt_Iface *iface);
 
 struct _Account
 {
@@ -51,6 +52,7 @@ struct _Interface
    Evas_Object         *entry;
    Evas_Object         *list;
    Evas_Object         *web;
+   Evas_Object         *web_entry;
    Etwitt_Config_Iface *config;
    Ebird_Object        *eobj;
    Elm_Genlist_Item    *header;
@@ -243,6 +245,20 @@ _pin_need_cb(void *data,
 
    etwitt_web_add(iface,url);
    _show_web(iface);
+
+    return EINA_TRUE;
+
+}
+
+static Eina_Bool
+_auth_done_cb(void *data,
+              int  type __UNUSED__,
+              void *event)
+{
+    Etwitt_Iface *iface = data;
+    char *url = event;
+   
+    _show_roll(iface);
 
     return EINA_TRUE;
 
@@ -463,9 +479,13 @@ _pin_input_bt_cb(void        *data,
                  Evas_Object *obj __UNUSED__,
                  void        *event_info __UNUSED__)
 {
-   Etwitt_Config_Iface *iface = data;
+   Etwitt_Iface *iface = data;
+   const char *pin;
    
-   printf("Click !\n");
+   pin = elm_entry_entry_get(iface->web_entry);
+   
+   ebird_authorisation_pin_set(iface->eobj,pin);
+   
 }
 
 
@@ -505,14 +525,14 @@ etwitt_web_add(Etwitt_Iface *iface, char *url)
                               "and paste PIN here.<br>");
       evas_object_show(lbl);
       
-      entry = elm_entry_add(iface->win);
-      evas_object_size_hint_weight_set(entry, EVAS_HINT_FILL, 0.0);
-      evas_object_size_hint_align_set(entry, EVAS_HINT_FILL, EVAS_HINT_FILL);
-      elm_entry_scrollable_set(entry, EINA_FALSE);
+      iface->web_entry = elm_entry_add(iface->win);
+      evas_object_size_hint_weight_set(iface->web_entry, EVAS_HINT_FILL, 0.0);
+      evas_object_size_hint_align_set(iface->web_entry, EVAS_HINT_FILL, EVAS_HINT_FILL);
+      elm_entry_scrollable_set(iface->web_entry, EINA_FALSE);
       //elm_entry_single_line_set(iface->config->en_name, EINA_TRUE);
-      elm_object_style_set(entry, "twitt");
-      elm_entry_single_line_set(entry, EINA_TRUE);
-      evas_object_show(entry);      
+      elm_object_style_set(iface->web_entry, "twitt");
+      elm_entry_single_line_set(iface->web_entry, EINA_TRUE);
+      evas_object_show(iface->web_entry);      
 
       bt = elm_button_add(iface->win);
       evas_object_size_hint_weight_set(bt, EVAS_HINT_EXPAND, 0.5);
@@ -523,7 +543,7 @@ etwitt_web_add(Etwitt_Iface *iface, char *url)
       elm_object_text_set(bt, "Ok");
       
       elm_box_pack_end(box,lbl);
-      elm_box_pack_end(box,entry);
+      elm_box_pack_end(box,iface->web_entry);
       elm_box_pack_end(box,bt);
       
       elm_win_inwin_content_set(iface->web,box);
@@ -682,6 +702,7 @@ elm_main(int    argc,
    Etwitt_Iface *iface;
    Ecore_Event_Handler *avatar_hdl;
    Ecore_Event_Handler *pin_hdl;
+   Ecore_Event_Handler *auth_done;
 
    if (!ebird_init())
      return -1;
@@ -720,6 +741,9 @@ elm_main(int    argc,
 
    pin_hdl = ecore_event_handler_add(EBIRD_EVENT_PIN_NEED,
                                      _pin_need_cb, iface);
+                                     
+   auth_done = ecore_event_handler_add(EBIRD_EVENT_AUTHORISATION_DONE,
+                                       _auth_done_cb, iface);                                  
 
    if (ebird_account_load(iface->eobj))
       iface->eobj->account->avatar = eina_stringshare_add("avatar.png");

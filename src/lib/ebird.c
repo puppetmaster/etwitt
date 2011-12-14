@@ -77,6 +77,8 @@ ebird_init()
    
    EBIRD_EVENT_AVATAR_DOWNLOAD = ecore_event_type_new();
    EBIRD_EVENT_PIN_NEED = ecore_event_type_new();
+   EBIRD_EVENT_PIN_RECEIVE = ecore_event_type_new();
+   EBIRD_EVENT_AUTHORISATION_DONE = ecore_event_type_new();
 
    dir = _ebird_config_dir_get(NULL);
    if (!ecore_file_is_dir(dir))
@@ -305,18 +307,6 @@ ebird_account_load(Ebird_Object *obj)
    eet_close(file);
 
    return EINA_TRUE;
-}
-
-EAPI int
-ebird_id_load(OauthToken *request_token)
-{
-   Eet_File *file;
-   int size;
-
-   file = eet_open(PACKAGE_DATA_DIR"/"EBIRD_ID_FILE, EET_FILE_MODE_READ);
-   request_token->consumer_key = strdup(eet_read(file, "key", &size));
-   request_token->consumer_secret = strdup(eet_read(file, "secret", &size));
-   eet_close(file);
 }
 
 /*
@@ -1145,6 +1135,7 @@ _ebird_access_token_get_cb(void *data,
           }
      }
    free(access_token_prm);
+   ecore_event_add(EBIRD_EVENT_AUTHORISATION_DONE,NULL,NULL,NULL);
    d->cb(obj, d->data, NULL);
 }
 
@@ -1191,16 +1182,11 @@ ebird_access_token_get(Async_Data *d)
 
 EAPI Eina_Bool
 ebird_authorisation_pin_set(Ebird_Object *obj,
-                            char         *pin)
+                            const char   *pin)
 {
    obj->request_token->authorisation_pin = strdup(pin);
+   ecore_event_add(EBIRD_EVENT_PIN_RECEIVE,obj,NULL,NULL);
    return EINA_TRUE;
-}
-
-Eina_Bool
-ebird_pin_set(Ebird_Object *obj,char *pin)
-{
-   obj->request_token->authorisation_pin = strdup(pin);
 }
 
 Eina_Bool
@@ -1229,11 +1215,29 @@ to access to your account.\n%s\n",
    return EINA_TRUE;
 }
 
-Eina_Bool
-ebird_authorisation_url_send(Ebird_Object *obj)
+static Eina_Bool
+_pin_receive_cb(void *data,
+                       int   type,
+                       void *event_info)
 {
+   Ecore_Event_Handler *h;
+   Async_Data *d = data;
+   
+   ebird_access_token_get(data);
+   
+   EINA_LIST_FREE(d->handlers, h)
+          ecore_event_handler_del(h);
+   
+   return EINA_TRUE;
+}
+
+Eina_Bool
+ebird_authorisation_url_send(Async_Data *d)
+{
+   Ebird_Object *obj = d->eobj;
    char buffer[EBIRD_PIN_SIZE];
    char url[EBIRD_URL_MAX];
+   Ecore_Event_Handler *hdl;
 
    snprintf(url, sizeof(url),
             EBIRD_DIRECT_TOKEN_URL "?authenticity_token=%s&oauth_token=%s",
@@ -1242,7 +1246,12 @@ ebird_authorisation_url_send(Ebird_Object *obj)
 
    obj->request_token->authorisation_url = eina_stringshare_add(url);
 
-   ecore_event_add(EBIRD_EVENT_PIN_NEED,strdup(url),NULL,NULL);
+   ecore_event_add(EBIRD_EVENT_PIN_NEED,strdup(url),NULL,NULL);   
+   
+   hdl = ecore_event_handler_add(EBIRD_EVENT_PIN_RECEIVE,
+                                 _pin_receive_cb, d);
+   d->handlers = eina_list_append(d->handlers, hdl);
+   
 
    return EINA_TRUE;
 }
@@ -1269,9 +1278,8 @@ _ebird_direct_token_get_cb(void *data,
    d->http_data = NULL;
    d->url = NULL;
    //ebird_read_pin_from_stdin(eobj);
-   ebird_authorisation_url_send(eobj);
-   ebird_access_token_get(d);
-
+    ebird_authorisation_url_send(d);
+   
 error:
    return EINA_FALSE;
 }
@@ -1471,3 +1479,14 @@ _ebird_config_dir_get(const char *suffix)
    return ret;
 }
 
+EAPI int
+ebird_id_load(OauthToken *request_token)
+{
+   Eet_File *file;
+   int size;
+
+   file = eet_open(PACKAGE_DATA_DIR"/"EBIRD_ID_FILE, EET_FILE_MODE_READ);
+   request_token->consumer_key = strdup(eet_read(file, "key", &size));
+   request_token->consumer_secret = strdup(eet_read(file, "secret", &size));
+   eet_close(file);
+}
