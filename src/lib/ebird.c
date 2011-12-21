@@ -237,6 +237,8 @@ _url_data_cb(void *data,
    Async_Data *d = data;
    Ecore_Con_Event_Url_Data *url_data = event_info;
 
+   DBG("HTTTP data receive");
+
    if (d->url != url_data->url_con)
      return EINA_TRUE;
 
@@ -1093,6 +1095,8 @@ _ebird_access_token_get_cb(void *data,
    int res;
    Ecore_Con_Event_Url_Complete *url = event_info;
 
+   DBG("Access Token HTTP DATA received");
+
    if (d->url != url->url_con)
      return EINA_TRUE;
 
@@ -1177,6 +1181,8 @@ ebird_access_token_get(Async_Data *d)
 
    DBG("[URL][%s]", buf);
    ecore_con_url_get(d->url);
+   DBG("HTTP GET started");
+   
    free(acc_url);
 }
 
@@ -1186,6 +1192,7 @@ ebird_authorisation_pin_set(Ebird_Object *obj,
 {
    obj->request_token->authorisation_pin = strdup(pin);
    ecore_event_add(EBIRD_EVENT_PIN_RECEIVE,obj,NULL,NULL);
+   puts("DEBUG ICI");
    return EINA_TRUE;
 }
 
@@ -1223,7 +1230,9 @@ _pin_receive_cb(void *data,
    Ecore_Event_Handler *h;
    Async_Data *d = data;
    
-   ebird_access_token_get(data);
+   puts("DEBUG LA !!!!");
+   
+   ebird_access_token_get(d);
    
    EINA_LIST_FREE(d->handlers, h)
           ecore_event_handler_del(h);
