@@ -743,7 +743,9 @@ elm_main(int    argc,
                                      _pin_need_cb, iface);
                                      
    auth_done = ecore_event_handler_add(EBIRD_EVENT_AUTHORISATION_DONE,
-                                       _auth_done_cb, iface);                                  
+                                       _auth_done_cb, iface);  
+                                       
+  // eobj->handlers = eina_list_append(eobj->handlers, hdl);
 
    if (ebird_account_load(iface->eobj))
       iface->eobj->account->avatar = eina_stringshare_add("avatar.png");

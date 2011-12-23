@@ -20,7 +20,7 @@
 #include <Ecore_Con.h>
 #include <Ecore_File.h>
 
-#include "Ebird.h"
+//#include "Ebird.h"
 #include "ebird_private.h"
 
 static int _ebird_main_count = 0;
@@ -237,8 +237,8 @@ _url_data_cb(void *data,
    Ebird_Object *eobj = data;
    Ecore_Con_Event_Url_Data *url_data = event_info;
 
-   DBG("HTTTP data receive");
-
+   //DBG("HTTTP data receive [%s]",url_data->data);
+   DBG("HTTP data receive");
    if (eobj->url != url_data->url_con)
      return EINA_TRUE;
 
@@ -929,7 +929,10 @@ _ebird_access_token_get_cb(void *data,
       DBG("DATA : %s", acc_token);
    }
    else
+   {
+      DBG("Error No http_data !");
       return EINA_FALSE;
+   }
 
    if (acc_token)
      {
@@ -953,13 +956,14 @@ _ebird_access_token_get_cb(void *data,
         else
           {
              ERR("Error on access_token split");
-             ERR("%s", acc_token);
+             ERR("Token {%s}", acc_token);
              ERR("[%i]", res);
 
              return EINA_FALSE;
           }
      }
    free(access_token_prm);
+   DBG("SENDING EBIRD_EVENT_AUTHORISATION_DONE Ecore_Event");
    ecore_event_add(EBIRD_EVENT_AUTHORISATION_DONE,NULL,NULL,NULL);
    eobj->cb(eobj, eobj->data, NULL);
 }
@@ -973,10 +977,20 @@ ebird_access_token_get(Ebird_Object *eobj)
 
    DBG("Start of access token get");
    
-   EINA_LIST_FREE(eobj->handlers, h)
-     ecore_event_handler_del(h);
-
-   eobj->handlers = NULL;
+   
+   if (eobj->handlers)
+   {
+      DBG("Free handlers");
+      EINA_LIST_FREE(eobj->handlers, h)
+      {
+         DBG(" ---> ecore_event_handler_del");
+         if (h)
+            ecore_event_handler_del(h);
+      }
+      DBG("Setting handlers to NULL");
+      eobj->handlers = NULL;
+      DBG("Done !");
+   }
    
    DBG("Signing URL");
 
@@ -1012,12 +1026,11 @@ ebird_access_token_get(Ebird_Object *eobj)
 }
 
 EAPI Eina_Bool
-ebird_authorisation_pin_set(Ebird_Object *obj,
+ebird_authorisation_pin_set(Ebird_Object *eobj,
                             const char   *pin)
 {
-   obj->request_token->authorisation_pin = strdup(pin);
-   ecore_event_add(EBIRD_EVENT_PIN_RECEIVE,obj,NULL,NULL);
-   puts("DEBUG ICI");
+   eobj->request_token->authorisation_pin = strdup(pin);
+   ebird_access_token_get(eobj);
    return EINA_TRUE;
 }
 
@@ -1047,34 +1060,11 @@ to access to your account.\n%s\n",
    return EINA_TRUE;
 }
 
-static Eina_Bool
-_pin_receive_cb(void *data,
-                int   type,
-                void *event_info)
-{
-   Ecore_Event_Handler *h;
-   Ebird_Object *eobj = data;
-   
-   EINA_LIST_FREE(eobj->handlers, h)
-      ecore_event_handler_del(h);
-      
-   eobj->handlers = NULL;
-
-   puts("DEBUG LA !!!!");
-      
-   ebird_access_token_get(eobj);
-   
-   DBG("Ebird_access_token_get Started !");
-   
-   return EINA_TRUE;
-}
-
 Eina_Bool
 ebird_authorisation_url_send(Ebird_Object *eobj)
 {
    char buffer[EBIRD_PIN_SIZE];
    char url[EBIRD_URL_MAX];
-   Ecore_Event_Handler *hdl;
 
    snprintf(url, sizeof(url),
             EBIRD_DIRECT_TOKEN_URL "?authenticity_token=%s&oauth_token=%s",
@@ -1083,13 +1073,7 @@ ebird_authorisation_url_send(Ebird_Object *eobj)
 
    eobj->request_token->authorisation_url = eina_stringshare_add(url);
 
-   ecore_event_add(EBIRD_EVENT_PIN_NEED,strdup(url),NULL,NULL);   
-   
-   hdl = ecore_event_handler_add(EBIRD_EVENT_PIN_RECEIVE,
-                                 _pin_receive_cb, eobj);
-                                 
-   eobj->handlers = eina_list_append(eobj->handlers, hdl);
-   
+   ecore_event_add(EBIRD_EVENT_PIN_NEED,strdup(url),NULL,NULL);      
 
    return EINA_TRUE;
 }
@@ -1146,7 +1130,7 @@ ebird_direct_token_get(Ebird_Object *eobj)
    h = ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,
                                _url_data_cb, eobj);
    DBG("eina_list_append");
-   eobj->handlers = eina_list_append(eobj->handlers, eobj);
+   eobj->handlers = eina_list_append(eobj->handlers, h);
 
    ecore_con_url_get(eobj->url);
 }

@@ -1,6 +1,10 @@
 #ifndef EBIRD_H_
 #define EBIRD_H_
 
+
+#include <Ecore.h>
+#include <Ecore_Con.h>
+
 typedef struct _Ebird_Account EbirdAccount;
 typedef struct _Ebird_Status EbirdStatus;
 typedef enum   _state State;
