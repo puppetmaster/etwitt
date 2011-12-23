@@ -35,7 +35,7 @@ static Eina_Bool _url_complete_cb(void *data,
                                   int   type,
                                   void *event_info);
 static void ebird_timeline_get(const char *url,
-                               Async_Data *d);
+                               Ebird_Object *eobj);
 
 static const char *_ebird_config_dir_get(const char *suffix);
 
@@ -234,18 +234,18 @@ _url_data_cb(void *data,
              int   type,
              void *event_info)
 {
-   Async_Data *d = data;
+   Ebird_Object *eobj = data;
    Ecore_Con_Event_Url_Data *url_data = event_info;
 
    DBG("HTTTP data receive");
 
-   if (d->url != url_data->url_con)
+   if (eobj->url != url_data->url_con)
      return EINA_TRUE;
 
-   if (!d->http_data)
-     d->http_data = eina_strbuf_new();
+   if (!eobj->http_data)
+     eobj->http_data = eina_strbuf_new();
 
-   eina_strbuf_append_length(d->http_data,
+   eina_strbuf_append_length(eobj->http_data,
                              url_data->data,
                              url_data->size);
 
@@ -330,14 +330,14 @@ ebird_error_code_get(char *string)
 }
 
 int
-ebird_token_authenticity_get(Async_Data *data)
+ebird_token_authenticity_get(Ebird_Object *eobj)
 {
    char *key,
    *end;
    const char *web_script;
 
-   if (data->http_data)
-      web_script = eina_strbuf_string_get(data->http_data);
+   if (eobj->http_data)
+      web_script = eina_strbuf_string_get(eobj->http_data);
    else
       return 1;
 
@@ -355,7 +355,7 @@ ebird_token_authenticity_get(Async_Data *data)
      return -1;
 
    *end = '\0';
-   data->eobj->request_token->authenticity_token = eina_stringshare_add(key);
+   eobj->request_token->authenticity_token = eina_stringshare_add(key);
    *end = '\'';
 
    return 0;
@@ -635,160 +635,6 @@ _parse_timeline(void                *_data,
      return EINA_TRUE;
 }
 
-/* TO REMOVE
-static Eina_Bool
-_parse_timeline(void                *_data,
-                Eina_Simple_XML_Type type,
-                const char          *content,
-                unsigned             offset,
-                unsigned             length)
-{
-   static EbirdStatus *cur = NULL;
-   static State s = NONE;
-   static State rt_s = NONE;
-   static UserState us = USER_NONE;
-   static UserState rt_us = USER_NONE;
-
-   void **data = (void **)_data;
-
-   if (type == EINA_SIMPLE_XML_OPEN && !strncmp("status", content, length))
-     {
-        cur = calloc(1, sizeof(EbirdStatus));
-        cur->user = calloc(1, sizeof(EbirdAccount));
-     }
-   else if (cur && type == EINA_SIMPLE_XML_OPEN)
-     {
-        us = USER_NONE;
-
-        if (!strncmp("retweeted_status", content, 16))
-          {
-             s = RETWEETED;
-             cur->retweeted_status = calloc(1, sizeof(EbirdStatus));
-             cur->retweeted_status->user = calloc(1, sizeof(EbirdAccount));
-             cur->retweeted = EINA_TRUE;
-          }
-        else if (!strncmp("created_at", content, 10))
-          s = CREATEDAT;
-        else if (!strncmp("text", content, 4))
-          s = TEXT;
-        else if (!strncmp("id", content, 2))
-          s = ID;
-        else if (!strncmp("user", content, 4))
-          s = USER;
-        else if (!strncmp("screen_name", content, 11))
-          {
-             us = SCREEN_NAME;
-             s = USER;
-          }
-        else if (!strncmp("profile_image_url_https", content, 23))
-          {
-             us = AVATAR;
-             s = USER;
-          }
-        else
-          s = NONE;
-     }
-   else if (cur && type == EINA_SIMPLE_XML_DATA)
-     {
-        char *ptr = strndup(content, length);
-        if ( !cur->retweeted)
-          {
-             switch(s)
-               {
-                case CREATEDAT:
-                  cur->created_at = ptr;
-                  break;
-
-                case TEXT:
-                  cur->text = ptr;
-                  break;
-
-                case ID:
-                  cur->id = ptr;
-                  break;
-
-                case USER:
-                  printf("user\n");
-                  break;
-               }
-
-             switch(us)
-               {
-                case SCREEN_NAME:
-                  cur->user->username = ptr;
-                  break;
-
-                case AVATAR:
-                  cur->user->avatar = ebird_wget(ptr);
-                  break;
-
-                case USER_NONE:
-                  break;
-               }
-          }
-        else
-          {
-             switch(s)
-               {
-                case CREATEDAT:
-                  cur->retweeted_status->created_at = ptr;
-                  break;
-
-                case TEXT:
-                  cur->retweeted_status->text = ptr;
-                  break;
-
-                case ID:
-                  cur->retweeted_status->id = ptr;
-                  break;
-
-                case RETWEETED:
-                  cur->retweeted_status->retweeted = EINA_TRUE;
-                  break;
-
-                case USER:
-                  break;
-               }
-
-             switch(us)
-               {
-                case SCREEN_NAME:
-                  cur->retweeted_status->user->username = ptr;
-                  break;
-
-                case AVATAR:
-                  cur->retweeted_status->user->avatar = ebird_wget(ptr);
-                  cur->retweeted = EINA_FALSE;
-
-                case USER_NONE:
-                  break;
-               }
-          }
-     }
-   else if (cur && type == EINA_SIMPLE_XML_CLOSE && !strncmp("user", content, 4))
-     s = NONE;
-   else if (cur && type == EINA_SIMPLE_XML_CLOSE && !strncmp("retweeted_status", content, 16))
-     {
-        cur->retweeted = EINA_FALSE;
-     }
-   else if (cur && type == EINA_SIMPLE_XML_CLOSE && !strncmp("status", content, 6) && !cur->retweeted)
-     {
-        if (!strncmp("RT ", cur->text, 3))
-          cur->retweeted = EINA_TRUE;
-
-        DBG("eina_list_append");
-        *data = eina_list_append(*data, cur);
-        cur = NULL;
-     }
-   else if (cur && type == EINA_SIMPLE_XML_CLOSE && !strncmp("retweeted_status", content, 16))
-     {
-        if (cur->retweeted)
-          cur->retweeted = EINA_FALSE;
-     }
-   return EINA_TRUE;
-}
-*/
-
 EAPI void
 ebird_timeline_free(Eina_List *timeline)
 {
@@ -820,15 +666,14 @@ _ebird_timeline_get_cb(void *data,
    Eina_List *timeline = NULL;
    Ecore_Event_Handler *h;
    Ecore_Con_Event_Url_Complete *url = event_info;
-   Async_Data *d = data;
-   Ebird_Object *eobj = d->eobj;
+   Ebird_Object *eobj = data;
    EbirdStatus *lastmsg = NULL;
 
-   if (d->url != url->url_con)
+   if (eobj->url != url->url_con)
      return EINA_TRUE;
 
-   if (d->http_data)
-     xml = eina_strbuf_string_get(d->http_data);
+   if (eobj->http_data)
+     xml = eina_strbuf_string_get(eobj->http_data);
    else
      xml = eina_stringshare_add("No timeline");
 
@@ -843,34 +688,33 @@ _ebird_timeline_get_cb(void *data,
       DBG("newer_msg_id = %s\n", eobj->newer_msg_id);
    }
 
-   EINA_LIST_FREE(d->handlers, h)
+   EINA_LIST_FREE(eobj->handlers, h)
    {
      ecore_event_handler_del(h);
    }
-   d->handlers = NULL;
+   eobj->handlers = NULL;
 
 
-   if (d->cb)
+   if (eobj->cb)
    {
-     d->cb(eobj, d->data, timeline);
+     eobj->cb(eobj, eobj->data, timeline);
    }
 }
 
 static void
 ebird_timeline_get(const char *url,
-                   Async_Data *d)
+                   Ebird_Object *eobj)
 {
    Ecore_Event_Handler *h;
-   Ebird_Object *eobj = d->eobj;
    char *sig_url;
    char full_url[EBIRD_URL_MAX];
 
-   if (d->eobj->newer_msg_id)
+   if (eobj->newer_msg_id)
      {
         snprintf(full_url, sizeof(full_url),
                  "%s&since_id=%s",
                  url,
-                 d->eobj->newer_msg_id);
+                 eobj->newer_msg_id);
         sig_url = ebird_oauth_sign_url(full_url,
                                        eobj->request_token->consumer_key,
                                        eobj->request_token->consumer_secret,
@@ -887,19 +731,19 @@ ebird_timeline_get(const char *url,
                                        eobj->account->access_token_secret, NULL);
      }
 
-   d->url = ecore_con_url_new(sig_url);
+   eobj->url = ecore_con_url_new(sig_url);
    DBG("TIMELINE_GET_URL [%s]\n", sig_url);
 
    h = ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,
-                               _url_data_cb, d);
+                               _url_data_cb, eobj);
    DBG("eina_list_append");
-   d->handlers = eina_list_append(d->handlers, h);
+   eobj->handlers = eina_list_append(eobj->handlers, h);
    h = ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE,
-                               _ebird_timeline_get_cb, d);
+                               _ebird_timeline_get_cb, eobj);
    DBG("eina_list_append");
-   d->handlers = eina_list_append(d->handlers, h);
+   eobj->handlers = eina_list_append(eobj->handlers, h);
 
-   ecore_con_url_get(d->url);
+   ecore_con_url_get(eobj->url);
 }
 
 EAPI void
@@ -907,18 +751,14 @@ ebird_timeline_home_get(Ebird_Object    *eobj,
                         Ebird_Session_Cb cb,
                         void            *data)
 {
-   Async_Data *d;
 
    if (!eobj)
      return;
 
-   d = calloc(1, sizeof(Async_Data));
-   d->eobj = eobj;
+   eobj->cb = cb;
+   eobj->data = data;
 
-   d->cb = cb;
-   d->data = data;
-
-   ebird_timeline_get(EBIRD_HOME_TIMELINE_URL, d);
+   ebird_timeline_get(EBIRD_HOME_TIMELINE_URL, eobj);
 }
 
 EAPI void
@@ -926,18 +766,13 @@ ebird_timeline_public_get(Ebird_Object    *eobj,
                           Ebird_Session_Cb cb,
                           void            *data)
 {
-   Async_Data *d;
-
    if (!eobj)
      return;
 
-   d = calloc(1, sizeof(Async_Data));
-   d->eobj = eobj;
+   eobj->cb = cb;
+   eobj->data = data;
 
-   d->cb = cb;
-   d->data = data;
-
-   ebird_timeline_get(EBIRD_PUBLIC_TIMELINE_URL, d);
+   ebird_timeline_get(EBIRD_PUBLIC_TIMELINE_URL, eobj);
 }
 
 EAPI void
@@ -945,18 +780,14 @@ ebird_timeline_user_get(Ebird_Object    *eobj,
                         Ebird_Session_Cb cb,
                         void            *data)
 {
-   Async_Data *d;
 
    if (!eobj)
      return;
 
-   d = calloc(1, sizeof(Async_Data));
-   d->eobj = eobj;
+   eobj->cb = cb;
+   eobj->data = data;
 
-   d->cb = cb;
-   d->data = data;
-
-   ebird_timeline_get(EBIRD_USER_TIMELINE_URL, d);
+   ebird_timeline_get(EBIRD_USER_TIMELINE_URL, eobj);
 }
 
 EAPI void
@@ -964,18 +795,14 @@ ebird_timeline_mentions_get(Ebird_Object    *eobj,
                             Ebird_Session_Cb cb,
                             void            *data)
 {
-   Async_Data *d;
 
    if (!eobj)
      return;
 
-   d = calloc(1, sizeof(Async_Data));
-   d->eobj = eobj;
+   eobj->cb = cb;
+   eobj->data = data;
 
-   d->cb = cb;
-   d->data = data;
-
-   ebird_timeline_get(EBIRD_USER_MENTIONS_URL, d);
+   ebird_timeline_get(EBIRD_USER_MENTIONS_URL, eobj);
 }
 
 static Eina_Bool
@@ -984,17 +811,16 @@ _ebird_status_update_cb(void *data,
                         void *event_info)
 {
    Ecore_Event_Handler *h;
-   Async_Data *d = data;
-   Ebird_Object *eobj = d->eobj;
+   Ebird_Object *eobj = data;
    const char *xml;
    Eina_List *timeline = NULL;
    Ecore_Con_Event_Url_Complete *url = event_info;
 
-   if (d->url != url->url_con)
+   if (eobj->url != url->url_con)
      return EINA_TRUE;
 
-   if (d->http_data)
-      xml = eina_strbuf_string_get(d->http_data);
+   if (eobj->http_data)
+      xml = eina_strbuf_string_get(eobj->http_data);
    else
       return EINA_FALSE;
 
@@ -1002,23 +828,22 @@ _ebird_status_update_cb(void *data,
    printf("%s\n",xml);
    eina_simple_xml_parse(xml, strlen(xml), EINA_TRUE, _parse_timeline, &timeline);
 
-   EINA_LIST_FREE(d->handlers, h)
+   EINA_LIST_FREE(eobj->handlers, h)
      ecore_event_handler_del(h);
-   d->handlers = NULL;
+   eobj->handlers = NULL;
 
-   if (d->cb)
-     d->cb(eobj, d->data, timeline);
+   if (eobj->cb)
+     eobj->cb(eobj, eobj->data, timeline);
 
    return EINA_TRUE;
 }
 
 EAPI void
 ebird_status_update(char            *message,
-                    Ebird_Object    *obj,
+                    Ebird_Object    *eobj,
                     Ebird_Session_Cb cb,
                     void            *data)
 {
-   Async_Data *d;
    Ecore_Event_Handler *h;
 
    Ecore_Con_Url *ec_url;
@@ -1026,11 +851,8 @@ ebird_status_update(char            *message,
    char *sig_url;
    char full_url[EBIRD_URL_MAX];
 
-   d = calloc(1, sizeof(Async_Data));
-   d->eobj = obj;
-
-   d->cb = cb;
-   d->data = data;
+   eobj->cb = cb;
+   eobj->data = data;
 
    DBG("Update Status Start Here !");
 
@@ -1040,26 +862,26 @@ ebird_status_update(char            *message,
             message);
 
    sig_url = ebird_oauth_sign_url(full_url,
-                                  obj->request_token->consumer_key,
-                                  obj->request_token->consumer_secret,
-                                  obj->account->access_token_key,
-                                  obj->account->access_token_secret, "POST");
+                                  eobj->request_token->consumer_key,
+                                  eobj->request_token->consumer_secret,
+                                  eobj->account->access_token_key,
+                                  eobj->account->access_token_secret, "POST");
 
 
    data = eina_strbuf_new();
 
-   d->url = ecore_con_url_new(sig_url);
+   eobj->url = ecore_con_url_new(sig_url);
    DBG("STATUS_UPDATE_URL [%s]\n", full_url);
    h = ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,
-                               _url_data_cb, d);
+                               _url_data_cb, eobj);
    DBG("eina_list_append");
-   d->handlers = eina_list_append(d->handlers, h);
+   eobj->handlers = eina_list_append(eobj->handlers, h);
    h = ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE,
-                               _ebird_status_update_cb, d);
+                               _ebird_status_update_cb, eobj);
    DBG("eina_list_append");
-   d->handlers = eina_list_append(d->handlers, h);
+   eobj->handlers = eina_list_append(eobj->handlers, h);
 
-   ecore_con_url_get(d->url);
+   ecore_con_url_get(eobj->url);
 }
 
 EAPI Eina_Bool
@@ -1088,8 +910,7 @@ _ebird_access_token_get_cb(void *data,
                            int   type,
                            void *event_info)
 {
-   Async_Data *d = data;
-   Ebird_Object *obj = d->eobj;
+   Ebird_Object *eobj = data;
    const char *acc_token;
    char **access_token_prm;
    int res;
@@ -1097,14 +918,14 @@ _ebird_access_token_get_cb(void *data,
 
    DBG("Access Token HTTP DATA received");
 
-   if (d->url != url->url_con)
+   if (eobj->url != url->url_con)
      return EINA_TRUE;
 
    access_token_prm = (char **)malloc(5 * sizeof(char *));
 
-   if (d->http_data)
+   if (eobj->http_data)
    {
-      acc_token = eina_strbuf_string_get(d->http_data);
+      acc_token = eina_strbuf_string_get(eobj->http_data);
       DBG("DATA : %s", acc_token);
    }
    else
@@ -1119,15 +940,15 @@ _ebird_access_token_get_cb(void *data,
         if (res == 4)
           {
              DBG("SPLIT OK");
-             obj->account->access_token_key = strdup(&(access_token_prm[0][12]));
-             DBG("ACCESS_TOKEN_KEY[%s]\n", obj->account->access_token_key);
-             obj->account->access_token_secret = strdup(&(access_token_prm[1][19]));
-             DBG("ACCESS_TOKEN_SECRET[%s]\n", obj->account->access_token_secret);
-             obj->account->userid = strdup(&(access_token_prm[2][8]));
-             obj->account->username = strdup(&(access_token_prm[3][12]));
-             obj->account->passwd = strdup("nill");
+             eobj->account->access_token_key = strdup(&(access_token_prm[0][12]));
+             DBG("ACCESS_TOKEN_KEY[%s]\n", eobj->account->access_token_key);
+             eobj->account->access_token_secret = strdup(&(access_token_prm[1][19]));
+             DBG("ACCESS_TOKEN_SECRET[%s]\n", eobj->account->access_token_secret);
+             eobj->account->userid = strdup(&(access_token_prm[2][8]));
+             eobj->account->username = strdup(&(access_token_prm[3][12]));
+             eobj->account->passwd = strdup("nill");
              DBG("SAVING CONFIGURATION");
-             ebird_account_save(obj);
+             ebird_account_save(eobj);
           }
         else
           {
@@ -1140,47 +961,51 @@ _ebird_access_token_get_cb(void *data,
      }
    free(access_token_prm);
    ecore_event_add(EBIRD_EVENT_AUTHORISATION_DONE,NULL,NULL,NULL);
-   d->cb(obj, d->data, NULL);
+   eobj->cb(eobj, eobj->data, NULL);
 }
 
 void
-ebird_access_token_get(Async_Data *d)
+ebird_access_token_get(Ebird_Object *eobj)
 {
    Ecore_Event_Handler *h;
-   Ebird_Object *obj = d->eobj;
    char *acc_url;
    char buf[EBIRD_URL_MAX];
 
    DBG("Start of access token get");
-
-   EINA_LIST_FREE(d->handlers, h)
+   
+   EINA_LIST_FREE(eobj->handlers, h)
      ecore_event_handler_del(h);
 
-   d->handlers = NULL;
+   eobj->handlers = NULL;
+   
+   DBG("Signing URL");
 
    acc_url = ebird_oauth_sign_url(EBIRD_ACCESS_TOKEN_URL,
-                                  obj->request_token->consumer_key,
-                                  obj->request_token->consumer_secret,
-                                  obj->request_token->key,
-                                  obj->request_token->secret, NULL);
+                                  eobj->request_token->consumer_key,
+                                  eobj->request_token->consumer_secret,
+                                  eobj->request_token->key,
+                                  eobj->request_token->secret, NULL);
 
+   DBG("Building full url");
    snprintf(buf, sizeof(buf), "%s&oauth_verifier=%s",
             acc_url,
-            d->eobj->request_token->authorisation_pin);
+            eobj->request_token->authorisation_pin);
 
-   d->http_data = eina_strbuf_new();
-   d->url = ecore_con_url_new(buf);
+
+   DBG("Starting ecore_event_stuff");
+   eobj->http_data = eina_strbuf_new();
+   eobj->url = ecore_con_url_new(buf);
    h = ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE,
-                               _ebird_access_token_get_cb, d);
+                               _ebird_access_token_get_cb, eobj);
    DBG("eina_list_append");
-   d->handlers = eina_list_append(d->handlers, h);
+   eobj->handlers = eina_list_append(eobj->handlers, h);
    h = ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,
-                               _url_data_cb, d);
+                               _url_data_cb, eobj);
    DBG("eina_list_append");
-   d->handlers = eina_list_append(d->handlers, h);
+   eobj->handlers = eina_list_append(eobj->handlers, h);
 
    DBG("[URL][%s]", buf);
-   ecore_con_url_get(d->url);
+   ecore_con_url_get(eobj->url);
    DBG("HTTP GET started");
    
    free(acc_url);
@@ -1224,42 +1049,46 @@ to access to your account.\n%s\n",
 
 static Eina_Bool
 _pin_receive_cb(void *data,
-                       int   type,
-                       void *event_info)
+                int   type,
+                void *event_info)
 {
    Ecore_Event_Handler *h;
-   Async_Data *d = data;
+   Ebird_Object *eobj = data;
    
+   EINA_LIST_FREE(eobj->handlers, h)
+      ecore_event_handler_del(h);
+      
+   eobj->handlers = NULL;
+
    puts("DEBUG LA !!!!");
+      
+   ebird_access_token_get(eobj);
    
-   ebird_access_token_get(d);
-   
-   EINA_LIST_FREE(d->handlers, h)
-          ecore_event_handler_del(h);
+   DBG("Ebird_access_token_get Started !");
    
    return EINA_TRUE;
 }
 
 Eina_Bool
-ebird_authorisation_url_send(Async_Data *d)
+ebird_authorisation_url_send(Ebird_Object *eobj)
 {
-   Ebird_Object *obj = d->eobj;
    char buffer[EBIRD_PIN_SIZE];
    char url[EBIRD_URL_MAX];
    Ecore_Event_Handler *hdl;
 
    snprintf(url, sizeof(url),
             EBIRD_DIRECT_TOKEN_URL "?authenticity_token=%s&oauth_token=%s",
-            obj->request_token->authenticity_token,
-            obj->request_token->key);
+            eobj->request_token->authenticity_token,
+            eobj->request_token->key);
 
-   obj->request_token->authorisation_url = eina_stringshare_add(url);
+   eobj->request_token->authorisation_url = eina_stringshare_add(url);
 
    ecore_event_add(EBIRD_EVENT_PIN_NEED,strdup(url),NULL,NULL);   
    
    hdl = ecore_event_handler_add(EBIRD_EVENT_PIN_RECEIVE,
-                                 _pin_receive_cb, d);
-   d->handlers = eina_list_append(d->handlers, hdl);
+                                 _pin_receive_cb, eobj);
+                                 
+   eobj->handlers = eina_list_append(eobj->handlers, hdl);
    
 
    return EINA_TRUE;
@@ -1270,37 +1099,35 @@ _ebird_direct_token_get_cb(void *data,
                            int   type,
                            void *event_info)
 {
-   Async_Data *d = data;
-   Ebird_Object *eobj = d->eobj;
+   Ebird_Object *eobj = data;
    Ecore_Con_Event_Url_Complete *url = event_info;
 
-   if (d->url != url->url_con)
+   if (eobj->url != url->url_con)
      return EINA_TRUE;
 
-   if (ebird_token_authenticity_get(d) < 0)
+   if (ebird_token_authenticity_get(eobj) < 0)
      goto error;
 
    DBG("[%s]\n", eobj->request_token->token);
    DBG("[%s]\n", eobj->request_token->key);
-   ecore_con_url_free(d->url);
-   eina_strbuf_free(d->http_data);
-   d->http_data = NULL;
-   d->url = NULL;
+   ecore_con_url_free(eobj->url);
+   eina_strbuf_free(eobj->http_data);
+   eobj->http_data = NULL;
+   eobj->url = NULL;
    //ebird_read_pin_from_stdin(eobj);
-    ebird_authorisation_url_send(d);
+   ebird_authorisation_url_send(eobj);
    
 error:
    return EINA_FALSE;
 }
 
 void
-ebird_direct_token_get(Async_Data *d)
+ebird_direct_token_get(Ebird_Object *eobj)
 {
    Ecore_Event_Handler *h;
-   Ebird_Object *eobj = d->eobj;
    char buf[1024];
 
-   if (!d)
+   if (!eobj)
      return;
 
    DBG("");
@@ -1310,18 +1137,18 @@ ebird_direct_token_get(Async_Data *d)
             EBIRD_DIRECT_TOKEN_URL,
             eobj->request_token->key);
 
-   d->http_data = eina_strbuf_new();
-   d->url = ecore_con_url_new(buf);
+   eobj->http_data = eina_strbuf_new();
+   eobj->url = ecore_con_url_new(buf);
    h = ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE,
-                               _ebird_direct_token_get_cb, d);
+                               _ebird_direct_token_get_cb, eobj);
    DBG("eina_list_append");
-   d->handlers = eina_list_append(d->handlers, h);
+   eobj->handlers = eina_list_append(eobj->handlers, h);
    h = ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,
-                               _url_data_cb, d);
+                               _url_data_cb, eobj);
    DBG("eina_list_append");
-   d->handlers = eina_list_append(d->handlers, h);
+   eobj->handlers = eina_list_append(eobj->handlers, eobj);
 
-   ecore_con_url_get(d->url);
+   ecore_con_url_get(eobj->url);
 }
 
 static Eina_Bool
@@ -1329,18 +1156,17 @@ _ebird_token_request_cb(void *data,
                         int   type,
                         void *event_info)
 {
-   Async_Data *d = data;
-   Ebird_Object *eobj = d->eobj;
+   Ebird_Object *eobj = data;
 
    int error_code;
    int res;
    Ecore_Con_Event_Url_Complete *url = event_info;
 
-   if (d->url != url->url_con)
+   if (eobj->url != url->url_con)
      return EINA_TRUE;
 
-   if (d->http_data)
-      eobj->request_token->token = strdup(eina_strbuf_string_get(d->http_data));
+   if (eobj->http_data)
+      eobj->request_token->token = strdup(eina_strbuf_string_get(eobj->http_data));
    else
       return EINA_FALSE;
 
@@ -1389,27 +1215,27 @@ _ebird_token_request_cb(void *data,
      {
         Ecore_Event_Handler *h;
         DBG("Access token exist");
-        d->cb(eobj, d->data, NULL);
-        ecore_con_url_free(d->url);
-        eina_strbuf_free(d->http_data);
-        d->http_data = NULL;
-        d->url = NULL;
-        EINA_LIST_FREE(d->handlers, h)
+        eobj->cb(eobj, eobj->data, NULL);
+        ecore_con_url_free(eobj->url);
+        eina_strbuf_free(eobj->http_data);
+        eobj->http_data = NULL;
+        eobj->url = NULL;
+        EINA_LIST_FREE(eobj->handlers, h)
           ecore_event_handler_del(h);
-        free(d);
+        //free(eobj); free(d);
      }
    else
      {
         Ecore_Event_Handler *h;
         DBG("Application Autorisation procedure start");
-        ecore_con_url_free(d->url);
-        eina_strbuf_free(d->http_data);
-        d->http_data = NULL;
-        d->url = NULL;
-        EINA_LIST_FREE(d->handlers, h)
+        ecore_con_url_free(eobj->url);
+        eina_strbuf_free(eobj->http_data);
+        eobj->http_data = NULL;
+        eobj->url = NULL;
+        EINA_LIST_FREE(eobj->handlers, h)
           ecore_event_handler_del(h);
-        d->handlers = NULL;
-        ebird_direct_token_get(d);
+        eobj->handlers = NULL;
+        ebird_direct_token_get(eobj);
      }
 
    return EINA_TRUE;
@@ -1428,22 +1254,14 @@ ebird_session_open(Ebird_Object    *eobj,
                    Ebird_Session_Cb cb,
                    void            *data)
 {
-   Async_Data *d;
    Ecore_Event_Handler *h;
 
    if (!eobj)
      return EINA_FALSE;
 
-   d = calloc(1, sizeof(Async_Data));
-   if (!d)
-     return EINA_FALSE;
-
-   DBG("");
-
-   d->eobj = eobj;
-   d->cb = cb;
-   d->data = data;
-   d->url = ecore_con_url_new
+   eobj->cb = cb;
+   eobj->data = data;
+   eobj->url = ecore_con_url_new
        (ebird_oauth_sign_url
          (EBIRD_REQUEST_TOKEN_URL,
          eobj->request_token->consumer_key,
@@ -1455,15 +1273,15 @@ ebird_session_open(Ebird_Object    *eobj,
        );
 
    h = ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA,
-                               _url_data_cb, d);
+                               _url_data_cb, eobj);
    DBG("eina_list_append");
-   d->handlers = eina_list_append(d->handlers, h);
+   eobj->handlers = eina_list_append(eobj->handlers, h);
    h = ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE,
-                               _ebird_token_request_cb, d);
+                               _ebird_token_request_cb, eobj);
    DBG("eina_list_append");
-   d->handlers = eina_list_append(d->handlers, h);
+   eobj->handlers = eina_list_append(eobj->handlers, h);
 
-   ecore_con_url_get(d->url);
+   ecore_con_url_get(eobj->url);
 
    return EINA_TRUE;
 }

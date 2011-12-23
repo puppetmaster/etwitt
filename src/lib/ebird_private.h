@@ -68,7 +68,6 @@ extern int _ebird_log_dom_global;
 
 typedef struct _Async_Data Async_Data;
 
-
 struct _oauth_token
 {
     char *consumer_key;
@@ -83,9 +82,6 @@ struct _oauth_token
     const char *authenticity_token;
     char *callback_confirmed;
 };
-
-
-
 
 struct _Async_Data
 {
@@ -102,12 +98,11 @@ struct _Async_Data
 
 char *ebird_http_get(Ebird_Object *obj,Ebird_Http_Cb cb);
 
-
 char *ebird_http_post(char *url, Ebird_Object *obj);
 
 int ebird_error_code_get(char *string);
 
-int ebird_token_authenticity_get(Async_Data *data);
+int ebird_token_authenticity_get(Ebird_Object *eobj);
 
 int ebird_authorisation_url_get(OauthToken *request_token);
 
@@ -119,11 +114,11 @@ Eina_Bool ebird_read_pin_from_stdin(Ebird_Object *obj);
 
 Eina_Bool ebird_authorise_app(Ebird_Object *obj);
 
-void ebird_direct_token_get(Async_Data *d);
+void ebird_direct_token_get(Ebird_Object *eobj);
 
-void ebird_access_token_get(Async_Data *d);
+void ebird_access_token_get(Ebird_Object *eobj);
 
-void ebird_token_request_get(Ebird_Object *obj);
+void ebird_token_request_get(Ebird_Object *eobj);
 
 void ebird_timeline_free(Eina_List *timeline);
 

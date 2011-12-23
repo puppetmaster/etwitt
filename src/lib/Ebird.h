@@ -63,6 +63,15 @@ struct _Ebird_Obj
    EbirdAccount *account;
    const char *newer_msg_id;
    const char *older_msg_id;
+   void           (*cb)(Ebird_Object *obj,
+                        void         *data,
+                        void         *event);
+   void          *data;
+   int            fd;
+   Ecore_Con_Url *url;
+   Eina_Strbuf   *http_data;
+   Eina_List     *handlers;
+   
    //Eina_List *home_timeline;
    //void (*http_complete_cb)(void *data, int type, void *event_info);
 };
