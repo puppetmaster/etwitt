@@ -280,6 +280,7 @@ etwitt_add_twitt(Etwitt_Iface *interface,
 
    twitt = calloc(1, sizeof(Twitt));
 
+   printf("TWITT_ADD[%s]\n",status->text);
    twitt->message = _markup_add(status->text);
    twitt->date = decode_twitt_date(status->created_at);
    twitt->icon = eina_stringshare_add(status->user->avatar);
