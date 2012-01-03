@@ -9,7 +9,7 @@
       data.item: "stacking" "above";
       data.item: "selectraise" "on";
       data.item: "treesize" "20";
-      data.item: "labels" "elm.text elm.date elm.name";
+      data.item: "texts" "elm.text elm.date elm.name";
       data.item: "contents" "elm.swallow.icon";
 
       styles {
@@ -210,7 +210,7 @@ group { name: "anchor";
       alias: "elm/genlist/item_compress_odd/twitt_header/default";
       data.item: "stacking" "above";
       data.item: "selectraise" "on";
-      data.item: "labels" "elm.text";
+      data.item: "texts" "elm.text";
 
       styles {
          style { name: "twitt_title_textblock_style";
