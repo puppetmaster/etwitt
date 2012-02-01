@@ -55,7 +55,7 @@ struct _Interface
    Evas_Object         *web_entry;
    Etwitt_Config_Iface *config;
    Ebird_Object        *eobj;
-   Elm_Genlist_Item    *header;
+   Elm_Object_Item     *header;
 };
 
 struct _ConfigIface
@@ -269,7 +269,7 @@ etwitt_add_twitt(Etwitt_Iface *interface,
                  EbirdStatus  *status)
 {
    Twitt *twitt;
-   Elm_Genlist_Item *egi;
+   Elm_Object_Item *egi;
 
    char *date;
    time_t tw_time;
@@ -638,7 +638,7 @@ etwitt_config_iface_add(Etwitt_Iface *iface)
    iface->config->bt_avatar = elm_fileselector_button_add(iface->win);
    elm_fileselector_button_path_set(iface->config->bt_avatar, "/home");
    elm_object_text_set(iface->config->bt_avatar, "Select a file");
-   elm_fileselector_button_icon_set(iface->config->bt_avatar, ic);
+//   elm_fileselector_button_icon_set(iface->config->bt_avatar, ic);
    elm_fileselector_button_inwin_mode_set(iface->config->bt_avatar, EINA_FALSE);
    evas_object_smart_callback_add(iface->config->bt_avatar, "file,chosen", _file_chosen, iface->config->ph_avatar);
    evas_object_show(iface->config->bt_avatar);
