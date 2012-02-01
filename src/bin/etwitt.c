@@ -381,9 +381,7 @@ _twitt_bt_press(void        *data,
 
    msg = strdup(entry);
 
-   printf("Button pressed\n");
-
-   //FIXME etwitt_add_twitt(data, msg);
+   ebird_status_update(msg, infos->eobj, NULL, NULL);
    elm_entry_entry_set(infos->entry, "");
    free(msg);
 }
