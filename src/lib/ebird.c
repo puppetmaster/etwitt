@@ -915,8 +915,8 @@ _ebird_access_token_get_cb(void *data,
                            void *event_info)
 {
    Ebird_Object *eobj = data;
-   const char *acc_token;
-   char **access_token_prm;
+   const char *acc_token = NULL;
+   char **access_token_prm = NULL;
    int res;
    Ecore_Con_Event_Url_Complete *url = event_info;
 
@@ -927,18 +927,14 @@ _ebird_access_token_get_cb(void *data,
 
    access_token_prm = (char **)malloc(5 * sizeof(char *));
 
-   if (eobj->http_data)
-   {
-      acc_token = eina_strbuf_string_get(eobj->http_data);
-      DBG("DATA : %s", acc_token);
-      eina_strbuf_free(eobj->http_data);
-      eobj->http_data = NULL;
-   }
-   else
+   if (!eobj->http_data)
    {
       DBG("Error No http_data !");
       return EINA_FALSE;
    }
+
+   acc_token = eina_strbuf_string_get(eobj->http_data);
+   DBG("DATA : %s", acc_token);
 
    if (acc_token)
      {
@@ -965,10 +961,15 @@ _ebird_access_token_get_cb(void *data,
              ERR("Token {%s}", acc_token);
              ERR("[%i]", res);
 
+             eina_strbuf_free(eobj->http_data);
+             eobj->http_data = NULL;
+
              return EINA_FALSE;
           }
      }
    free(access_token_prm);
+   eina_strbuf_free(eobj->http_data);
+   eobj->http_data = NULL;
    DBG("SENDING EBIRD_EVENT_AUTHORISATION_DONE Ecore_Event");
    ecore_event_add(EBIRD_EVENT_AUTHORISATION_DONE,NULL,NULL,NULL);
    eobj->cb(eobj, eobj->data, NULL);
@@ -1035,6 +1036,7 @@ EAPI Eina_Bool
 ebird_authorisation_pin_set(Ebird_Object *eobj,
                             const char   *pin)
 {
+   
    eobj->request_token->authorisation_pin = strdup(pin);
    ebird_access_token_get(eobj);
    return EINA_TRUE;

@@ -170,16 +170,6 @@ _list_item_default_icon_get(void        *data,
    return ic;
 }
 
-static Elm_Genlist_Item_Class itc_default = {
-   "twitt",
-   {
-      _list_item_default_label_get,
-      _list_item_default_icon_get,
-      NULL,
-      NULL
-   }
-};
-
 static const char *
 _markup_add(const char *text)
 {
@@ -264,6 +254,19 @@ _auth_done_cb(void *data,
 
 }
 
+static Elm_Genlist_Item_Class itc_default;
+
+Elm_Genlist_Item_Class *_default_item_class_get()
+{
+   itc_default.item_style = "twitt";
+   itc_default.func.text_get = _list_item_default_label_get;
+   itc_default.func.content_get = _list_item_default_icon_get;
+   itc_default.func.state_get = NULL;
+   itc_default.func.del = NULL;
+
+   return &itc_default;
+}
+
 static void
 etwitt_add_twitt(Etwitt_Iface *interface,
                  EbirdStatus  *status)
@@ -286,10 +289,10 @@ etwitt_add_twitt(Etwitt_Iface *interface,
    twitt->icon = eina_stringshare_add(status->user->avatar);
    twitt->name = eina_stringshare_add(status->user->realname);
 
-   egi = elm_genlist_item_append(interface->list, &itc_default, twitt, interface->header,
+   egi = elm_genlist_item_append(interface->list, _default_item_class_get(), twitt, interface->header,
                                  ELM_GENLIST_ITEM_NONE, NULL, NULL);
 
-   elm_genlist_item_show(egi);
+   elm_genlist_item_show(egi, ELM_GENLIST_ITEM_SCROLLTO_NONE);
 }
 
 static void
@@ -337,8 +340,7 @@ static void
 _show_roll(Etwitt_Iface *iface)
 {
    elm_object_signal_emit(iface->layout, "show,timeline", "etwitt");
-   edje_object_signal_emit((Evas_Object *)elm_genlist_item_object_get(iface->header),
-                                 "show,loader", "etwitt");
+   elm_object_item_signal_emit(iface->header, "show,loader", "etwitt");
    ebird_timeline_home_get(iface->eobj, _timeline_get_cb, iface);
 
    printf("Callback _refresh_roll\n");
@@ -452,23 +454,12 @@ etwitt_twitt_bar_add(Etwitt_Iface *interface)
    elm_object_part_text_set(interface->layout, "tweet.left", "140 left");
 }
 
-static Elm_Genlist_Item_Class itc_timeline_header = {
-        "twitt_header",
-        {
-                NULL,
-                NULL,
-                NULL,
-                NULL
-        }
-};
-
 static Eina_Bool
 _start_loading_anim(void *data)
 {
     Etwitt_Iface *interface = data;
     
-    edje_object_signal_emit((Evas_Object *)elm_genlist_item_object_get(interface->header),
-                                 "show,loader", "etwitt");
+    elm_object_item_signal_emit(interface->header, "show,loader", "etwitt");
 
     return EINA_FALSE;
 }
@@ -552,11 +543,23 @@ etwitt_web_add(Etwitt_Iface *iface, char *url)
    }
 }
 
+static Elm_Genlist_Item_Class itc_timeline_header;
+
+Elm_Genlist_Item_Class *_get_header_item_class()
+{
+   itc_timeline_header.item_style = "twitt_header";
+   itc_timeline_header.func.text_get = NULL;
+   itc_timeline_header.func.content_get = NULL;
+   itc_timeline_header.func.state_get = NULL;
+   itc_timeline_header.func.del = NULL;
+   return &itc_timeline_header;
+}
+
 static void
 etwitt_roll_add(Etwitt_Iface *interface)
 {
    interface->list = elm_genlist_add(interface->win);
-   elm_genlist_height_for_width_mode_set(interface->list, EINA_TRUE);
+   elm_genlist_mode_set(interface->list, ELM_LIST_COMPRESS);
    evas_object_show(interface->list);
    elm_genlist_scroller_policy_set(interface->list, ELM_SCROLLER_POLICY_OFF,
                                    ELM_SCROLLER_POLICY_ON);
@@ -565,7 +568,7 @@ etwitt_roll_add(Etwitt_Iface *interface)
    elm_object_style_set(interface->list, "etwitt");
 
    
-   interface->header = elm_genlist_item_append(interface->list, &itc_timeline_header, NULL, NULL,
+   interface->header = elm_genlist_item_append(interface->list, _get_header_item_class(), NULL, NULL,
                                  ELM_GENLIST_ITEM_GROUP, NULL, NULL);
 
    ecore_timer_add(0.5, _start_loading_anim, interface);
@@ -681,8 +684,7 @@ _timeline_get_cb(Ebird_Object *obj,
         etwitt_add_twitt(iface, st);
      }
 
-   edje_object_signal_emit((Evas_Object *)elm_genlist_item_object_get(iface->header),
-                                 "hide,loader", "etwitt");
+   elm_object_item_signal_emit(iface->header, "hide,loader", "etwitt");
 }
 
 void
