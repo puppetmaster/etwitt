@@ -482,7 +482,7 @@ _pin_input_bt_cb(void        *data,
 static void
 etwitt_web_add(Etwitt_Iface *iface, char *url)
 {   
-   if (!elm_need_web())
+/*   if (!elm_need_web())
    {
       iface->web = elm_web_add(iface->win);
       evas_object_size_hint_weight_set(iface->web, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
@@ -490,7 +490,7 @@ etwitt_web_add(Etwitt_Iface *iface, char *url)
       evas_object_show(iface->web);
       elm_object_part_content_set(iface->layout, "web:label/message", iface->web);
    }
-   else
+   else*/
    {
       char cmd[2048];
       Evas_Object *lbl, *entry, *box, *bt;
