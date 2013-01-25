@@ -676,15 +676,13 @@ _ebird_timeline_get_cb(void *data,
    if (eobj->http_data)
    {
       xml = eina_strbuf_string_get(eobj->http_data);
-      eina_strbuf_free(eobj->http_data);
-      eobj->http_data = NULL;
    }
    else
    {
       xml = eina_stringshare_add("No timeline");
    }
 
-   DBG("%s", xml);
+   DBG("The XML is : %s", xml);
    eina_simple_xml_parse(xml, strlen(xml), EINA_TRUE, _parse_timeline, &timeline);
 
    if (timeline)//lastmsg = eina_list_last(timeline);
@@ -693,6 +691,8 @@ _ebird_timeline_get_cb(void *data,
       DBG("NTH ID [%s]\n", lastmsg->id);
       eobj->newer_msg_id = lastmsg->id;
       DBG("newer_msg_id = %s\n", eobj->newer_msg_id);
+      eina_strbuf_free(eobj->http_data);
+      eobj->http_data = NULL;
    }
 
    EINA_LIST_FREE(eobj->handlers, h)
@@ -1130,6 +1130,7 @@ ebird_direct_token_get(Ebird_Object *eobj)
             eobj->request_token->key);
 
    eobj->http_data = eina_strbuf_new();
+   printf("url : %s", buf);
    eobj->url = ecore_con_url_new(buf);
    h = ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE,
                                _ebird_direct_token_get_cb, eobj);
