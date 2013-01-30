@@ -15,7 +15,7 @@
 #include <Ebird.h>
 #include "twitt_date.h"
 
-typedef struct _Twitt       Twitt;
+typedef struct _MicroMessage       MicroMessage;
 typedef struct _Account     Account;
 typedef struct _Interface   Etwitt_Iface;
 typedef struct _ConfigIface Etwitt_Config_Iface;
@@ -34,7 +34,7 @@ struct _Account
    const char *avatar;
 };
 
-struct _Twitt
+struct _MicroMessage
 {
    const char *message;
    time_t date;
@@ -138,7 +138,7 @@ _list_item_default_label_get(void        *data,
                              Evas_Object *obj __UNUSED__,
                              const char  *part)
 {
-   Twitt *twitt = data;
+   MicroMessage *twitt = data;
 
    if (!strcmp(part, "elm.text") && twitt->message)
      return strdup(twitt->message);
@@ -156,7 +156,7 @@ _list_item_default_icon_get(void        *data,
                             const char  *part)
 {
    Evas_Object *ic = NULL;
-   Twitt *twitt = data;
+   MicroMessage *twitt = data;
 
    if (!strcmp(part, "elm.swallow.icon"))
      {
@@ -271,7 +271,7 @@ static void
 etwitt_add_twitt(Etwitt_Iface *interface,
                  EbirdStatus  *status)
 {
-   Twitt *twitt;
+   MicroMessage *twitt;
    Elm_Object_Item *egi;
 
    char *date;
@@ -281,7 +281,7 @@ etwitt_add_twitt(Etwitt_Iface *interface,
    tw_time = time(NULL);
    tb = localtime(&tw_time);
 
-   twitt = calloc(1, sizeof(Twitt));
+   twitt = calloc(1, sizeof(MicroMessage));
 
    printf("TWITT_ADD[%s]\n",status->text);
    twitt->message = _markup_add(status->text);
@@ -445,7 +445,7 @@ etwitt_twitt_bar_add(Etwitt_Iface *interface)
    evas_object_show(interface->entry);
 
    button = elm_button_add(interface->win);
-   elm_object_text_set(button, "Twitt !");
+   elm_object_text_set(button, "Send !");
    evas_object_smart_callback_add(button, "clicked", _twitt_bt_press, interface);
    elm_object_part_content_set(interface->layout, "button.tweet", button);
    elm_object_style_set(button, "twitt");
